@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    alias(libs.plugins.kotlin.ksp)
+
+    alias(libs.plugins.hilt.ksp)
+
+    alias(libs.plugins.kotlin.serialization)
+
 }
 
 android {
@@ -34,6 +41,9 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
     buildFeatures {
         compose = true
     }
@@ -49,6 +59,43 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
+
+    // Room Database with KSP
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.ksp.room.compiler)
+
+    //Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Coroutines for asynchronous operations
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    //Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.serialization)
+    implementation(libs.ktor.serialization.json)
+    implementation(libs.ktor.client.cio)
+
+
+    //Geofence API
+    implementation(libs.gms.play.services.location)
+
+    //Work manager
+    implementation(libs.androidx.work.manager)
+
+    //viewModel (MVVM)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    //Jetpack compose navigation
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    //Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -56,4 +103,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }
