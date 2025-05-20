@@ -1,6 +1,6 @@
 # 📱 NearbyNote - Location-Based Notification App
 
-**_Currently developing_**
+**_Currently developing_**...
 
 ---
 
