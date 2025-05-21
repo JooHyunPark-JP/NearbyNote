@@ -1,4 +1,4 @@
-package com.example.nearbynote.GeoFence
+package com.example.nearbynote.nearbyNoteMainFunction.note
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,10 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph
 
 @Composable
-fun GeoFenceMain(navController: NavController, modifier: Modifier = Modifier,) {
+fun NoteListMain(navController: NavController, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()

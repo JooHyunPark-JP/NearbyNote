@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.nearbynote.GeoFence.GeoFenceMain
+import com.example.nearbynote.nearbyNoteMainFunction.note.NoteListMain
 
 @Composable
 fun NavGraph(
@@ -13,7 +13,7 @@ fun NavGraph(
     ) {
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
-            GeoFenceMain(
+            NoteListMain(
                 navController,
             )
         }
