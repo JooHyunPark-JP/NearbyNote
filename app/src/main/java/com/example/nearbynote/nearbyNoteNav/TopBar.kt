@@ -68,7 +68,7 @@ fun TopBar(navController: NavHostController) {
 
         else -> {
             CenterAlignedTopAppBar(
-                title = { Text("HealthFusion") },
+                title = { Text("NearbyNote") },
                 colors = topBarColors
             )
         }

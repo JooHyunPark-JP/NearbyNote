@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
                         TopBar(navController)
                     },
                     bottomBar = {
-
                         BottomNavBar(navController = navController)
 
                     }) { innerPadding ->
