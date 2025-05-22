@@ -5,17 +5,21 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.nearbynote.nearbyNoteMainFunction.note.NoteListMain
+import com.example.nearbynote.nearbyNoteMainFunction.note.WriteNoteScreen
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-
     ) {
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
             NoteListMain(
                 navController,
             )
+        }
+
+        composable(Screen.WriteNoteScreen.route) {
+            WriteNoteScreen(navController)
         }
 
         /*        composable(Screen.Diet.route) {
