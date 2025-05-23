@@ -11,6 +11,6 @@ class MyApplication : Application() {
             super.onCreate()
 
             // use this code when you need to delete previous (room) database
-            deleteDatabase("healthfusion_database")
+            deleteDatabase("nearby_note.db")
         }*/
 }

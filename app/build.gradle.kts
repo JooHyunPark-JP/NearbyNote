@@ -95,6 +95,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    //Accompanist
+    implementation(libs.accompanist.jetpack.compose.permission)
+
     //Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
