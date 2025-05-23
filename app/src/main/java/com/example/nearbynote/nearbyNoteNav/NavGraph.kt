@@ -10,7 +10,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.note.WriteNoteScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    ) {
+) {
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
             NoteListMain(
