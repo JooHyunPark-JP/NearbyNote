@@ -1,4 +1,4 @@
-package com.example.nearbynote.nearbyNoteMainFunction.note
+package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -48,7 +48,10 @@ import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun WriteNoteScreen(navController: NavController) {
+fun WriteNoteScreen(
+    navController: NavController,
+    noteViewModel: NoteViewModel
+) {
     val context = LocalContext.current
     val permissionState = rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -110,7 +113,15 @@ fun WriteNoteScreen(navController: NavController) {
                     }
                 }
             },
-            onSaveClick = { /* TODO: 저장 로직 */ },
+            onSaveClick = {
+                noteViewModel.saveNote(
+                    content = noteText,
+                    geofenceId = if (geofenceEnabled) geofenceText else null,
+                    locationName = geofenceText,
+                    isVoice = false
+                )
+                navController.popBackStack()
+            },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
 
@@ -138,7 +149,10 @@ fun WriteNoteScreen(navController: NavController) {
                 },
                 title = { Text("Permission Required") },
                 text = {
-                    Text("음성 인식을 사용하려면 마이크 권한이 필요합니다. 설정에서 권한을 직접 허용해주세요.")
+                    Text(
+                        "Voice recognition requires microphone access.\n" +
+                                "Please grant permission in settings."
+                    )
                 }
             )
         }

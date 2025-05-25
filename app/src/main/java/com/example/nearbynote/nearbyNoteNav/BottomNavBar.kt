@@ -17,8 +17,6 @@ fun BottomNavBar(navController: NavController) {
     val items = listOf(
         Screen.Main,
         Screen.WriteNoteScreen,
-        Screen.Main3,
-        Screen.Main4,
     )
     NavigationBar(
         containerColor = Color.White,
@@ -36,16 +34,6 @@ fun BottomNavBar(navController: NavController) {
                         )
 
                         is Screen.WriteNoteScreen -> Icon(
-                            painterResource(id = R.drawable.ic_placeholder_icon),
-                            contentDescription = null
-                        )
-
-                        is Screen.Main3 -> Icon(
-                            painterResource(id = R.drawable.ic_placeholder_icon),
-                            contentDescription = null
-                        )
-
-                        is Screen.Main4 -> Icon(
                             painterResource(id = R.drawable.ic_placeholder_icon),
                             contentDescription = null
                         )
