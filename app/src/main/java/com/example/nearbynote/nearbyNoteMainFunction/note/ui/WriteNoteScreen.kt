@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,9 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.nearbynote.R
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -98,7 +100,7 @@ fun WriteNoteScreen(
             onVoiceClick = {
                 when (val status = permissionState.status) {
                     is PermissionStatus.Granted -> {
-                        // ✅ 권한 있음 → 음성 인식 시작
+                        // Start voice recogniztion
                     }
 
                     is PermissionStatus.Denied -> {
@@ -206,7 +208,7 @@ fun NoteTextField(
     TextField(
         value = noteText,
         onValueChange = onNoteChange,
-        placeholder = { Text("노트를 입력하세요...") },
+        placeholder = { Text("Write down anything!") },
         textStyle = LocalTextStyle.current.copy(lineHeight = 24.sp),
         modifier = modifier.fillMaxWidth()
     )
@@ -227,13 +229,13 @@ fun BottomFABRow(
 
         //mic (voice regonition)
         FloatingActionButton(onClick = onVoiceClick, modifier = Modifier.size(56.dp)) {
-            Icon(Icons.Default.Phone, contentDescription = "Voice Input")
+            Icon(painterResource(R.drawable.ic_microphone), contentDescription = "Voice Input")
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
         FloatingActionButton(onClick = onSaveClick, modifier = Modifier.size(56.dp)) {
-            Icon(Icons.Default.Phone, contentDescription = "Save")
+            Icon(Icons.Default.Add, contentDescription = "Save")
         }
     }
 }
