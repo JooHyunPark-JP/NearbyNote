@@ -1,9 +1,11 @@
-package com.example.nearbynote.nearbyNoteMainFunction.note
+package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -11,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,7 +29,14 @@ import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun NoteListMain(navController: NavController, modifier: Modifier = Modifier) {
+fun NoteListMain(
+    navController: NavController,
+    noteViewModel: NoteViewModel,
+    modifier: Modifier = Modifier
+) {
+
+    val notes by noteViewModel.notes.collectAsState()
+
 
     val locationPermissionsState = rememberMultiplePermissionsState(
         listOf(
@@ -34,7 +44,7 @@ fun NoteListMain(navController: NavController, modifier: Modifier = Modifier) {
             android.Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
-    //    val context = LocalContext.current
+    //   val context = LocalContext.current
     //   var showPermissionDialog by remember { mutableStateOf(false) }
 
     var hasLaunchedPermissionRequest by rememberSaveable { mutableStateOf(false) }
@@ -69,7 +79,11 @@ fun NoteListMain(navController: NavController, modifier: Modifier = Modifier) {
                 .padding(top = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Hello world!")
+            LazyColumn {
+                items(notes) { note ->
+                    Text(text = note.content, modifier = Modifier.padding(16.dp))
+                }
+            }
         }
 
         FloatingActionButton(

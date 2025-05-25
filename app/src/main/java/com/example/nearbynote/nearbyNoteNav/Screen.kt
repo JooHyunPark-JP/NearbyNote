@@ -3,8 +3,7 @@ package com.example.nearbynote.nearbyNoteNav
 sealed class Screen(val route: String) {
     data object Main : Screen("main")
     data object WriteNoteScreen : Screen("WriteNoteScreen")
-    data object Main3 : Screen("main3")
-    data object Main4 : Screen("main4")
+
     /*    data object WorkoutGoal : Screen("workoutGoal")
         data object WorkoutEdit : Screen("workoutEdit")
 

@@ -13,4 +13,9 @@ class MyApplication : Application() {
             // use this code when you need to delete previous (room) database
             deleteDatabase("nearby_note.db")
         }*/
+
+    // Useful prompt command, clean and rebuild
+    // ./gradlew clean
+    // ./gradlew build
+    // ./gradlew build --refresh-dependencies
 }

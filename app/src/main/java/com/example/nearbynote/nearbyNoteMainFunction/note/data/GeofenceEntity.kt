@@ -5,7 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "geofences")
 data class GeofenceEntity(
-    @PrimaryKey val id: String,  // GeofencingClient 등록할 때 사용하는 고유 ID
+    @PrimaryKey
+    val id: String,
     val name: String,
     val latitude: Double,
     val longitude: Double,
