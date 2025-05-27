@@ -9,6 +9,10 @@ lifecycleRuntimeKtx = "2.9.0"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
 
+testCoroutine = "1.10.1"
+testMockK = "1.14.2"
+testTurbine = "1.2.0"
+
 
 room = "2.7.1"
 ksp = "2.1.21-2.0.1"
@@ -49,6 +53,10 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-ksp-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+test-coroutine = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "testCoroutine" }
+test-mockK = { group = "io.mockk", name = "mockk", version.ref = "testMockK" }
+test-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "testTurbine" }
 
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
