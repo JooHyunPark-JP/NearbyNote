@@ -110,19 +110,19 @@ fun NoteListMain(
                             }
                         )
                     }) {
-                        Text("설정 열기")
+                        Text("Open Setting")
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = {
                         showPermissionDialog = false
                     }) {
-                        Text("취소")
+                        Text("Cancel")
                     }
                 },
-                title = { Text("위치 권한 필요") },
+                title = { Text("Location Permission required") },
                 text = {
-                    Text("이 앱은 위치 기반 메모 기능을 위해 위치 권한이 필요합니다. 설정에서 권한을 직접 허용해주세요.")
+                    Text("Location access required in order to use Geofence setup. Please grant permission in settings.")
                 }
             )
         }*/

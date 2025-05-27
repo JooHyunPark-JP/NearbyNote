@@ -107,4 +107,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //Testing for viewmodel
+    testImplementation(libs.test.mockK)
+    //Testing for flow
+    testImplementation(libs.test.turbine)
+    testImplementation(libs.test.coroutine)
+
 }

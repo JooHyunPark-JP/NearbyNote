@@ -1,8 +1,14 @@
 package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -64,6 +70,40 @@ fun WriteNoteScreen(
     var geofenceEnabled by remember { mutableStateOf(false) }
     var geofenceText by remember { mutableStateOf("") }
 
+    //Launcher for speech recognition
+    val speechLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val results = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            results?.firstOrNull()?.let { recognized ->
+/*                if (noteText.isEmpty()) {
+                    noteText = recognized
+                } else {
+                    noteText += " $recognized" //add one space from existed Text
+                }*/
+                noteText = listOf(noteText, recognized).filter { it.isNotBlank() }.joinToString(" ")
+            }
+        }
+    }
+
+    fun startVoiceRecognition() {
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            Toast.makeText(
+                context,
+                "Speech recognition unavailable. Requires Google app & Play Services.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        //Current setting is only for 'English'
+        val intent = createVoiceRecognitionIntent("en-US")
+        speechLauncher.launch(intent)
+
+    }
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -100,7 +140,7 @@ fun WriteNoteScreen(
             onVoiceClick = {
                 when (val status = permissionState.status) {
                     is PermissionStatus.Granted -> {
-                        // Start voice recogniztion
+                        startVoiceRecognition()
                     }
 
                     is PermissionStatus.Denied -> {
@@ -116,13 +156,21 @@ fun WriteNoteScreen(
                 }
             },
             onSaveClick = {
-                noteViewModel.saveNote(
-                    content = noteText,
-                    geofenceId = if (geofenceEnabled) geofenceText else null,
-                    locationName = geofenceText,
-                    isVoice = false
-                )
-                navController.popBackStack()
+                if (noteText.isBlank()) {
+                    Toast.makeText(
+                        context,
+                        "Write down something before saving!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    noteViewModel.saveNote(
+                        content = noteText,
+                        geofenceId = if (geofenceEnabled) geofenceText else null,
+                        locationName = geofenceText,
+                        isVoice = false
+                    )
+                    navController.popBackStack()
+                }
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
@@ -158,6 +206,14 @@ fun WriteNoteScreen(
                 }
             )
         }
+    }
+}
+
+fun createVoiceRecognitionIntent(language: String): Intent {
+    return Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
+        putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
     }
 }
 
