@@ -1,15 +1,16 @@
 package com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data
 
+import com.example.nearbynote.BuildConfig
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
+
 
 
 class MapboxRepositoryImpl @Inject constructor(
     private val httpClient: MapboxHttpClient
 ) : MapboxRepository {
 
-    private val token =
-        "pk.eyJ1IjoicGpoMDYyOSIsImEiOiJjbWFvaWRocWQwNm9uMmxvZno0amgzZjY0In0.KUt35ham2WyiV9rYoEX_Zg"
+    private val token = BuildConfig.MAPBOX_API_KEY
 
     override suspend fun fetchAddressSuggestions(query: String): List<Pair<String, String>> {
         val url =
