@@ -3,20 +3,13 @@ package com.example.nearbynote
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.MapboxHttpClient
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.MapboxRepository
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.MapboxRepositoryImpl
-
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.statement.HttpResponse
-import io.mockk.MockKAnnotations
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
 
 
 class MapboxRepositoryTest {
@@ -32,7 +25,8 @@ class MapboxRepositoryTest {
 
     @Test
     fun `fetchAddressSuggestions returns parsed suggestions when response is valid`() = runTest {
-        val json = """{ "type": "FeatureCollection", "query": ["seoul"], "features": [ { "id": "1", "type": "Feature", "place_name": "Seoul, South Korea", "geometry": { "coordinates": [126.978, 37.5665] } } ] }"""
+        val json =
+            """{ "type": "FeatureCollection", "query": ["seoul"], "features": [ { "id": "1", "type": "Feature", "place_name": "Seoul, South Korea", "geometry": { "coordinates": [126.978, 37.5665] } } ] }"""
 
         coEvery { httpClient.getPlaceData(any()) } returns json
 
