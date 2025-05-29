@@ -1,4 +1,4 @@
-package com.example.nearbynote.nearbyNoteMainFunction.geoFence
+package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

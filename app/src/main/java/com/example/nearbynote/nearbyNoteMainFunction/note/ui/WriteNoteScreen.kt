@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -77,11 +80,6 @@ fun WriteNoteScreen(
         if (result.resultCode == Activity.RESULT_OK) {
             val results = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             results?.firstOrNull()?.let { recognized ->
-/*                if (noteText.isEmpty()) {
-                    noteText = recognized
-                } else {
-                    noteText += " $recognized" //add one space from existed Text
-                }*/
                 noteText = listOf(noteText, recognized).filter { it.isNotBlank() }.joinToString(" ")
             }
         }
@@ -119,13 +117,33 @@ fun WriteNoteScreen(
                 Column {
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
-                        value = geofenceText,
-                        onValueChange = { geofenceText = it },
+                        value = noteViewModel.addressQuery,
+                        onValueChange = { noteViewModel.onQueryChanged(it) },
                         placeholder = { Text("Enter location name or address") },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
+
+            LazyColumn {
+                items(
+                    items = noteViewModel.suggestions,
+                    key = { it.first }
+                ) { suggestion ->
+                    Text(
+                        text = "${suggestion.first} (${suggestion.second})",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                geofenceText = suggestion.first
+                                noteViewModel.addressQuery = suggestion.first
+                                noteViewModel.suggestions = emptyList()
+                            }
+                            .padding(8.dp)
+                    )
+                }
+            }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 
