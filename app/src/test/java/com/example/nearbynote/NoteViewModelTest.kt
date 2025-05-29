@@ -1,5 +1,6 @@
 package com.example.nearbynote
 
+import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.MapboxRepository
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteRepository
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import io.mockk.coVerify
@@ -16,11 +17,14 @@ class NoteViewModelTest {
 
     private val repository: NoteRepository = mockk(relaxed = true)
     private lateinit var viewModel: NoteViewModel
+    private lateinit var MapBoxRepository: MapboxRepository
+
 
     @Before
     fun setup() {
         every { repository.allNotes } returns flowOf(emptyList())
-        viewModel = NoteViewModel(repository)
+        MapBoxRepository = mockk(relaxed = true)
+        viewModel = NoteViewModel(repository,MapBoxRepository)
     }
 
     @Test
