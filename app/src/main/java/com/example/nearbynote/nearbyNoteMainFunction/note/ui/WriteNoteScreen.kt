@@ -53,6 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nearbynote.R
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.BasicGeofenceSetup
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
+import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -61,7 +64,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun WriteNoteScreen(
     navController: NavController,
-    noteViewModel: NoteViewModel
+    noteViewModel: NoteViewModel,
+    geofenceViewModel: GeofenceViewModel
 ) {
     val context = LocalContext.current
     val permissionState = rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
@@ -72,6 +76,8 @@ fun WriteNoteScreen(
     var noteText by remember { mutableStateOf("") }
     var geofenceEnabled by remember { mutableStateOf(false) }
     var geofenceText by remember { mutableStateOf("") }
+
+    val suggestions = noteViewModel.suggestions
 
     //Launcher for speech recognition
     val speechLauncher = rememberLauncherForActivityResult(
@@ -127,16 +133,16 @@ fun WriteNoteScreen(
 
             LazyColumn {
                 items(
-                    items = noteViewModel.suggestions,
-                    key = { it.first }
+                    items = suggestions,
+                    key = { it.placeName }
                 ) { suggestion ->
                     Text(
-                        text = "${suggestion.first} (${suggestion.second})",
+                        text = "${suggestion.placeName} (Lat: ${suggestion.latitude}, Lon: ${suggestion.longitude})",
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                geofenceText = suggestion.first
-                                noteViewModel.addressQuery = suggestion.first
+                                geofenceViewModel.onSuggestionSelected(suggestion)
+                                noteViewModel.addressQuery = suggestion.placeName
                                 noteViewModel.suggestions = emptyList()
                             }
                             .padding(8.dp)
@@ -144,6 +150,10 @@ fun WriteNoteScreen(
                 }
             }
 
+            if (geofenceEnabled) {
+                Spacer(modifier = Modifier.height(16.dp))
+                BasicGeofenceSetup(geofenceViewModel)
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -313,4 +323,5 @@ fun BottomFABRow(
         }
     }
 }
+
 

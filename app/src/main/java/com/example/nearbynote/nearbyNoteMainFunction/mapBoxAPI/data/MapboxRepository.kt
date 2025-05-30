@@ -2,5 +2,5 @@ package com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data
 
 
 interface MapboxRepository {
-    suspend fun fetchAddressSuggestions(query: String): List<Pair<String, String>>
+    suspend fun fetchAddressSuggestions(query: String): List<AddressSuggestion>
 }

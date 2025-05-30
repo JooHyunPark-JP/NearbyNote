@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteNav.BottomNavBar
 import com.example.nearbynote.nearbyNoteNav.NavGraph
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val noteViewModel: NoteViewModel by viewModels()
+        val geofenceViewModel: GeofenceViewModel by viewModels()
 
         setContent {
             NearbyNoteTheme {
@@ -43,7 +45,8 @@ class MainActivity : ComponentActivity() {
                     Column(modifier = Modifier.padding(innerPadding)) {
                         NavGraph(
                             navController = navController,
-                            noteViewModel = noteViewModel
+                            noteViewModel = noteViewModel,
+                            geofenceViewModel = geofenceViewModel
                         )
                     }
                 }

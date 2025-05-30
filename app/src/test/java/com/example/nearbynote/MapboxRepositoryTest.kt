@@ -33,8 +33,8 @@ class MapboxRepositoryTest {
         val result = repository.fetchAddressSuggestions("seoul")
 
         assertEquals(1, result.size)
-        assertEquals("Seoul, South Korea", result[0].first)
-        assertTrue(result[0].second.contains("Lat"))
+        assertEquals("Seoul, South Korea", result[0].placeName)
+
     }
 
     @Test

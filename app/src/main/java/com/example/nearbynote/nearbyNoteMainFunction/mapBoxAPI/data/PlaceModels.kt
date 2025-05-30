@@ -31,3 +31,9 @@ data class PlaceFeature(
 data class Geometry(
     val coordinates: List<Double>
 )
+
+data class AddressSuggestion(
+    val placeName: String,
+    val latitude: Double,
+    val longitude: Double
+)
