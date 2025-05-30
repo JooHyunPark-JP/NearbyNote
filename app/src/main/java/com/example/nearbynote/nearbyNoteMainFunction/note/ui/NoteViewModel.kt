@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.MapboxRepository
 
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
@@ -26,7 +27,7 @@ class NoteViewModel @Inject constructor(
     val notes: StateFlow<List<NoteEntity>> = _notes
 
     var addressQuery by mutableStateOf("")
-    var suggestions by mutableStateOf(emptyList<Pair<String, String>>())
+    var suggestions by mutableStateOf(emptyList<AddressSuggestion>())
 
     init {
         viewModelScope.launch {
