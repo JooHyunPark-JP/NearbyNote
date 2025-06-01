@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteNav.BottomNavBar
@@ -18,9 +19,14 @@ import com.example.nearbynote.nearbyNoteNav.NavGraph
 import com.example.nearbynote.nearbyNoteNav.TopBar
 import com.example.nearbynote.ui.theme.NearbyNoteTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+
+    @Inject
+    lateinit var geofenceManager: GeofenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +34,8 @@ class MainActivity : ComponentActivity() {
 
         val noteViewModel: NoteViewModel by viewModels()
         val geofenceViewModel: GeofenceViewModel by viewModels()
+
+
 
         setContent {
             NearbyNoteTheme {
@@ -46,7 +54,9 @@ class MainActivity : ComponentActivity() {
                         NavGraph(
                             navController = navController,
                             noteViewModel = noteViewModel,
-                            geofenceViewModel = geofenceViewModel
+                            geofenceViewModel = geofenceViewModel,
+                            geofenceManager = geofenceManager
+
                         )
                     }
                 }
