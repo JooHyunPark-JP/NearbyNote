@@ -54,8 +54,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.BasicGeofenceSetup
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
-import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -65,7 +65,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 fun WriteNoteScreen(
     navController: NavController,
     noteViewModel: NoteViewModel,
-    geofenceViewModel: GeofenceViewModel
+    geofenceViewModel: GeofenceViewModel,
+    geofenceManager: GeofenceManager
 ) {
     val context = LocalContext.current
     val permissionState = rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
@@ -152,7 +153,10 @@ fun WriteNoteScreen(
 
             if (geofenceEnabled) {
                 Spacer(modifier = Modifier.height(16.dp))
-                BasicGeofenceSetup(geofenceViewModel)
+                BasicGeofenceSetup(
+                    geofenceViewModel = geofenceViewModel,
+                    geofenceManager = geofenceManager
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

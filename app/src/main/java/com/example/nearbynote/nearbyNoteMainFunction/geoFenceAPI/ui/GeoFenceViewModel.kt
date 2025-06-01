@@ -55,13 +55,18 @@ class GeofenceViewModel @Inject constructor(
         }
     }
 
-    fun onAddGeofenceClick() {
-        // TODO: 연결 예정
+    fun onRemoveAllGeofencesClick() {
+        geofenceManager.removeAllGeofences(
+            onSuccess = {
+                _geofenceMessage.value = "🗑️ All geofences removed."
+            },
+            onFailure = {
+                _geofenceMessage.value = "❌ Failed to remove geofences: ${it.message}"
+            },
+            context = geofenceManager.context
+        )
     }
 
-    fun onRemoveAllGeofencesClick() {
-        // TODO: 연결 예정
-    }
     fun onSuggestionSelected(suggestion: AddressSuggestion) {
         _latitude.value = suggestion.latitude.toString()
         _longitude.value = suggestion.longitude.toString()
