@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +37,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import java.util.UUID
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -61,6 +64,16 @@ fun BasicGeofenceSetup(
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         }
+
+    val geofenceId = "nearbyNote_" + UUID.randomUUID().toString()
+    Log.d("GeofenceSetup", "Creating geofence with ID: $geofenceId")
+
+    LaunchedEffect(Unit) {
+        backgroundLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
     Column(
         modifier = Modifier
@@ -143,7 +156,7 @@ fun BasicGeofenceSetup(
 
                     if (lat != null && lng != null && rad != null) {
                         geofenceManager.addGeofence(
-                            geofenceId = "GEOFENCE_ID",
+                            geofenceId = geofenceId,
                             latitude = lat,
                             longitude = lng,
                             radius = rad,

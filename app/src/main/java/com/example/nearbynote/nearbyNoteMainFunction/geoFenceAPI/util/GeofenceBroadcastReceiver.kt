@@ -50,6 +50,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         ).apply {
             description = "Notifications for Geofence events"
         }
+
         notificationManager.createNotificationChannel(channel)
 
         val notification = NotificationCompat.Builder(context, channelId)
