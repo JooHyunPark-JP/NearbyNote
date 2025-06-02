@@ -1,4 +1,4 @@
-package com.example.nearbynote.nearbyNoteMainFunction.note.data
+package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data
 
 import androidx.room.Dao
 import androidx.room.Delete

@@ -1,4 +1,4 @@
-package com.example.nearbynote.nearbyNoteMainFunction.note.data
+package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -11,4 +11,5 @@ data class GeofenceEntity(
     val latitude: Double,
     val longitude: Double,
     val radius: Float = 100f,
+    val createdAt: Long,
 )

@@ -7,7 +7,7 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp
 class MyApplication : Application() {
 
-    /*    override fun onCreate() {
+/*        override fun onCreate() {
             super.onCreate()
 
             // use this code when you need to delete previous (room) database
