@@ -2,7 +2,7 @@ package com.example.nearbynote.nearbyNoteMainFunction.nearbyNoteData
 
 import android.content.Context
 import androidx.room.Room
-import com.example.nearbynote.nearbyNoteMainFunction.note.data.GeofenceDao
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceDao
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteDao
 import dagger.Module
 import dagger.Provides

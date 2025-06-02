@@ -2,6 +2,7 @@ package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceRepository
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GeofenceViewModel @Inject constructor(
-    private val geofenceManager: GeofenceManager
+    private val geofenceManager: GeofenceManager,
+    private val geofenceRepository: GeofenceRepository
 ) : ViewModel() {
 
     private val _latitude = MutableStateFlow("43.822192")

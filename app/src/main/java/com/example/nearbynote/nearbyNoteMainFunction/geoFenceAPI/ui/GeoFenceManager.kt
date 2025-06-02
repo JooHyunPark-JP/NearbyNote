@@ -23,6 +23,9 @@ class GeofenceManager @Inject constructor(
     @ApplicationContext val context: Context,
     private val geofencingClient: GeofencingClient
 ) {
+
+    private val activeGeofences = mutableListOf<String>()
+
     suspend fun getAddressFromLatLng(lat: Double, lng: Double): String {
         return withContext(Dispatchers.IO) {
             try {
@@ -46,8 +49,8 @@ class GeofenceManager @Inject constructor(
     }
 
 
-    //suppress missing permission here because it is checking in UI level.
-    // check
+    //suppress missing permission here because it is checking already in UI level.
+    //Check BasicGeofenceSetup.kt
     @SuppressLint("MissingPermission")
     fun addGeofence(
         geofenceId: String,
@@ -71,11 +74,13 @@ class GeofenceManager @Inject constructor(
 
         geofencingClient.addGeofences(geofencingRequest, getGeofencePendingIntent(context))
             .addOnSuccessListener {
-                Log.d("GeofenceManager", "Geofence added: $geofenceId")
+                Log.d("GeofenceManager", "✅ Geofence added: $geofenceId")
+                activeGeofences.add(geofenceId)
+                Log.d("GeofenceManager", "📋 All registered geofences: $activeGeofences")
                 onSuccess()
             }
             .addOnFailureListener { e ->
-                Log.e("GeofenceManager", "Failed to add geofence: ${e.message}")
+                Log.e("GeofenceManager", "❌ Failed to add geofence: ${e.message}")
                 onFailure(e)
             }
     }
