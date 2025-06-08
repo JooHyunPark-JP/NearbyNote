@@ -216,14 +216,19 @@ fun BasicGeofenceSetup(
                     Text("Cancel")
                 }
             },
-            title = { Text("Location permission Required") },
+            title = { Text("Background location permission Required") },
             text = {
                 Text(
                     buildString {
-                        appendLine("To save notes tied to a location, please allow background location access.")
+                        appendLine("📍 For a smarter note-taking experience...")
                         appendLine()
-                        appendLine("Steps:")
-                        appendLine("1. Click \"Open Settings\"")
+                        appendLine("To keep showing your note when you arrive at a location, your phone requires you to enable \"Allow all the time\" manually.")
+                        appendLine()
+                        appendLine("📌 Don’t worry — your location is never stored or shared.")
+                        appendLine("You can always change anytime in Settings.")
+                        appendLine()
+                        appendLine("🔧 How to set it:")
+                        appendLine("1. Tap \"Open Settings\" below")
                         appendLine("2. Tap \"Permissions\"")
                         appendLine("3. Choose \"Location\"")
                         appendLine("4. Select \"Allow all the time\"")
