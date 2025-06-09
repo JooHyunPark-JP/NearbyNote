@@ -1,6 +1,7 @@
 package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -27,6 +28,9 @@ class NoteViewModel @Inject constructor(
     val notes: StateFlow<List<NoteEntity>> = _notes
 
     var addressQuery by mutableStateOf("")
+
+    var addressLongitude by mutableDoubleStateOf(0.0)
+    var addressLatitude by mutableDoubleStateOf(0.0)
     var suggestions by mutableStateOf(emptyList<AddressSuggestion>())
 
     init {

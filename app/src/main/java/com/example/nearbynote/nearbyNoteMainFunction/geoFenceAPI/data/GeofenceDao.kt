@@ -19,6 +19,11 @@ interface GeofenceDao {
     @Query("SELECT * FROM geofences")
     fun getAllGeofences(): Flow<List<GeofenceEntity>>
 
+    @Query("DELETE FROM geofences")
+    suspend fun deleteAll()
+
     @Delete
     suspend fun delete(geofence: GeofenceEntity)
+
+
 }

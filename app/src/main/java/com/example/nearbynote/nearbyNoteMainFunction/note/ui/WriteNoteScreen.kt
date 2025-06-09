@@ -1,7 +1,10 @@
 package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
+import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.speech.RecognizerIntent
@@ -19,12 +22,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -38,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.BasicGeofenceSetup
@@ -59,6 +67,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceView
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import java.util.UUID
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -68,17 +77,36 @@ fun WriteNoteScreen(
     geofenceViewModel: GeofenceViewModel,
     geofenceManager: GeofenceManager
 ) {
+    val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val permissionState = rememberPermissionState(android.Manifest.permission.RECORD_AUDIO)
+    val permissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     var showPermissionDialog by remember { mutableStateOf(false) }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
 
 
     var noteText by remember { mutableStateOf("") }
     var geofenceEnabled by remember { mutableStateOf(false) }
-    var geofenceText by remember { mutableStateOf("") }
 
     val suggestions = noteViewModel.suggestions
+
+    //val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    var backgroundLocationGranted by remember { mutableStateOf(false) }
+    var showBackgroundDialog by remember { mutableStateOf(false) }
+
+    val settingsLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            backgroundLocationGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+
+    LaunchedEffect(Unit) {
+        backgroundLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
     //Launcher for speech recognition
     val speechLauncher = rememberLauncherForActivityResult(
@@ -105,7 +133,6 @@ fun WriteNoteScreen(
         //Current setting is only for 'English'
         val intent = createVoiceRecognitionIntent("en-US")
         speechLauncher.launch(intent)
-
     }
 
 
@@ -114,6 +141,7 @@ fun WriteNoteScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 16.dp)
+                .verticalScroll(scrollState)
         ) {
             GeofenceToggleRow(
                 geofenceEnabled = geofenceEnabled,
@@ -123,43 +151,52 @@ fun WriteNoteScreen(
             AnimatedVisibility(visible = geofenceEnabled) {
                 Column {
                     Spacer(modifier = Modifier.height(8.dp))
+
                     TextField(
                         value = noteViewModel.addressQuery,
                         onValueChange = { noteViewModel.onQueryChanged(it) },
                         placeholder = { Text("Enter location name or address") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
-            }
 
-            LazyColumn {
-                items(
-                    items = suggestions,
-                    key = { it.placeName }
-                ) { suggestion ->
-                    Text(
-                        text = "${suggestion.placeName} (Lat: ${suggestion.latitude}, Lon: ${suggestion.longitude})",
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                geofenceViewModel.onSuggestionSelected(suggestion)
-                                noteViewModel.addressQuery = suggestion.placeName
-                                noteViewModel.suggestions = emptyList()
-                            }
-                            .padding(8.dp)
-                    )
+                            .heightIn(max = 200.dp) // clamp list height
+                            .padding(top = 4.dp)
+                    ) {
+                        items(
+                            items = suggestions,
+                            key = { it.placeName }
+                        ) { suggestion ->
+                            Text(
+                                text = "${suggestion.placeName} (Lat: ${suggestion.latitude}, Lon: ${suggestion.longitude})",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        geofenceViewModel.onSuggestionSelected(suggestion)
+                                        noteViewModel.addressQuery = suggestion.placeName
+                                        noteViewModel.addressLatitude = suggestion.latitude
+                                        geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
+                                        noteViewModel.addressLongitude = suggestion.longitude
+                                        geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
+                                        noteViewModel.suggestions = emptyList()
+                                    }
+                                    .padding(8.dp)
+                            )
+                        }
+                    }
                 }
             }
 
             if (geofenceEnabled) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 BasicGeofenceSetup(
                     geofenceViewModel = geofenceViewModel,
-                    geofenceManager = geofenceManager
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             NoteTextField(
                 noteText = noteText,
@@ -188,24 +225,67 @@ fun WriteNoteScreen(
                 }
             },
             onSaveClick = {
-                if (noteText.isBlank()) {
-                    Toast.makeText(
-                        context,
-                        "Write down something before saving!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    noteViewModel.saveNote(
-                        content = noteText,
-                        geofenceId = if (geofenceEnabled) geofenceText else null,
-                        locationName = geofenceText,
-                        isVoice = false
-                    )
-                    navController.popBackStack()
-                }
+                handleNoteSave(
+                    context = context,
+                    noteText = noteText,
+                    geofenceEnabled = geofenceEnabled,
+                    backgroundLocationGranted = backgroundLocationGranted,
+                    addressQuery = noteViewModel.addressQuery,
+                    lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
+                    lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
+                    rad = geofenceViewModel.radius.value.toFloatOrNull(),
+                    geofenceManager = geofenceManager,
+                    geofenceViewModel = geofenceViewModel,
+                    noteViewModel = noteViewModel,
+                    navController = navController,
+                    onShowBackgroundDialog = { showBackgroundDialog = true }
+                )
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+
+        if (showBackgroundDialog && geofenceEnabled) {
+            AlertDialog(
+                onDismissRequest = { showBackgroundDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showBackgroundDialog = false
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        settingsLauncher.launch(intent)
+                    }) {
+                        Text("Open Settings")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showBackgroundDialog = false
+                    }) {
+                        Text("Cancel")
+                    }
+                },
+                title = { Text("Background location permission Required") },
+                text = {
+                    Text(
+                        buildString {
+                            appendLine("📍 For a smarter note-taking experience...")
+                            appendLine()
+                            appendLine("To keep showing your note when you arrive at a location, your phone requires you to enable \"Allow all the time\" manually.")
+                            appendLine()
+                            appendLine("📌 Don’t worry — your location is never stored or shared.")
+                            appendLine("You can always change anytime in Settings.")
+                            appendLine()
+                            appendLine("🔧 How to set it:")
+                            appendLine("1. Tap \"Open Settings\" below")
+                            appendLine("2. Tap \"Permissions\"")
+                            appendLine("3. Choose \"Location\"")
+                            appendLine("4. Select \"Allow all the time\"")
+                        }
+                    )
+                }
+            )
+        }
 
         if (showPermissionDialog) {
             AlertDialog(
@@ -247,6 +327,82 @@ fun createVoiceRecognitionIntent(language: String): Intent {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
         putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
     }
+}
+
+fun handleNoteSave(
+    context: Context,
+    noteText: String,
+    geofenceEnabled: Boolean,
+    backgroundLocationGranted: Boolean,
+    addressQuery: String,
+    lat: Double?,
+    lng: Double?,
+    rad: Float?,
+    geofenceManager: GeofenceManager,
+    geofenceViewModel: GeofenceViewModel,
+    noteViewModel: NoteViewModel,
+    navController: NavController,
+    onShowBackgroundDialog: () -> Unit
+) {
+    if (noteText.isBlank()) {
+        Toast.makeText(context, "Write down something before saving!", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    if (!geofenceEnabled) {
+        noteViewModel.saveNote(
+            content = noteText,
+            geofenceId = null,
+            locationName = null,
+            isVoice = false
+        )
+        navController.popBackStack()
+        return
+    }
+
+    if (!backgroundLocationGranted) {
+        onShowBackgroundDialog()
+        return
+    }
+
+    if (lat == null || lng == null || rad == null) {
+        Toast.makeText(context, "Invalid geofence data", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val geofenceId = "nearbyNote_" + UUID.randomUUID().toString()
+
+    geofenceManager.addGeofence(
+        geofenceId = geofenceId,
+        latitude = lat,
+        longitude = lng,
+        radius = rad,
+        onSuccess = {
+            geofenceViewModel.saveGeofenceToDb(
+                id = geofenceId,
+                name = addressQuery,
+                lat = lat,
+                lng = lng,
+                radius = rad
+            )
+            noteViewModel.saveNote(
+                content = noteText,
+                geofenceId = geofenceId,
+                locationName = addressQuery,
+                isVoice = false
+            )
+            noteViewModel.addressQuery = ""
+            navController.popBackStack()
+        },
+        onFailure = {
+            Toast.makeText(
+                context,
+                "Failed to add geofence: ${it.message}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    )
+
 }
 
 
@@ -298,7 +454,9 @@ fun NoteTextField(
         onValueChange = onNoteChange,
         placeholder = { Text("Write down anything!") },
         textStyle = LocalTextStyle.current.copy(lineHeight = 24.sp),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 120.dp, max = 300.dp)
     )
 }
 
