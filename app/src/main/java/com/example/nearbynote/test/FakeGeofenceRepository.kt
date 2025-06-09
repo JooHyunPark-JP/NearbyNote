@@ -26,4 +26,8 @@ class FakeGeofenceRepository : GeofenceRepository {
         geofences.remove(geofence.id)
         flow.value = geofences.values.toList()
     }
+
+    override suspend fun deleteAllGeofences() {
+        TODO("Not yet implemented")
+    }
 }

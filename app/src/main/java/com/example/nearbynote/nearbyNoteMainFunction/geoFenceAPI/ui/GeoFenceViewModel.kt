@@ -2,9 +2,11 @@ package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceRepository
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,11 +17,10 @@ class GeofenceViewModel @Inject constructor(
     private val geofenceManager: GeofenceManager,
     private val geofenceRepository: GeofenceRepository
 ) : ViewModel() {
-
-    private val _latitude = MutableStateFlow("43.822192")
+    private val _latitude = MutableStateFlow("")
     val latitude: StateFlow<String> = _latitude
 
-    private val _longitude = MutableStateFlow("-79.418731")
+    private val _longitude = MutableStateFlow("")
     val longitude: StateFlow<String> = _longitude
 
     private val _radius = MutableStateFlow("1000")
@@ -30,6 +31,8 @@ class GeofenceViewModel @Inject constructor(
 
     private val _geofenceMessage = MutableStateFlow("Waiting for Geofence status...")
     val geofenceMessage: StateFlow<String> = _geofenceMessage
+
+    val allGeofences: Flow<List<GeofenceEntity>> = geofenceRepository.getAllGeofences()
 
     fun onLatitudeChanged(value: String) {
         _latitude.value = value
@@ -60,6 +63,9 @@ class GeofenceViewModel @Inject constructor(
     fun onRemoveAllGeofencesClick() {
         geofenceManager.removeAllGeofences(
             onSuccess = {
+                viewModelScope.launch {
+                    geofenceRepository.deleteAllGeofences()
+                }
                 _geofenceMessage.value = "🗑️ All geofences removed."
             },
             onFailure = {
@@ -77,5 +83,25 @@ class GeofenceViewModel @Inject constructor(
 
     fun updateGeofenceStatus(message: String) {
         _geofenceMessage.value = message
+    }
+
+    fun saveGeofenceToDb(
+        id: String,
+        name: String,
+        lat: Double,
+        lng: Double,
+        radius: Float
+    ) {
+        viewModelScope.launch {
+            val entity = GeofenceEntity(
+                id = id,
+                name = name,
+                latitude = lat,
+                longitude = lng,
+                radius = radius,
+                createdAt = System.currentTimeMillis()
+            )
+            geofenceRepository.saveGeofence(entity)
+        }
     }
 }

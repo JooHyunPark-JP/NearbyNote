@@ -21,7 +21,8 @@ fun NavGraph(
         composable(Screen.Main.route) {
             NoteListMain(
                 navController = navController,
-                noteViewModel = noteViewModel
+                noteViewModel = noteViewModel,
+                geofenceViewModel = geofenceViewModel
             )
         }
 
