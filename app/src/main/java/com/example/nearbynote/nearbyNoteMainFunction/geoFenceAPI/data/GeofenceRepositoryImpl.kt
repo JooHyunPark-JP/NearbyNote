@@ -24,4 +24,8 @@ class GeofenceRepositoryImpl @Inject constructor(
     override suspend fun deleteGeofence(geofence: GeofenceEntity) {
         geofenceDao.delete(geofence)
     }
+
+    override suspend fun deleteAllGeofences() {
+        geofenceDao.deleteAll()
+    }
 }
