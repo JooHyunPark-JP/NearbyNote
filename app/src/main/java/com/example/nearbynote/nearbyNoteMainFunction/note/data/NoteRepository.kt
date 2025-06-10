@@ -11,4 +11,7 @@ class NoteRepository @Inject constructor(
     val allNotes: Flow<List<NoteEntity>> = dao.getAllNotes()
 
     suspend fun insertNote(note: NoteEntity) = dao.insert(note)
+
+    suspend fun updateNote(note: NoteEntity) = dao.update(note)
+    suspend fun getNoteById(id: Long): NoteEntity? = dao.getNoteById(id)
 }

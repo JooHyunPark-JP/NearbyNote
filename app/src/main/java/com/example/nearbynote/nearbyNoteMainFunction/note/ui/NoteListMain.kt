@@ -1,17 +1,19 @@
 package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
+import android.os.Build
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,11 +29,14 @@ import androidx.navigation.NavController
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import java.text.DateFormat
 import java.util.Date
+import com.google.accompanist.permissions.rememberPermissionState
 
+/*
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun NoteListMain(
@@ -61,12 +66,16 @@ fun NoteListMain(
         val allGranted = locationPermissionsState.allPermissionsGranted
         val shouldShow = locationPermissionsState.permissions.any { it.status.shouldShowRationale }
 
-        /*        val allDeniedWithoutRationale = locationPermissionsState.permissions.all {
+        */
+/*        val allDeniedWithoutRationale = locationPermissionsState.permissions.all {
                     it.status is PermissionStatus.Denied && !it.status.shouldShowRationale
-                }*/
+                }*//*
+
 
         when {
-            allGranted -> { /* OK */
+            allGranted -> { */
+/* OK *//*
+
             }
 
             !hasLaunchedPermissionRequest -> {
@@ -124,7 +133,8 @@ fun NoteListMain(
         }
     }
 
-    /*    if (showPermissionDialog) {
+    */
+/*    if (showPermissionDialog) {
             AlertDialog(
                 onDismissRequest = { showPermissionDialog = false },
                 confirmButton = {
@@ -151,5 +161,103 @@ fun NoteListMain(
                     Text("Location access required in order to use Geofence setup. Please grant permission in settings.")
                 }
             )
-        }*/
+        }*//*
+
+}*/
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun NoteListMain(
+    navController: NavController,
+    noteViewModel: NoteViewModel,
+    geofenceViewModel: GeofenceViewModel,
+    modifier: Modifier = Modifier
+) {
+    val notes by noteViewModel.notes.collectAsState()
+    val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
+    val locationPermissionsState = rememberMultiplePermissionsState(
+        listOf(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
+    var hasLaunchedPermissionRequest by rememberSaveable { mutableStateOf(false) }
+
+    val notificationPermissionState = rememberPermissionState(
+        android.Manifest.permission.POST_NOTIFICATIONS
+    )
+
+    //Above API api 33
+    val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+    LaunchedEffect(Unit) {
+        val allGranted = locationPermissionsState.allPermissionsGranted
+        val shouldShow = locationPermissionsState.permissions.any { it.status.shouldShowRationale }
+
+        when {
+            allGranted -> Unit
+            !hasLaunchedPermissionRequest -> {
+                hasLaunchedPermissionRequest = true
+                locationPermissionsState.launchMultiplePermissionRequest()
+            }
+            shouldShow -> locationPermissionsState.launchMultiplePermissionRequest()
+        }
+        if (isNotificationPermissionRequired && notificationPermissionState.status is PermissionStatus.Denied) {
+            notificationPermissionState.launchPermissionRequest()
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Text("📝 Notes", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+            }
+
+            items(notes) { note ->
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
+                        }
+                ) {
+                    Text(text = note.content)
+                    Text(text = "Geofence ID: ${note.geofenceId}")
+                    Text(text = "Location: ${note.locationName}")
+                    HorizontalDivider()
+                }
+            }
+
+            item {
+                Text("📍 Geofences", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+            }
+
+            items(allGeofences) { geofence ->
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text("ID: ${geofence.id}")
+                    Text("📍 ${geofence.name}")
+                    Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
+                    Text("Radius: ${geofence.radius}m")
+                    Text("Created at: ${DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))}")
+                    HorizontalDivider()
+                }
+            }
+        }
+
+        FloatingActionButton(
+            onClick = {
+                navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(null))
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
+        }
+    }
 }
