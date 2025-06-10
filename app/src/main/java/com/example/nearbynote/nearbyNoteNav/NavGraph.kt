@@ -2,8 +2,10 @@ package com.example.nearbynote.nearbyNoteNav
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteListMain
@@ -26,14 +28,31 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.WriteNoteScreen.route) {
+/*        composable(Screen.WriteNoteScreen.route) {
             WriteNoteScreen(
                 navController = navController,
                 noteViewModel = noteViewModel,
                 geofenceViewModel = geofenceViewModel,
                 geofenceManager = geofenceManager
             )
+        }*/
+
+        composable(
+            route = Screen.WriteNoteScreen.route, arguments = listOf(navArgument("noteId") {
+                type = NavType.LongType
+                defaultValue = -1L
+            })
+        ) { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getLong("noteId")
+            WriteNoteScreen(
+                navController = navController,
+                noteViewModel = noteViewModel,
+                geofenceViewModel = geofenceViewModel,
+                geofenceManager = geofenceManager,
+                noteId = if (noteId == -1L) null else noteId)
         }
+
+
 
     }
 }
