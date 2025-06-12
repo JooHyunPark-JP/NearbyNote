@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BasicGeofenceSetup(
     geofenceViewModel: GeofenceViewModel,
+    geofenceOptionsEnabled: Boolean = false
 ) {
     val radius by geofenceViewModel.radius.collectAsState()
     //   val geofenceStatus by geofenceViewModel.geofenceMessage.collectAsState()
@@ -48,7 +49,6 @@ fun BasicGeofenceSetup(
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Text("Set Radius for this note to trigger!", style = MaterialTheme.typography.titleMedium)
         Text(
             text = "📏 Radius: $radiusDisplay",
             style = MaterialTheme.typography.bodySmall,
@@ -69,7 +69,8 @@ fun BasicGeofenceSetup(
                 },
                 valueRange = 100f..2000f,
                 steps = 18,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                enabled = geofenceOptionsEnabled
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -86,7 +87,8 @@ fun BasicGeofenceSetup(
                 label = { Text("Radius(m)") },
                 singleLine = true,
                 modifier = Modifier.width(100.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                enabled = geofenceOptionsEnabled
             )
         }
 
@@ -107,13 +109,5 @@ fun BasicGeofenceSetup(
         ) {
             Text("Remove All Geofences")
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        /*        Text(
-                    text = geofenceStatus,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )*/
     }
 }

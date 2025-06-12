@@ -27,13 +27,12 @@ class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val mapboxRepository: MapboxRepository,
 
-) : ViewModel() {
+    ) : ViewModel() {
 
     private val _notes = MutableStateFlow<List<NoteEntity>>(emptyList())
     val notes: StateFlow<List<NoteEntity>> = _notes
 
     var addressQuery by mutableStateOf("")
-
     var addressLongitude by mutableDoubleStateOf(0.0)
     var addressLatitude by mutableDoubleStateOf(0.0)
     var suggestions by mutableStateOf(emptyList<AddressSuggestion>())
@@ -153,4 +152,6 @@ class NoteViewModel @Inject constructor(
             }
         }
     }
+
+
 }
