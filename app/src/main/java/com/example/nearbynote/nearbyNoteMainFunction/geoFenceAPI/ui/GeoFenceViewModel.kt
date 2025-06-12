@@ -104,4 +104,8 @@ class GeofenceViewModel @Inject constructor(
             geofenceRepository.saveGeofence(entity)
         }
     }
+
+    suspend fun getGeofenceById(id: String): GeofenceEntity? {
+        return geofenceRepository.getGeofenceById(id)
+    }
 }

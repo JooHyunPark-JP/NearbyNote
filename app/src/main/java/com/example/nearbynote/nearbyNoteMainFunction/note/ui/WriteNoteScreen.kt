@@ -68,6 +68,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceView
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -85,7 +86,6 @@ fun WriteNoteScreen(
     var showPermissionDialog by remember { mutableStateOf(false) }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
 
-
     var noteText by remember { mutableStateOf("") }
     var geofenceEnabled by remember { mutableStateOf(false) }
 
@@ -95,6 +95,12 @@ fun WriteNoteScreen(
     var backgroundLocationGranted by remember { mutableStateOf(false) }
     var showBackgroundDialog by remember { mutableStateOf(false) }
 
+    var hasExistingGeofence by remember { mutableStateOf(false) }
+
+    val isGeofenceImmutable by remember(noteId, hasExistingGeofence) {
+        mutableStateOf(noteId != null && hasExistingGeofence)
+    }
+
     val settingsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             backgroundLocationGranted = ContextCompat.checkSelfPermission(
@@ -102,6 +108,35 @@ fun WriteNoteScreen(
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         }
+
+    fun resetNewNoteState() {
+        noteText = ""
+        geofenceEnabled = false
+        noteViewModel.addressQuery = ""
+        geofenceViewModel.onLatitudeChanged("")
+        geofenceViewModel.onLongitudeChanged("")
+        geofenceViewModel.onRadiusChanged("1000")
+    }
+
+    suspend fun loadExistingNote(noteId: Long) {
+        val existing = noteViewModel.getNoteById(noteId) ?: return
+        noteText = existing.content
+        geofenceEnabled = existing.geofenceId != null
+        hasExistingGeofence = existing.geofenceId != null
+        noteViewModel.addressQuery = existing.locationName.orEmpty()
+
+        val geofence = existing.geofenceId?.let { geofenceViewModel.getGeofenceById(it) }
+        if (geofence != null) {
+            geofenceViewModel.onLatitudeChanged(geofence.latitude.toString())
+            geofenceViewModel.onLongitudeChanged(geofence.longitude.toString())
+            geofenceViewModel.onRadiusChanged(geofence.radius.toInt().toString())
+        } else {
+            noteViewModel.addressQuery = ""
+            geofenceViewModel.onLatitudeChanged("")
+            geofenceViewModel.onLongitudeChanged("")
+            geofenceViewModel.onRadiusChanged("1000")
+        }
+    }
 
     LaunchedEffect(Unit) {
         backgroundLocationGranted = ContextCompat.checkSelfPermission(
@@ -112,13 +147,10 @@ fun WriteNoteScreen(
 
 
     LaunchedEffect(noteId) {
-        //If note ID is not null, get the exist note.
         if (noteId != null) {
-            val existing = noteViewModel.getNoteById(noteId)
-            if (existing != null) {
-                noteText = existing.content
-                geofenceEnabled = existing.geofenceId != null
-            }
+            launch { loadExistingNote(noteId) }
+        } else {
+            resetNewNoteState()
         }
     }
 
@@ -159,6 +191,7 @@ fun WriteNoteScreen(
         ) {
             GeofenceToggleRow(
                 geofenceEnabled = geofenceEnabled,
+                isGeofenceImmutable = !isGeofenceImmutable,
                 onToggle = { geofenceEnabled = it }
             )
 
@@ -170,8 +203,15 @@ fun WriteNoteScreen(
                         value = noteViewModel.addressQuery,
                         onValueChange = { noteViewModel.onQueryChanged(it) },
                         placeholder = { Text("Enter location name or address") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isGeofenceImmutable,
                     )
+                    if (isGeofenceImmutable) {
+                        Text(
+                            text = "📍 This note has a location reminder. To change location, please create a new note.",
+                            style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+                        )
+                    }
 
                     LazyColumn(
                         modifier = Modifier
@@ -207,6 +247,7 @@ fun WriteNoteScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 BasicGeofenceSetup(
                     geofenceViewModel = geofenceViewModel,
+                    geofenceOptionsEnabled = !isGeofenceImmutable
                 )
             }
 
@@ -239,26 +280,45 @@ fun WriteNoteScreen(
                 }
             },
             onSaveClick = {
-                handleNoteSave(
-                    context = context,
-                    noteText = noteText,
-                    geofenceEnabled = geofenceEnabled,
-                    backgroundLocationGranted = backgroundLocationGranted,
-                    addressQuery = noteViewModel.addressQuery,
-                    lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
-                    lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
-                    rad = geofenceViewModel.radius.value.toFloatOrNull(),
-                    geofenceManager = geofenceManager,
-                    geofenceViewModel = geofenceViewModel,
-                    noteViewModel = noteViewModel,
-                    navController = navController,
-                    noteId = noteId,
-                    onShowBackgroundDialog = { showBackgroundDialog = true }
-                )
+                if (noteId == null) {
+                    //create new note
+                    handleNewNoteSave(
+                        context = context,
+                        noteText = noteText,
+                        geofenceEnabled = geofenceEnabled,
+                        backgroundLocationGranted = backgroundLocationGranted,
+                        addressQuery = noteViewModel.addressQuery,
+                        lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
+                        lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
+                        rad = geofenceViewModel.radius.value.toFloatOrNull(),
+                        geofenceManager = geofenceManager,
+                        geofenceViewModel = geofenceViewModel,
+                        noteViewModel = noteViewModel,
+                        navController = navController,
+                        onShowBackgroundDialog = { showBackgroundDialog = true }
+                    )
+                } else {
+                    //Edit existed note
+                    handleExistingNoteUpdate(
+                        context = context,
+                        noteId = noteId,
+                        noteText = noteText,
+                        geofenceEnabled = geofenceEnabled,
+                        addressQuery = noteViewModel.addressQuery,
+                        lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
+                        lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
+                        rad = geofenceViewModel.radius.value.toFloatOrNull(),
+                        geofenceManager = geofenceManager,
+                        geofenceViewModel = geofenceViewModel,
+                        noteViewModel = noteViewModel,
+                        navController = navController
+                    )
+                }
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
 
+        //Pop up the background permission message to users
         if (showBackgroundDialog && geofenceEnabled) {
             AlertDialog(
                 onDismissRequest = { showBackgroundDialog = false },
@@ -344,7 +404,7 @@ fun createVoiceRecognitionIntent(language: String): Intent {
     }
 }
 
-fun handleNoteSave(
+fun handleNewNoteSave(
     context: Context,
     noteText: String,
     geofenceEnabled: Boolean,
@@ -357,7 +417,6 @@ fun handleNoteSave(
     geofenceViewModel: GeofenceViewModel,
     noteViewModel: NoteViewModel,
     navController: NavController,
-    noteId: Long? = null,
     onShowBackgroundDialog: () -> Unit
 ) {
     if (noteText.isBlank()) {
@@ -370,177 +429,119 @@ fun handleNoteSave(
         return
     }
 
-    if (noteId == null) {
-        // new note and geofence enabled
-        if (geofenceEnabled) {
-            if (lat == null || lng == null || rad == null) {
-                Toast.makeText(context, "Invalid geofence data", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val geofenceId = UUID.randomUUID().toString()
-
-            geofenceManager.addGeofence(
-                geofenceId = geofenceId,
-                latitude = lat,
-                longitude = lng,
-                radius = rad,
-                onSuccess = {
-                    geofenceViewModel.saveGeofenceToDb(
-                        id = geofenceId,
-                        name = addressQuery,
-                        lat = lat,
-                        lng = lng,
-                        radius = rad
-                    )
-                    noteViewModel.saveNote(
-                        content = noteText,
-                        geofenceId = geofenceId,
-                        locationName = addressQuery,
-                        isVoice = false
-                    )
-                    noteViewModel.addressQuery = ""
-                    navController.popBackStack()
-                },
-                onFailure = {
-                    Toast.makeText(
-                        context,
-                        "Failed to add geofence: ${it.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            )
-        } else {
-            // new note and no geofence
-            noteViewModel.saveNote(
-                content = noteText,
-                geofenceId = null,
-                locationName = null,
-                isVoice = false
-            )
-            navController.popBackStack()
+    if (geofenceEnabled) {
+        if (lat == null || lng == null || rad == null || addressQuery.isBlank()) {
+            Toast.makeText(
+                context,
+                "Please add address to register the location",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
         }
 
-        // if noteID != null, (aka, edit notes)
-    } /*else {
-        noteViewModel.viewModelScope.launch {
-            val oldNote = noteViewModel.getNoteById(noteId)
-            if (oldNote == null) {
-                Toast.makeText(context, "Note not found.", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
+        val geofenceId = UUID.randomUUID().toString()
 
-            if (geofenceEnabled) {
-                if (lat == null || lng == null || rad == null) {
-                    Toast.makeText(context, "Invalid geofence data", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                val geofenceId = oldNote.geofenceId ?: UUID.randomUUID().toString()
-
-                if (oldNote.geofenceId == null) {
-                    geofenceManager.addGeofence(
-                        geofenceId = geofenceId,
-                        latitude = lat,
-                        longitude = lng,
-                        radius = rad,
-                        onSuccess = {
-                            geofenceViewModel.saveGeofenceToDb(
-                                id = geofenceId,
-                                name = addressQuery,
-                                lat = lat,
-                                lng = lng,
-                                radius = rad
-                            )
-                            noteViewModel.updateNote(
-                                oldNote.copy(
-                                    content = noteText,
-                                    geofenceId = geofenceId,
-                                    locationName = addressQuery,
-                                    isVoice = false
-                                )
-                            )
-                            noteViewModel.addressQuery = ""
-                            navController.popBackStack()
-                        },
-                        onFailure = {
-                            Toast.makeText(
-                                context,
-                                "Failed to add geofence: ${it.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    )
-                } else {
-                    // Keep the same geofence
-                    noteViewModel.updateNote(
-                        oldNote.copy(
-                            content = noteText,
-                            locationName = addressQuery,
-                            isVoice = false
-                        )
-                    )
-                    navController.popBackStack()
-                }
-
-            }
-            // edit note and geofence is not enabled.
-            else {
-                noteViewModel.updateNote(
-                    oldNote.copy(
-                        content = noteText,
-                        geofenceId = null,
-                        locationName = null,
-                        isVoice = false
-                    )
-                )
-                navController.popBackStack()
-            }
-        }
-    }*/
-    else {
-        // if noteID != null, (aka, edit notes)
-        val geofenceEntity: GeofenceEntity? = if (geofenceEnabled) {
-            if (lat == null || lng == null || rad == null) {
-                Toast.makeText(context, "Invalid geofence data", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            GeofenceEntity(
-                id = "",
-                name = addressQuery,
-                latitude = lat,
-                longitude = lng,
-                radius = rad,
-                createdAt = System.currentTimeMillis()
-            )
-        } else null
-
-        noteViewModel.updateNoteWithGeofence(
-            noteId = noteId,
-            content = noteText,
-            geofenceEntity = geofenceEntity,
-            geofenceManager = geofenceManager,
-            geofenceViewModel = geofenceViewModel,
+        geofenceManager.addGeofence(
+            geofenceId = geofenceId,
+            latitude = lat,
+            longitude = lng,
+            radius = rad,
             onSuccess = {
+                geofenceViewModel.saveGeofenceToDb(
+                    id = geofenceId,
+                    name = addressQuery,
+                    lat = lat,
+                    lng = lng,
+                    radius = rad
+                )
+                noteViewModel.saveNote(
+                    content = noteText,
+                    geofenceId = geofenceId,
+                    locationName = addressQuery,
+                    isVoice = false
+                )
                 noteViewModel.addressQuery = ""
                 navController.popBackStack()
             },
             onFailure = {
                 Toast.makeText(
                     context,
-                    it.message ?: "Failed to update note",
+                    "Failed to add geofence: ${it.message}",
                     Toast.LENGTH_LONG
                 ).show()
             }
         )
+    } else {
+        noteViewModel.saveNote(
+            content = noteText,
+            geofenceId = null,
+            locationName = null,
+            isVoice = false
+        )
+        navController.popBackStack()
     }
+}
+
+fun handleExistingNoteUpdate(
+    context: Context,
+    noteId: Long,
+    noteText: String,
+    geofenceEnabled: Boolean,
+    addressQuery: String,
+    lat: Double?,
+    lng: Double?,
+    rad: Float?,
+    geofenceManager: GeofenceManager,
+    geofenceViewModel: GeofenceViewModel,
+    noteViewModel: NoteViewModel,
+    navController: NavController
+) {
+    if (noteText.isBlank()) {
+        Toast.makeText(context, "Write down something before saving!", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val geofenceEntity: GeofenceEntity? = if (geofenceEnabled) {
+        if (lat == null || lng == null || rad == null) {
+            Toast.makeText(context, "Invalid geofence data", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        GeofenceEntity(
+            id = "",
+            name = addressQuery,
+            latitude = lat,
+            longitude = lng,
+            radius = rad,
+            createdAt = System.currentTimeMillis()
+        )
+    } else null
+
+    noteViewModel.updateNoteWithGeofence(
+        noteId = noteId,
+        content = noteText,
+        geofenceEntity = geofenceEntity,
+        geofenceManager = geofenceManager,
+        geofenceViewModel = geofenceViewModel,
+        onSuccess = {
+            noteViewModel.addressQuery = ""
+            navController.popBackStack()
+        },
+        onFailure = {
+            Toast.makeText(
+                context,
+                it.message ?: "Failed to update note",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    )
 }
 
 
 @Composable
 fun GeofenceToggleRow(
     geofenceEnabled: Boolean,
+    isGeofenceImmutable: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -559,7 +560,8 @@ fun GeofenceToggleRow(
             IconToggleButton(
                 checked = geofenceEnabled,
                 onCheckedChange = onToggle,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                enabled = isGeofenceImmutable
             ) {
                 if (geofenceEnabled) {
                     Icon(
@@ -605,7 +607,7 @@ fun BottomFABRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        //mic (voice regonition)
+        //mic (voice recognition)
         FloatingActionButton(onClick = onVoiceClick, modifier = Modifier.size(56.dp)) {
             Icon(painterResource(R.drawable.ic_microphone), contentDescription = "Voice Input")
         }
@@ -616,6 +618,8 @@ fun BottomFABRow(
             Icon(Icons.Default.Add, contentDescription = "Save")
         }
     }
+
+
 }
 
 
