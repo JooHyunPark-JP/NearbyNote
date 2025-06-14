@@ -26,8 +26,7 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val mapboxRepository: MapboxRepository,
-
-    ) : ViewModel() {
+) : ViewModel() {
 
     private val _notes = MutableStateFlow<List<NoteEntity>>(emptyList())
     val notes: StateFlow<List<NoteEntity>> = _notes
@@ -149,6 +148,18 @@ class NoteViewModel @Inject constructor(
                     )
                 )
                 onSuccess()
+            }
+        }
+    }
+
+    fun deleteNoteAndGeofence(noteId: Long, geofenceViewModel: GeofenceViewModel) {
+        viewModelScope.launch {
+            val note = getNoteById(noteId)
+            if (note != null) {
+                noteRepository.deleteNote(note)
+                note.geofenceId?.let { id ->
+                    geofenceViewModel.deleteGeofenceById(id)
+                }
             }
         }
     }

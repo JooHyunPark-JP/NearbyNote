@@ -4,15 +4,19 @@ import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,139 +35,10 @@ import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import java.text.DateFormat
 import java.util.Date
-import com.google.accompanist.permissions.rememberPermissionState
-
-/*
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun NoteListMain(
-    navController: NavController,
-    noteViewModel: NoteViewModel,
-    geofenceViewModel: GeofenceViewModel,
-    modifier: Modifier = Modifier
-) {
-
-    val notes by noteViewModel.notes.collectAsState()
-    val scrollState = rememberScrollState()
-    val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
-
-
-    val locationPermissionsState = rememberMultiplePermissionsState(
-        listOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-    )
-    //   val context = LocalContext.current
-    //   var showPermissionDialog by remember { mutableStateOf(false) }
-
-    var hasLaunchedPermissionRequest by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        val allGranted = locationPermissionsState.allPermissionsGranted
-        val shouldShow = locationPermissionsState.permissions.any { it.status.shouldShowRationale }
-
-        */
-/*        val allDeniedWithoutRationale = locationPermissionsState.permissions.all {
-                    it.status is PermissionStatus.Denied && !it.status.shouldShowRationale
-                }*//*
-
-
-        when {
-            allGranted -> { */
-/* OK *//*
-
-            }
-
-            !hasLaunchedPermissionRequest -> {
-                hasLaunchedPermissionRequest = true
-                locationPermissionsState.launchMultiplePermissionRequest()
-            }
-
-            shouldShow -> locationPermissionsState.launchMultiplePermissionRequest()
-            // allDeniedWithoutRationale -> showPermissionDialog = true
-        }
-    }
-
-
-    Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            LazyColumn {
-                items(notes) { note ->
-                    Text(text = note.content, modifier = Modifier.padding(4.dp))
-                    Text(text = note.geofenceId.toString())
-                }
-            }
-
-            LazyColumn {
-                items(items = allGeofences) { geofence ->
-                    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                        Text("ID: ${geofence.id}")
-                        Text("📍 ${geofence.name}")
-                        Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
-                        Text("Radius: ${geofence.radius}m")
-                        Text(
-                            "Created at: ${
-                                DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))
-                            }"
-                        )
-                        HorizontalDivider()
-                    }
-                }
-            }
-        }
-
-        FloatingActionButton(
-            onClick = {
-                navController.navigate(Screen.WriteNoteScreen.route)
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
-        }
-    }
-
-    */
-/*    if (showPermissionDialog) {
-            AlertDialog(
-                onDismissRequest = { showPermissionDialog = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showPermissionDialog = false
-                        context.startActivity(
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", context.packageName, null)
-                            }
-                        )
-                    }) {
-                        Text("Open Setting")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showPermissionDialog = false
-                    }) {
-                        Text("Cancel")
-                    }
-                },
-                title = { Text("Location Permission required") },
-                text = {
-                    Text("Location access required in order to use Geofence setup. Please grant permission in settings.")
-                }
-            )
-        }*//*
-
-}*/
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -200,6 +75,7 @@ fun NoteListMain(
                 hasLaunchedPermissionRequest = true
                 locationPermissionsState.launchMultiplePermissionRequest()
             }
+
             shouldShow -> locationPermissionsState.launchMultiplePermissionRequest()
         }
         if (isNotificationPermissionRequired && notificationPermissionState.status is PermissionStatus.Denied) {
@@ -215,26 +91,50 @@ fun NoteListMain(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Text("📝 Notes", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+                Text(
+                    "📝 Notes",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
 
             items(notes) { note ->
-                Column(
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(8.dp)
                         .clickable {
                             navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
-                        }
+                        },
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = note.content)
-                    Text(text = "Geofence ID: ${note.geofenceId}")
-                    Text(text = "Location: ${note.locationName}")
-                    HorizontalDivider()
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = note.content)
+                        Text(text = "Geofence ID: ${note.geofenceId}")
+                        Text(text = "Location: ${note.locationName}")
+                    }
+
+                    IconButton(onClick = {
+                        noteViewModel.deleteNoteAndGeofence(
+                            noteId = note.id,
+                            geofenceViewModel = geofenceViewModel
+                        )
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Note"
+                        )
+                    }
                 }
+                HorizontalDivider()
             }
 
             item {
-                Text("📍 Geofences", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+                Text(
+                    "📍 Geofences",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
 
             items(allGeofences) { geofence ->
@@ -243,7 +143,11 @@ fun NoteListMain(
                     Text("📍 ${geofence.name}")
                     Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
                     Text("Radius: ${geofence.radius}m")
-                    Text("Created at: ${DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))}")
+                    Text(
+                        "Created at: ${
+                            DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))
+                        }"
+                    )
                     HorizontalDivider()
                 }
             }

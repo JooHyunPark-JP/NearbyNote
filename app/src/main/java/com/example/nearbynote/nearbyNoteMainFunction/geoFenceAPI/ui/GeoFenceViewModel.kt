@@ -108,4 +108,28 @@ class GeofenceViewModel @Inject constructor(
     suspend fun getGeofenceById(id: String): GeofenceEntity? {
         return geofenceRepository.getGeofenceById(id)
     }
+
+    fun deleteGeofenceById(geofenceId: String) {
+        viewModelScope.launch {
+            val entity = geofenceRepository.getGeofenceById(geofenceId)
+            if (entity != null) {
+                // Remove geofence from system
+                geofenceManager.removeGeofenceById(
+                    geofenceId,
+                    onSuccess = {
+                        viewModelScope.launch {
+                            geofenceRepository.deleteGeofence(entity)
+                            _geofenceMessage.value = "✅ Geofence removed for ID: $geofenceId"
+                        }
+                    },
+                    onFailure = {
+                        _geofenceMessage.value = "❌ Failed to remove geofence: ${it.message}"
+                    },
+                    context = geofenceManager.context
+                )
+            }
+        }
+    }
+
+
 }
