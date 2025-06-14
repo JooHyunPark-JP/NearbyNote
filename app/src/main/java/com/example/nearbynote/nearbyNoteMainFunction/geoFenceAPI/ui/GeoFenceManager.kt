@@ -101,6 +101,24 @@ class GeofenceManager @Inject constructor(
             }
     }
 
+    fun removeGeofenceById(
+        geofenceId: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (Throwable) -> Unit = {},
+        context: Context
+    ) {
+        geofencingClient.removeGeofences(listOf(geofenceId))
+            .addOnSuccessListener {
+                Log.d("GeofenceManager", "✅ Geofence removed: $geofenceId")
+                activeGeofences.remove(geofenceId)
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.e("GeofenceManager", "❌ Failed to remove geofence $geofenceId: ${e.message}")
+                onFailure(e)
+            }
+    }
+
     private fun getGeofencePendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
         return PendingIntent.getBroadcast(
