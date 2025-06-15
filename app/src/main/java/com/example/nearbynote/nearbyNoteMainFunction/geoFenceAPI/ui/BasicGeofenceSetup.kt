@@ -1,5 +1,6 @@
 package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,12 +9,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -28,7 +33,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BasicGeofenceSetup(
     geofenceViewModel: GeofenceViewModel,
-    geofenceOptionsEnabled: Boolean = false
+    geofenceOptionsEnabled: Boolean = false,
+    isFavoriteAddress: MutableState<Boolean>,
+    favoriteAddressName: MutableState<String>
 ) {
     val radius by geofenceViewModel.radius.collectAsState()
     //   val geofenceStatus by geofenceViewModel.geofenceMessage.collectAsState()
@@ -49,6 +56,41 @@ fun BasicGeofenceSetup(
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { isFavoriteAddress.value = !isFavoriteAddress.value }
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (isFavoriteAddress.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Add to Favorites",
+                tint = if (isFavoriteAddress.value) Color.Red else Color.Gray
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Add to favourite addresses")
+        }
+
+        if (isFavoriteAddress.value) {
+            OutlinedTextField(
+                value = favoriteAddressName.value,
+                onValueChange = { favoriteAddressName.value = it },
+                label = { Text("Name for this favourite address?") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                singleLine = true,
+                placeholder = {
+                    Text(
+                        text = "Home or Work...",
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color.LightGray)
+                    )
+                }
+            )
+        }
+
         Text(
             text = "📏 Radius: $radiusDisplay",
             style = MaterialTheme.typography.bodySmall,
@@ -103,11 +145,11 @@ fun BasicGeofenceSetup(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = { geofenceViewModel.onRemoveAllGeofencesClick() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Remove All Geofences")
-        }
+        /*        Button(
+                    onClick = { geofenceViewModel.onRemoveAllGeofencesClick() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Remove All Geofences")
+                }*/
     }
 }
