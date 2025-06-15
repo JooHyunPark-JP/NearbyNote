@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
+import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.example.nearbynote.nearbyNoteNav.BottomNavBar
 import com.example.nearbynote.nearbyNoteNav.NavGraph
 import com.example.nearbynote.nearbyNoteNav.TopBar
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
         val noteViewModel: NoteViewModel by viewModels()
         val geofenceViewModel: GeofenceViewModel by viewModels()
+        val savedAddressViewModel: SavedAddressViewModel by viewModels()
 
 
 
@@ -55,7 +57,8 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             noteViewModel = noteViewModel,
                             geofenceViewModel = geofenceViewModel,
-                            geofenceManager = geofenceManager
+                            geofenceManager = geofenceManager,
+                            savedAddressViewModel = savedAddressViewModel
 
                         )
                     }

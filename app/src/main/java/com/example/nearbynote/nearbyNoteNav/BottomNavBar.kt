@@ -16,7 +16,7 @@ import com.example.nearbynote.R
 fun BottomNavBar(navController: NavController) {
     val items = listOf(
         Screen.Main,
-        Screen.WriteNoteScreen,
+        Screen.SavedAddressScreen,
     )
     NavigationBar(
         containerColor = Color.White,
@@ -33,7 +33,7 @@ fun BottomNavBar(navController: NavController) {
                             contentDescription = null
                         )
 
-                        is Screen.WriteNoteScreen -> Icon(
+                        is Screen.SavedAddressScreen -> Icon(
                             painterResource(id = R.drawable.ic_placeholder_icon),
                             contentDescription = null
                         )
