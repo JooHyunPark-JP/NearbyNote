@@ -11,13 +11,16 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceView
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteListMain
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.WriteNoteScreen
+import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressMain
+import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 
 @Composable
 fun NavGraph(
     noteViewModel: NoteViewModel,
     navController: NavHostController,
     geofenceViewModel: GeofenceViewModel,
-    geofenceManager: GeofenceManager
+    geofenceManager: GeofenceManager,
+    savedAddressViewModel: SavedAddressViewModel
 ) {
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
@@ -28,14 +31,9 @@ fun NavGraph(
             )
         }
 
-/*        composable(Screen.WriteNoteScreen.route) {
-            WriteNoteScreen(
-                navController = navController,
-                noteViewModel = noteViewModel,
-                geofenceViewModel = geofenceViewModel,
-                geofenceManager = geofenceManager
-            )
-        }*/
+        composable(Screen.SavedAddressScreen.route) {
+            SavedAddressMain(savedAddressViewModel = savedAddressViewModel)
+        }
 
         composable(
             route = Screen.WriteNoteScreen.route, arguments = listOf(navArgument("noteId") {
@@ -49,9 +47,10 @@ fun NavGraph(
                 noteViewModel = noteViewModel,
                 geofenceViewModel = geofenceViewModel,
                 geofenceManager = geofenceManager,
-                noteId = if (noteId == -1L) null else noteId)
+                savedAddressViewModel = savedAddressViewModel,
+                noteId = if (noteId == -1L) null else noteId
+            )
         }
-
 
 
     }

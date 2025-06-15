@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceDao
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteDao
+import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,4 +31,7 @@ object DatabaseModule {
 
     @Provides
     fun provideGeofenceDao(db: NearbyNoteDatabase): GeofenceDao = db.geofenceDao()
+
+    @Provides
+    fun provideSavedAddressDao(db: NearbyNoteDatabase): SavedAddressDao = db.savedAddressDao()
 }

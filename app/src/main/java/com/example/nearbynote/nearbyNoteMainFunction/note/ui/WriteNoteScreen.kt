@@ -45,6 +45,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +67,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEn
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.BasicGeofenceSetup
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
+import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -78,6 +81,7 @@ fun WriteNoteScreen(
     noteViewModel: NoteViewModel,
     geofenceViewModel: GeofenceViewModel,
     geofenceManager: GeofenceManager,
+    savedAddressViewModel: SavedAddressViewModel,
     noteId: Long?
 ) {
     val scrollState = rememberScrollState()
@@ -108,6 +112,14 @@ fun WriteNoteScreen(
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         }
+
+    val isFavoriteAddress = remember { mutableStateOf(false) }
+    val favoriteAddressName = remember { mutableStateOf("") }
+
+    // composable 상태
+    val savedAddresses by savedAddressViewModel.savedAddresses.collectAsState()
+    var expanded by remember { mutableStateOf(false) }
+    var selectedLabel by remember { mutableStateOf("") }
 
     fun resetNewNoteState() {
         noteText = ""
@@ -189,6 +201,7 @@ fun WriteNoteScreen(
                 .padding(top = 16.dp)
                 .verticalScroll(scrollState)
         ) {
+
             GeofenceToggleRow(
                 geofenceEnabled = geofenceEnabled,
                 isGeofenceImmutable = !isGeofenceImmutable,
@@ -247,7 +260,9 @@ fun WriteNoteScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 BasicGeofenceSetup(
                     geofenceViewModel = geofenceViewModel,
-                    geofenceOptionsEnabled = !isGeofenceImmutable
+                    geofenceOptionsEnabled = !isGeofenceImmutable,
+                    isFavoriteAddress = isFavoriteAddress,
+                    favoriteAddressName = favoriteAddressName
                 )
             }
 
@@ -295,6 +310,9 @@ fun WriteNoteScreen(
                         geofenceViewModel = geofenceViewModel,
                         noteViewModel = noteViewModel,
                         navController = navController,
+                        savedAddressViewModel = savedAddressViewModel,
+                        isFavoriteAddress = isFavoriteAddress,
+                        favoriteAddressName = favoriteAddressName,
                         onShowBackgroundDialog = { showBackgroundDialog = true }
                     )
                 } else {
@@ -417,6 +435,9 @@ fun handleNewNoteSave(
     geofenceViewModel: GeofenceViewModel,
     noteViewModel: NoteViewModel,
     navController: NavController,
+    savedAddressViewModel: SavedAddressViewModel,
+    isFavoriteAddress: MutableState<Boolean>,
+    favoriteAddressName: MutableState<String>,
     onShowBackgroundDialog: () -> Unit
 ) {
     if (noteText.isBlank()) {
@@ -460,6 +481,16 @@ fun handleNewNoteSave(
                     locationName = addressQuery,
                     isVoice = false
                 )
+
+                if (isFavoriteAddress.value) {
+                    savedAddressViewModel.saveAddress(
+                        name = favoriteAddressName.value.ifBlank { "Unnamed" },
+                        placeName = addressQuery,
+                        lat = lat,
+                        lng = lng
+                    )
+                }
+
                 noteViewModel.addressQuery = ""
                 navController.popBackStack()
             },
