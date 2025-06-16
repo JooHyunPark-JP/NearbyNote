@@ -8,11 +8,11 @@ import dagger.hilt.android.HiltAndroidApp
 class MyApplication : Application() {
 
 /*        override fun onCreate() {
-            super.onCreate()
+        super.onCreate()
 
-            // use this code when you need to delete previous (room) database
-            deleteDatabase("nearby_note.db")
-        }*/
+        // use this code when you need to delete previous (room) database
+        deleteDatabase("nearby_note.db")
+    }*/
 
     // Useful prompt command, clean and rebuild
     // ./gradlew clean
