@@ -35,7 +35,9 @@ fun BasicGeofenceSetup(
     geofenceViewModel: GeofenceViewModel,
     geofenceOptionsEnabled: Boolean = false,
     isFavoriteAddress: MutableState<Boolean>,
-    favoriteAddressName: MutableState<String>
+    favoriteAddressName: MutableState<String>,
+    isFavoriteAddressDisable: Boolean,
+    shouldDisableSavedAddressRow: Boolean
 ) {
     val radius by geofenceViewModel.radius.collectAsState()
     //   val geofenceStatus by geofenceViewModel.geofenceMessage.collectAsState()
@@ -50,6 +52,12 @@ fun BasicGeofenceSetup(
         }
     }
 
+    val clickableModifier = if (isFavoriteAddressDisable || shouldDisableSavedAddressRow) {
+        Modifier
+    } else {
+        Modifier.clickable { isFavoriteAddress.value = !isFavoriteAddress.value }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,7 +68,7 @@ fun BasicGeofenceSetup(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { isFavoriteAddress.value = !isFavoriteAddress.value }
+                .then(clickableModifier)
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -70,7 +78,10 @@ fun BasicGeofenceSetup(
                 tint = if (isFavoriteAddress.value) Color.Red else Color.Gray
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Add to favourite addresses")
+            Text(
+                "Add to favourite addresses",
+                color = if (!isFavoriteAddressDisable && !shouldDisableSavedAddressRow) Color.Black else Color.Gray
+            )
         }
 
         if (isFavoriteAddress.value) {
