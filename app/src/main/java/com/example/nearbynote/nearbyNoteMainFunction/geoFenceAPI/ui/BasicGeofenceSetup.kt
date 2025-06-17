@@ -87,7 +87,7 @@ fun BasicGeofenceSetup(
         if (isFavoriteAddress.value) {
             OutlinedTextField(
                 value = favoriteAddressName.value,
-                onValueChange = { favoriteAddressName.value = it },
+                onValueChange = { if (it.length <= 20) favoriteAddressName.value = it },
                 label = { Text("Name for this favourite address?") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,8 +95,8 @@ fun BasicGeofenceSetup(
                 singleLine = true,
                 placeholder = {
                     Text(
-                        text = "Home or Work...",
-                        style = MaterialTheme.typography.bodySmall.copy(color = Color.LightGray)
+                        text = "e.g. Home, School",
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray)
                     )
                 }
             )

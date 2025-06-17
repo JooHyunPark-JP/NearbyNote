@@ -45,4 +45,10 @@ class SavedAddressViewModel @Inject constructor(
             repository.delete(address)
         }
     }
+
+    fun isDuplicateAddress(placeName: String, lat: Double, lng: Double): Boolean {
+        return savedAddresses.value.any {
+            it.placeName == placeName && it.latitude == lat && it.longitude == lng
+        }
+    }
 }
