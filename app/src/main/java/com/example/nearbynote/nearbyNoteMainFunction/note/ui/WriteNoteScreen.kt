@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -236,14 +234,20 @@ fun WriteNoteScreen(
 
             AnimatedVisibility(visible = geofenceEnabled) {
                 Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TextField(
-                        value = noteViewModel.addressQuery,
-                        onValueChange = { noteViewModel.onQueryChanged(it) },
-                        placeholder = { Text("Enter location name or address") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !isGeofenceImmutable && !isSavedAddressClicked,
+                    AddressSearchSection(
+                        addressQuery = noteViewModel.addressQuery,
+                        onQueryChange = { noteViewModel.onQueryChanged(it) },
+                        suggestions = noteViewModel.suggestions,
+                        onSuggestionSelected = { suggestion ->
+                            geofenceViewModel.onSuggestionSelected(suggestion)
+                            noteViewModel.addressQuery = suggestion.placeName
+                            noteViewModel.addressLatitude = suggestion.latitude
+                            geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
+                            noteViewModel.addressLongitude = suggestion.longitude
+                            geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
+                            noteViewModel.suggestions = emptyList()
+                        },
+                        enabled = !isGeofenceImmutable && !isSavedAddressClicked
                     )
                     if (isGeofenceImmutable) {
                         Text(
@@ -251,38 +255,11 @@ fun WriteNoteScreen(
                             style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
                         )
                     }
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 200.dp) // clamp list height
-                            .padding(top = 4.dp)
-                    ) {
-                        items(
-                            items = suggestions,
-                            key = { it.placeName }
-                        ) { suggestion ->
-                            Text(
-                                text = "${suggestion.placeName} (Lat: ${suggestion.latitude}, Lon: ${suggestion.longitude})",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        geofenceViewModel.onSuggestionSelected(suggestion)
-                                        noteViewModel.addressQuery = suggestion.placeName
-                                        noteViewModel.addressLatitude = suggestion.latitude
-                                        geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
-                                        noteViewModel.addressLongitude = suggestion.longitude
-                                        geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
-                                        noteViewModel.suggestions = emptyList()
-                                    }
-                                    .padding(8.dp)
-                            )
-                        }
-                    }
                 }
             }
 
             if (geofenceEnabled) {
+                //Saved address section
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = savedRowModifier.padding(8.dp)
@@ -307,8 +284,6 @@ fun WriteNoteScreen(
                             onClick = {
                                 selectedAddress = null
                                 expanded = false
-
-                                // 초기화
                                 noteViewModel.addressQuery = ""
                                 noteViewModel.addressLatitude = 0.0
                                 noteViewModel.addressLongitude = 0.0
@@ -316,31 +291,37 @@ fun WriteNoteScreen(
                                 geofenceViewModel.onLongitudeChanged("")
                                 isFavoriteAddressDisable = false
                                 isSavedAddressClicked = false
+                                isFavoriteAddress.value = false
+                                favoriteAddressName.value = ""
                             }
                         )
 
-                        DropdownMenuItem(
-                            text = { HorizontalDivider() },
-                            onClick = {}, // divider 클릭 막기용
-                            enabled = false
-                        )
-
-                        savedAddresses.forEach { address ->
+                        if (savedAddresses.isNotEmpty()) {
                             DropdownMenuItem(
-                                text = { Text(address.name) },
-                                onClick = {
-                                    selectedAddress = address
-                                    expanded = false
-
-                                    noteViewModel.addressQuery = address.placeName
-                                    noteViewModel.addressLatitude = address.latitude
-                                    noteViewModel.addressLongitude = address.longitude
-                                    geofenceViewModel.onLatitudeChanged(address.latitude.toString())
-                                    geofenceViewModel.onLongitudeChanged(address.longitude.toString())
-                                    isFavoriteAddressDisable = true
-                                    isSavedAddressClicked = true
-                                }
+                                text = { HorizontalDivider() },
+                                onClick = {},
+                                enabled = false
                             )
+
+                            savedAddresses.forEach { address ->
+                                DropdownMenuItem(
+                                    text = { Text(address.name) },
+                                    onClick = {
+                                        selectedAddress = address
+                                        expanded = false
+
+                                        noteViewModel.addressQuery = address.placeName
+                                        noteViewModel.addressLatitude = address.latitude
+                                        noteViewModel.addressLongitude = address.longitude
+                                        geofenceViewModel.onLatitudeChanged(address.latitude.toString())
+                                        geofenceViewModel.onLongitudeChanged(address.longitude.toString())
+                                        isFavoriteAddressDisable = true
+                                        isSavedAddressClicked = true
+                                        isFavoriteAddress.value = false
+                                        favoriteAddressName.value = ""
+                                    }
+                                )
+                            }
                         }
                     }
                 }
