@@ -13,17 +13,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
+import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -61,9 +65,10 @@ fun NoteListMain(
     val notificationPermissionState = rememberPermissionState(
         android.Manifest.permission.POST_NOTIFICATIONS
     )
-
-    //Above API api 33
     val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var noteToDelete by remember { mutableStateOf<NoteEntity?>(null) }
 
     LaunchedEffect(Unit) {
         val allGranted = locationPermissionsState.allPermissionsGranted
@@ -78,6 +83,7 @@ fun NoteListMain(
 
             shouldShow -> locationPermissionsState.launchMultiplePermissionRequest()
         }
+
         if (isNotificationPermissionRequired && notificationPermissionState.status is PermissionStatus.Denied) {
             notificationPermissionState.launchPermissionRequest()
         }
@@ -115,15 +121,10 @@ fun NoteListMain(
                     }
 
                     IconButton(onClick = {
-                        noteViewModel.deleteNoteAndGeofence(
-                            noteId = note.id,
-                            geofenceViewModel = geofenceViewModel
-                        )
+                        noteToDelete = note
+                        showDeleteDialog = true
                     }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Note"
-                        )
+                        Icon(Icons.Default.Delete, contentDescription = "Delete Note")
                     }
                 }
                 HorizontalDivider()
@@ -162,6 +163,40 @@ fun NoteListMain(
                 .padding(16.dp)
         ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
+        }
+
+
+        if (showDeleteDialog && noteToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    noteToDelete = null
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        noteToDelete?.let {
+                            noteViewModel.deleteNoteAndGeofence(
+                                noteId = it.id,
+                                geofenceViewModel = geofenceViewModel
+                            )
+                        }
+                        showDeleteDialog = false
+                        noteToDelete = null
+                    }) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDeleteDialog = false
+                        noteToDelete = null
+                    }) {
+                        Text("Cancel")
+                    }
+                },
+                title = { Text("Delete note?") },
+                text = { Text("Are you sure you want to delete this note?") }
+            )
         }
     }
 }
