@@ -47,6 +47,8 @@
             android:exported="true"
             android:permission="com.google.android.gms.permission.BIND_GEOFENCE_SERVICE">
         </receiver>
+
+        <receiver android:name=".nearbyNoteMainFunction.geoFenceAPI.util.CancelNotificationReceiver" />
     </application>
 
 </manifest>

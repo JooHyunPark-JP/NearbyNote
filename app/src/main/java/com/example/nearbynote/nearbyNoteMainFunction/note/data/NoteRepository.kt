@@ -15,4 +15,8 @@ class NoteRepository @Inject constructor(
     suspend fun updateNote(note: NoteEntity) = dao.update(note)
     suspend fun getNoteById(id: Long): NoteEntity? = dao.getNoteById(id)
     suspend fun deleteNote(note: NoteEntity) = dao.delete(note)
+
+    suspend fun getNoteByGeofenceId(geofenceId: String): NoteEntity? {
+        return dao.getNotesByGeofence(geofenceId).firstOrNull()
+    }
 }
