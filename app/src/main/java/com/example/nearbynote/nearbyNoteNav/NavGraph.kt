@@ -17,13 +17,14 @@ import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddres
 
 @Composable
 fun NavGraph(
+    startDestination: String,
     noteViewModel: NoteViewModel,
     navController: NavHostController,
     geofenceViewModel: GeofenceViewModel,
     geofenceManager: GeofenceManager,
     savedAddressViewModel: SavedAddressViewModel
 ) {
-    NavHost(navController = navController, startDestination = Screen.Main.route) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Main.route) {
             NoteListMain(
                 navController = navController,

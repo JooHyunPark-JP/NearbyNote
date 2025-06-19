@@ -17,6 +17,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.example.nearbynote.nearbyNoteNav.BottomNavBar
 import com.example.nearbynote.nearbyNoteNav.NavGraph
+import com.example.nearbynote.nearbyNoteNav.Screen
 import com.example.nearbynote.nearbyNoteNav.TopBar
 import com.example.nearbynote.ui.theme.NearbyNoteTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +38,12 @@ class MainActivity : ComponentActivity() {
         val geofenceViewModel: GeofenceViewModel by viewModels()
         val savedAddressViewModel: SavedAddressViewModel by viewModels()
 
+        val noteIdFromIntent = intent?.getLongExtra("noteId", -1L)
+        val startDestination = if (noteIdFromIntent != null && noteIdFromIntent != -1L) {
+            Screen.WriteNoteScreen.routeWithNoteId(noteIdFromIntent)
+        } else {
+            Screen.Main.route
+        }
 
 
         setContent {
@@ -54,6 +61,7 @@ class MainActivity : ComponentActivity() {
                     }) { innerPadding ->
                     Column(modifier = Modifier.padding(innerPadding)) {
                         NavGraph(
+                            startDestination = startDestination,
                             navController = navController,
                             noteViewModel = noteViewModel,
                             geofenceViewModel = geofenceViewModel,
