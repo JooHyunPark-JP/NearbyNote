@@ -17,6 +17,7 @@ fun BottomNavBar(navController: NavController) {
     val items = listOf(
         Screen.Main,
         Screen.SavedAddressScreen,
+        Screen.MapboxScreen
     )
     NavigationBar(
         containerColor = Color.White,
@@ -38,6 +39,11 @@ fun BottomNavBar(navController: NavController) {
                             contentDescription = null
                         )
 
+                        is Screen.MapboxScreen -> Icon(
+                            painterResource(id = R.drawable.ic_placeholder_icon),
+                            contentDescription = null
+                        )
+
                         else -> {
                             Icon(
                                 painterResource(id = R.drawable.ic_placeholder_icon),
@@ -47,7 +53,7 @@ fun BottomNavBar(navController: NavController) {
                     }
                 },
 
-                label = { Text(text = screen.route.replaceFirstChar { it.uppercase() }) },
+                label = { Text(text = screen.label) },
                 selected = currentRoute == screen.route,
                 onClick = {
                     if (currentRoute != screen.route) {

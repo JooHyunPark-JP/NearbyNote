@@ -53,7 +53,7 @@ fun SavedAddressMain(
         ) {
             item {
                 Text(
-                    "⭐ Favourite Addresses",
+                    "⭐ Favorite Addresses",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
@@ -85,7 +85,7 @@ fun SavedAddressMain(
                     }
 
                     Text("📍 ${address.placeName}", style = MaterialTheme.typography.bodyMedium)
-                    Text("🧭 Lat: ${address.latitude}, Lng: ${address.longitude}")
+                    //  Text("🧭 Lat: ${address.latitude}, Lng: ${address.longitude}")
                     Text(
                         "📅 Saved: ${
                             DateFormat.getDateTimeInstance().format(Date(address.createdAt))

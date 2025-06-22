@@ -34,6 +34,7 @@ class GeofenceViewModel @Inject constructor(
 
     val allGeofences: Flow<List<GeofenceEntity>> = geofenceRepository.getAllGeofences()
 
+
     fun onLatitudeChanged(value: String) {
         _latitude.value = value
     }
@@ -79,6 +80,7 @@ class GeofenceViewModel @Inject constructor(
         _latitude.value = suggestion.latitude.toString()
         _longitude.value = suggestion.longitude.toString()
         _address.value = suggestion.placeName
+
     }
 
     fun updateGeofenceStatus(message: String) {

@@ -130,12 +130,13 @@ fun WriteNoteScreen(
     var selectedAddress by remember { mutableStateOf<SavedAddressEntity?>(null) }
     var isSavedAddressClicked by remember { mutableStateOf(false) }
 
-
     val shouldDisableSavedAddressRow by remember(noteId, hasExistingGeofence) {
         mutableStateOf(noteId != null && hasExistingGeofence)
     }
 
     // val shouldDisableSavedAddressRow = noteId != null && hasExistingGeofence
+
+    val isAddressSearching = noteViewModel.isSearching
 
 
     val savedRowModifier = if (shouldDisableSavedAddressRow) {
@@ -247,7 +248,9 @@ fun WriteNoteScreen(
                             geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
                             noteViewModel.suggestions = emptyList()
                         },
-                        enabled = !isGeofenceImmutable && !isSavedAddressClicked
+                        enabled = !isGeofenceImmutable && !isSavedAddressClicked,
+                        isAddressSearching = isAddressSearching,
+                        isSavedAddressClicked = isSavedAddressClicked,
                     )
                     if (isGeofenceImmutable) {
                         Text(
@@ -293,6 +296,7 @@ fun WriteNoteScreen(
                                 isSavedAddressClicked = false
                                 isFavoriteAddress.value = false
                                 favoriteAddressName.value = ""
+                                noteViewModel.suggestions = emptyList()
                             }
                         )
 
@@ -309,7 +313,6 @@ fun WriteNoteScreen(
                                     onClick = {
                                         selectedAddress = address
                                         expanded = false
-
                                         noteViewModel.addressQuery = address.placeName
                                         noteViewModel.addressLatitude = address.latitude
                                         noteViewModel.addressLongitude = address.longitude
@@ -319,6 +322,9 @@ fun WriteNoteScreen(
                                         isSavedAddressClicked = true
                                         isFavoriteAddress.value = false
                                         favoriteAddressName.value = ""
+                                        //remove the search bar result
+                                        noteViewModel.suggestions = emptyList()
+
                                     }
                                 )
                             }
