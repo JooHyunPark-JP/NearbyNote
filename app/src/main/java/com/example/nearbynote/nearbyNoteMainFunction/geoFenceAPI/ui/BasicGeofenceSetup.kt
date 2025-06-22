@@ -79,7 +79,7 @@ fun BasicGeofenceSetup(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Add to favourite addresses",
+                "Add to favorite addresses",
                 color = if (!isFavoriteAddressDisable && !shouldDisableSavedAddressRow) Color.Black else Color.Gray
             )
         }
@@ -88,7 +88,7 @@ fun BasicGeofenceSetup(
             OutlinedTextField(
                 value = favoriteAddressName.value,
                 onValueChange = { if (it.length <= 20) favoriteAddressName.value = it },
-                label = { Text("Name for this favourite address?") },
+                label = { Text("Name for this favorite address?") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),

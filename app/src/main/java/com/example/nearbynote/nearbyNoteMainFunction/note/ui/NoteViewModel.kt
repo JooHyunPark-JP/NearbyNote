@@ -11,17 +11,22 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceMana
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.MapboxRepository
-
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
@@ -36,11 +41,42 @@ class NoteViewModel @Inject constructor(
     var addressLatitude by mutableDoubleStateOf(0.0)
     var suggestions by mutableStateOf(emptyList<AddressSuggestion>())
 
+    var isSearching by mutableStateOf(false)
+
+    private val queryFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
+
+    private val addressCache = mutableMapOf<String, List<AddressSuggestion>>()
+
     init {
         viewModelScope.launch {
             noteRepository.allNotes.collectLatest {
                 _notes.value = it
             }
+        }
+
+        viewModelScope.launch {
+            queryFlow
+                .onEach { isSearching = true }
+                .debounce(1500)
+                .distinctUntilChanged()
+                .collectLatest { rawQuery ->
+                    val query = rawQuery.trim().lowercase()
+                    if (query.length >= 4) {
+                        //Memory Cache to prevent duplicate results when searching address via replace API
+                        if (addressCache.containsKey(query)) {
+                            suggestions = addressCache[query].orEmpty()
+                        } else {
+
+                            val result = mapboxRepository.fetchAddressSuggestions(query)
+                            addressCache[query] = result
+                            //save search result string to memory cache
+                            suggestions = result
+                        }
+                    } else {
+                        suggestions = emptyList()
+                    }
+                    isSearching = false
+                }
         }
     }
 
@@ -59,14 +95,10 @@ class NoteViewModel @Inject constructor(
 
     fun onQueryChanged(query: String) {
         addressQuery = query
-        if (query.length >= 3) {
-            viewModelScope.launch {
-                suggestions = mapboxRepository.fetchAddressSuggestions(query)
-            }
-        }
+        queryFlow.tryEmit(query)
     }
 
-    fun updateNote(note: NoteEntity) {
+    private fun updateNote(note: NoteEntity) {
         viewModelScope.launch {
             noteRepository.updateNote(note)
         }
@@ -163,6 +195,4 @@ class NoteViewModel @Inject constructor(
             }
         }
     }
-
-
 }
