@@ -57,13 +57,12 @@ fun SavedAddressAdd(
             addressQuery = addressQuery,
             onQueryChange = { noteViewModel.onQueryChanged(it) },
             suggestions = suggestions,
-            onSuggestionSelected = {
-                selectedSuggestion.value = it
-                noteViewModel.addressQuery = it.placeName
+            onSuggestionSelected = { suggestion ->
+                selectedSuggestion.value = suggestion
+                noteViewModel.addressQuery = suggestion.placeName
                 noteViewModel.suggestions = emptyList()
             },
             isAddressSearching = isAddressSearching,
-
             )
 
         Spacer(modifier = Modifier.height(12.dp))

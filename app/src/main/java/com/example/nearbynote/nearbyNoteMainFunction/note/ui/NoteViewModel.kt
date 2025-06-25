@@ -66,7 +66,6 @@ class NoteViewModel @Inject constructor(
                         if (addressCache.containsKey(query)) {
                             suggestions = addressCache[query].orEmpty()
                         } else {
-
                             val result = mapboxRepository.fetchAddressSuggestions(query)
                             addressCache[query] = result
                             //save search result string to memory cache

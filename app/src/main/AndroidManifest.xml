@@ -49,6 +49,10 @@
         </receiver>
 
         <receiver android:name=".nearbyNoteMainFunction.geoFenceAPI.util.CancelNotificationReceiver" />
+
+        <meta-data
+            android:name="com.mapbox.access_token"
+            android:value="@string/mapbox_access_token" />
     </application>
 
 </manifest>
