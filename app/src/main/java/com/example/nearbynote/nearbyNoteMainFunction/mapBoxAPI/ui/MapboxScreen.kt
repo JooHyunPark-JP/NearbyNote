@@ -3,6 +3,7 @@ package com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -39,14 +40,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.scale
 import androidx.navigation.NavController
+import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.google.android.gms.location.LocationServices
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 
 @Composable
 fun MapboxScreen(
@@ -159,7 +166,48 @@ fun MapboxScreen(
                     factory = { context ->
                         MapView(context).also { mv ->
                             mapView = mv
-                            mv.mapboxMap.loadStyle(Style.STANDARD)
+                            mv.mapboxMap.loadStyle(Style.STANDARD) { style ->
+                                // 1. 마커 아이콘 등록
+                                style.addImage(
+                                    "current-location-icon",
+                                    BitmapFactory.decodeResource(
+                                        context.resources,
+                                        R.drawable.current_location_icon
+                                    ).scale(100, 100, false)
+                                )
+
+                                // 2. 현재 위치 마커 추가
+                                if (ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    fusedLocationProviderClient.lastLocation
+                                        .addOnSuccessListener { location ->
+                                            location?.let {
+                                                val point =
+                                                    Point.fromLngLat(it.longitude, it.latitude)
+
+                                                // 카메라 이동
+                                                mv.mapboxMap.setCamera(
+                                                    CameraOptions.Builder()
+                                                        .center(point)
+                                                        .zoom(14.0)
+                                                        .build()
+                                                )
+
+                                                // 마커 추가
+                                                val annotationApi = mv.annotations
+                                                val pointAnnotationManager =
+                                                    annotationApi.createPointAnnotationManager()
+                                                val options = PointAnnotationOptions()
+                                                    .withPoint(point)
+                                                    .withIconImage("current-location-icon")
+                                                pointAnnotationManager.create(options)
+                                            }
+                                        }
+                                }
+                            }
                         }
                     }
                 )
