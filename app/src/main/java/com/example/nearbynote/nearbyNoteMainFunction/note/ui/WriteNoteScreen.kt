@@ -618,7 +618,7 @@ fun handleExistingNoteUpdate(
 
         GeofenceEntity(
             id = "",
-            name = addressQuery,
+            addressName = addressQuery,
             latitude = lat,
             longitude = lng,
             radius = rad,

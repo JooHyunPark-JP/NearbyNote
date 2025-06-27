@@ -141,7 +141,7 @@ fun NoteListMain(
             items(allGeofences) { geofence ->
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text("ID: ${geofence.id}")
-                    Text("📍 ${geofence.name}")
+                    Text("📍 ${geofence.addressName}")
                     Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
                     Text("Radius: ${geofence.radius}m")
                     Text(

@@ -77,7 +77,8 @@ fun NavGraph(
         composable(Screen.MapboxScreen.route) {
             MapboxScreen(
                 navController = navController,
-                noteViewModel = noteViewModel
+                noteViewModel = noteViewModel,
+                geofenceViewModel = geofenceViewModel
             )
         }
 
