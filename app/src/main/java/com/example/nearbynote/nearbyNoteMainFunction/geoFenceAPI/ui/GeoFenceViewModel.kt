@@ -97,7 +97,7 @@ class GeofenceViewModel @Inject constructor(
         viewModelScope.launch {
             val entity = GeofenceEntity(
                 id = id,
-                name = name,
+                addressName = name,
                 latitude = lat,
                 longitude = lng,
                 radius = radius,

@@ -153,7 +153,7 @@ class NoteViewModel @Inject constructor(
                         //Add geofence to room database
                         geofenceViewModel.saveGeofenceToDb(
                             id = finalGeofenceId,
-                            name = geofenceEntity.name,
+                            name = geofenceEntity.addressName,
                             lat = geofenceEntity.latitude,
                             lng = geofenceEntity.longitude,
                             radius = geofenceEntity.radius
@@ -162,7 +162,7 @@ class NoteViewModel @Inject constructor(
                             oldNote.copy(
                                 content = content,
                                 geofenceId = finalGeofenceId,
-                                locationName = geofenceEntity.name,
+                                locationName = geofenceEntity.addressName,
                                 isVoice = false
                             )
                         )
@@ -174,7 +174,7 @@ class NoteViewModel @Inject constructor(
                 updateNote(
                     oldNote.copy(
                         content = content,
-                        locationName = geofenceEntity.name,
+                        locationName = geofenceEntity.addressName,
                         isVoice = false
                     )
                 )
