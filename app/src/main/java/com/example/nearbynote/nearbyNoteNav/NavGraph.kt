@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxScreen
+import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteListMain
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.WriteNoteScreen
@@ -23,7 +24,8 @@ fun NavGraph(
     navController: NavHostController,
     geofenceViewModel: GeofenceViewModel,
     geofenceManager: GeofenceManager,
-    savedAddressViewModel: SavedAddressViewModel
+    savedAddressViewModel: SavedAddressViewModel,
+    mapboxViewModel: MapboxViewModel
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Main.route) {
@@ -78,7 +80,8 @@ fun NavGraph(
             MapboxScreen(
                 navController = navController,
                 noteViewModel = noteViewModel,
-                geofenceViewModel = geofenceViewModel
+                geofenceViewModel = geofenceViewModel,
+                mapboxViewModel = mapboxViewModel
             )
         }
 
