@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import android.util.Log
@@ -34,7 +35,7 @@ class GeofenceManager @Inject constructor(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     suspendCancellableCoroutine { cont ->
                         geocoder.getFromLocation(lat, lng, 1) { addresses ->
-                            val address = addresses?.firstOrNull()?.getAddressLine(0)
+                            val address = addresses.firstOrNull()?.getAddressLine(0)
                             cont.resume(address ?: "No address found")
                         }
                     }
@@ -44,6 +45,33 @@ class GeofenceManager @Inject constructor(
                 }
             } catch (e: Exception) {
                 "Error: ${e.message}"
+            }
+        }
+    }
+
+
+    suspend fun getLatLngFromAddress(address: String): Address? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val geocoder = Geocoder(context, Locale.getDefault())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    suspendCancellableCoroutine { cont ->
+                        geocoder.getFromLocationName(address, 1, object : Geocoder.GeocodeListener {
+                            override fun onGeocode(addresses: MutableList<Address>) {
+                                cont.resume(addresses.firstOrNull())
+                            }
+
+                            override fun onError(errorMessage: String?) {
+                                cont.resume(null)
+                            }
+                        })
+                    }
+                } else {
+                    val results = geocoder.getFromLocationName(address, 1)
+                    results?.firstOrNull()
+                }
+            } catch (e: Exception) {
+                null
             }
         }
     }

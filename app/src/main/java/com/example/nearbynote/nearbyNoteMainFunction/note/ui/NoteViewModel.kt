@@ -47,6 +47,8 @@ class NoteViewModel @Inject constructor(
 
     private val addressCache = mutableMapOf<String, List<AddressSuggestion>>()
 
+    var preserveMapLocation by mutableStateOf(false)
+
     init {
         viewModelScope.launch {
             noteRepository.allNotes.collectLatest {

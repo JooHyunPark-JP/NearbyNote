@@ -81,10 +81,9 @@ fun NavGraph(
                 navController = navController,
                 noteViewModel = noteViewModel,
                 geofenceViewModel = geofenceViewModel,
-                mapboxViewModel = mapboxViewModel
+                mapboxViewModel = mapboxViewModel,
+                geofenceManager = geofenceManager
             )
         }
-
-
     }
 }
