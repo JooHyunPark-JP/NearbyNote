@@ -73,6 +73,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceMana
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressEntity
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
+import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -147,11 +148,19 @@ fun WriteNoteScreen(
 
     fun resetNewNoteState() {
         noteText = ""
-        geofenceEnabled = false
-        noteViewModel.addressQuery = ""
-        geofenceViewModel.onLatitudeChanged("")
-        geofenceViewModel.onLongitudeChanged("")
-        geofenceViewModel.onRadiusChanged("1000")
+
+        //if user is coming from map
+        if (noteViewModel.preserveMapLocation) {
+            geofenceEnabled = true
+        } else {
+            geofenceEnabled = false
+            noteViewModel.addressQuery = ""
+            geofenceViewModel.onLatitudeChanged("")
+            geofenceViewModel.onLongitudeChanged("")
+            geofenceViewModel.onRadiusChanged("1000")
+        }
+
+        noteViewModel.preserveMapLocation = false
     }
 
     suspend fun loadExistingNote(noteId: Long) {
@@ -570,7 +579,7 @@ fun handleNewNoteSave(
                 }
 
                 noteViewModel.addressQuery = ""
-                navController.popBackStack()
+                navController.navigate(Screen.Main.route)
             },
             onFailure = {
                 Toast.makeText(

@@ -4,18 +4,20 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
@@ -36,17 +38,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
 import androidx.navigation.NavController
 import com.example.nearbynote.R
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.SelectedNoteInfo
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
+import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
@@ -54,6 +60,10 @@ import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.gestures.gestures
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
 import kotlin.math.cos
@@ -64,7 +74,8 @@ fun MapboxScreen(
     navController: NavController,
     noteViewModel: NoteViewModel,
     geofenceViewModel: GeofenceViewModel,
-    mapboxViewModel: MapboxViewModel
+    mapboxViewModel: MapboxViewModel,
+    geofenceManager: GeofenceManager
 ) {
     val notes by noteViewModel.notes.collectAsState()
     val geofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
@@ -78,7 +89,11 @@ fun MapboxScreen(
     val userLocation = mapboxViewModel.userLocation
     val showLocationDialog = mapboxViewModel.showLocationDialog
 
+    var cameraSubscription: Cancelable? = null
+
     var mapView by remember { mutableStateOf<MapView?>(null) }
+
+
 
     LaunchedEffect(Unit) {
         noteViewModel.addressQuery = ""
@@ -98,7 +113,24 @@ fun MapboxScreen(
             onSuggestionSelected = { suggestion ->
                 noteViewModel.addressQuery = suggestion.placeName
                 noteViewModel.suggestions = emptyList()
+
+                // 지도 보이기
                 mapboxViewModel.toggleMap(true)
+
+                // 지도 중심을 주소 위치로 이동
+                CoroutineScope(Dispatchers.Main).launch {
+                    val address = geofenceManager.getLatLngFromAddress(suggestion.placeName)
+                    if (address != null) {
+                        val point = Point.fromLngLat(address.longitude, address.latitude)
+                        mapboxViewModel.userLocation = point
+                        mapView?.mapboxMap?.setCamera(
+                            CameraOptions.Builder()
+                                .center(point)
+                                .zoom(25.0)
+                                .build()
+                        )
+                    }
+                }
             },
             isAddressSearching = isSearching
         )
@@ -132,11 +164,10 @@ fun MapboxScreen(
                         .size(64.dp)
                         .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
                 ) {
-                    Icon(
-                        Icons.Default.LocationOn,
-                        contentDescription = "Load Map",
-                        tint = Color.White,
-                        modifier = Modifier.size(36.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.mapicon),
+                        contentDescription = "My Location",
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
@@ -150,6 +181,17 @@ fun MapboxScreen(
                         MapView(context).also { mv ->
                             mapView = mv
                             mv.mapboxMap.loadStyle(Style.STANDARD) { style ->
+                                mv.gestures.addOnMapClickListener { point ->
+                                    mapboxViewModel.tappedLocation = point
+                                    true
+                                }
+
+                                // clear the message "Create a note here" on map when zoom in/out or move map
+                                cameraSubscription = mv.mapboxMap.subscribeCameraChanged {
+                                    mapboxViewModel.clearTappedLocation()
+                                }
+
+
                                 style.addImage(
                                     "current-location-icon",
                                     BitmapFactory.decodeResource(
@@ -158,6 +200,15 @@ fun MapboxScreen(
                                     )
                                         .scale(100, 100, false)
                                 )
+                                style.addImage(
+                                    "location-marker-icon",
+                                    BitmapFactory.decodeResource(
+                                        context.resources,
+                                        R.drawable.location_pin
+                                    )
+                                        .scale(62, 62, false)
+                                )
+
                                 style.addImage(
                                     "note-marker-icon",
                                     BitmapFactory.decodeResource(
@@ -223,13 +274,95 @@ fun MapboxScreen(
                     }
                 }
 
+                LaunchedEffect(mapboxViewModel.tappedLocation) {
+                    val tappedPoint = mapboxViewModel.tappedLocation ?: return@LaunchedEffect
+                    mapView?.let { mv ->
+                        val annotationApi = mv.annotations
+
+                        mapboxViewModel.tappedAnnotationManager?.deleteAll()
+                        val tappedManager = annotationApi.createPointAnnotationManager()
+                        mapboxViewModel.tappedAnnotationManager = tappedManager
+
+
+                        tappedManager.create(
+                            PointAnnotationOptions()
+                                .withPoint(tappedPoint)
+                                .withIconImage("location-marker-icon")
+                        )
+                    }
+                }
+
                 FloatingActionButton(
-                    onClick = { mapboxViewModel.loadUserLocation() },
+                    onClick = {
+                        mapboxViewModel.loadUserLocation { point ->
+                            mapView?.mapboxMap?.setCamera(
+                                CameraOptions.Builder().center(point).zoom(14.0).build()
+                            )
+                        }
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)
                 ) {
-                    Icon(Icons.Default.Done, contentDescription = "My Location")
+                    Icon(
+                        Icons.Default.LocationOn,
+                        contentDescription = "Load Map",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+
+
+                mapboxViewModel.tappedLocation?.let { point ->
+                    val density = LocalDensity.current
+                    val screenCoordinate = mapView?.mapboxMap?.pixelForCoordinate(point)
+
+                    screenCoordinate?.let { coordinate ->
+
+                        val xDp = with(density) { coordinate.x.toFloat().toDp() }
+                        val yDp = with(density) { coordinate.y.toFloat().toDp() }
+                        Box(
+                            modifier = Modifier
+                                .absoluteOffset(
+                                    x = xDp,
+                                    y = yDp
+                                )
+                                .background(Color.White, RoundedCornerShape(8.dp))
+                                .padding(8.dp)
+                        ) {
+                            TextButton(onClick = {
+                                val tappedPoint = mapboxViewModel.tappedLocation
+                                if (tappedPoint != null) {
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        val addressText = geofenceManager.getAddressFromLatLng(
+                                            tappedPoint.latitude(),
+                                            tappedPoint.longitude()
+                                        )
+
+                                        noteViewModel.addressQuery = addressText
+                                        noteViewModel.addressLatitude = tappedPoint.latitude()
+                                        noteViewModel.addressLongitude = tappedPoint.longitude()
+
+                                        geofenceViewModel.onLatitudeChanged(
+                                            tappedPoint.latitude().toString()
+                                        )
+                                        geofenceViewModel.onLongitudeChanged(
+                                            tappedPoint.longitude().toString()
+                                        )
+
+                                        noteViewModel.preserveMapLocation = true
+                                        navController.navigate(
+                                            Screen.WriteNoteScreen.routeWithNoteId(
+                                                null
+                                            )
+                                        )
+                                    }
+                                }
+                            }) {
+                                Text("Create a note here")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -296,7 +429,6 @@ fun MapboxScreen(
         )
     }
 }
-
 
 fun convertMetersToPixelsAtLatitude(
     radius: Double,

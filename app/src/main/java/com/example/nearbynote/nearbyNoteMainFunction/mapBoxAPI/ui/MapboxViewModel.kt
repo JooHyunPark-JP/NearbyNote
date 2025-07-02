@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.SelectedNoteInfo
 import com.google.android.gms.location.LocationServices
 import com.mapbox.geojson.Point
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -28,9 +29,15 @@ class MapboxViewModel @Inject constructor(
 
     var selectedNote by mutableStateOf<SelectedNoteInfo?>(null)
 
+    //current user location point on the map
     var userLocation by mutableStateOf<Point?>(null)
 
     var showLocationDialog by mutableStateOf(false)
+
+    //location points where user tap on the map
+    var tappedLocation by mutableStateOf<Point?>(null)
+
+    var tappedAnnotationManager: PointAnnotationManager? = null
 
 
     fun loadUserLocation(onSuccess: ((Point) -> Unit)? = null) {
@@ -65,5 +72,9 @@ class MapboxViewModel @Inject constructor(
 
     fun toggleMap(show: Boolean) {
         showMap = show
+    }
+
+    fun clearTappedLocation() {
+        tappedLocation = null
     }
 }
