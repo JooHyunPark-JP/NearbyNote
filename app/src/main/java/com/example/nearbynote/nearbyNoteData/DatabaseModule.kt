@@ -1,7 +1,9 @@
-package com.example.nearbynote.nearbyNoteMainFunction.nearbyNoteData
+package com.example.nearbynote.nearbyNoteData
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceDao
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteDao
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressDao
@@ -20,10 +22,13 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): NearbyNoteDatabase {
         return Room.databaseBuilder(
-            context,
-            NearbyNoteDatabase::class.java,
-            "nearby_note.db"
-        ).build()
+                context,
+                NearbyNoteDatabase::class.java,
+                "nearby_note.db"
+            )
+            //.fallbackToDestructiveMigration(true)
+         //   .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     @Provides
@@ -34,4 +39,10 @@ object DatabaseModule {
 
     @Provides
     fun provideSavedAddressDao(db: NearbyNoteDatabase): SavedAddressDao = db.savedAddressDao()
+
+    private val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+
+        }
+    }
 }

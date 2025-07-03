@@ -1,4 +1,4 @@
-package com.example.nearbynote.nearbyNoteMainFunction.nearbyNoteData
+package com.example.nearbynote.nearbyNoteData
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

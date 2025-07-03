@@ -25,14 +25,14 @@ fun NavGraph(
     geofenceViewModel: GeofenceViewModel,
     geofenceManager: GeofenceManager,
     savedAddressViewModel: SavedAddressViewModel,
-    mapboxViewModel: MapboxViewModel
+    mapboxViewModel: MapboxViewModel,
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.Main.route) {
             NoteListMain(
                 navController = navController,
                 noteViewModel = noteViewModel,
-                geofenceViewModel = geofenceViewModel
+                geofenceViewModel = geofenceViewModel,
             )
         }
 

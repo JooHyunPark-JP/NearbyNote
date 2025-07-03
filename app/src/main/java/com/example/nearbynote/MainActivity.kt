@@ -69,9 +69,9 @@ class MainActivity : ComponentActivity() {
                             geofenceViewModel = geofenceViewModel,
                             geofenceManager = geofenceManager,
                             savedAddressViewModel = savedAddressViewModel,
-                            mapboxViewModel = mapboxViewModel
+                            mapboxViewModel = mapboxViewModel,
 
-                        )
+                            )
                     }
                 }
             }
