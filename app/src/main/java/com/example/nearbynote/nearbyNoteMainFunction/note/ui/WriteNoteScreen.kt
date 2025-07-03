@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -103,7 +104,11 @@ fun WriteNoteScreen(
 
     //val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var backgroundLocationGranted by remember { mutableStateOf(false) }
+    var notificationPermissionGranted by remember { mutableStateOf(false) }
+    val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
     var showBackgroundDialog by remember { mutableStateOf(false) }
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
 
     var hasExistingGeofence by remember { mutableStateOf(false) }
 
@@ -111,9 +116,15 @@ fun WriteNoteScreen(
         mutableStateOf(noteId != null && hasExistingGeofence)
     }
 
+    //app knows when permission state has changed when user access to setting from an app.
     val settingsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             backgroundLocationGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            notificationPermissionGranted = ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
@@ -188,6 +199,11 @@ fun WriteNoteScreen(
         backgroundLocationGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        notificationPermissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -389,6 +405,7 @@ fun WriteNoteScreen(
                         noteText = noteText,
                         geofenceEnabled = geofenceEnabled,
                         backgroundLocationGranted = backgroundLocationGranted,
+                        notificationPermissionGranted = notificationPermissionGranted,
                         addressQuery = noteViewModel.addressQuery,
                         lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
                         lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
@@ -400,7 +417,8 @@ fun WriteNoteScreen(
                         savedAddressViewModel = savedAddressViewModel,
                         isFavoriteAddress = isFavoriteAddress,
                         favoriteAddressName = favoriteAddressName,
-                        onShowBackgroundDialog = { showBackgroundDialog = true }
+                        onShowBackgroundDialog = { showBackgroundDialog = true },
+                        onShowNotificationDialog = { showNotificationPermissionDialog = true }
                     )
                 } else {
                     //Edit existed note
@@ -467,6 +485,49 @@ fun WriteNoteScreen(
             )
         }
 
+        //Pop up the background permission message to users
+        if (showNotificationPermissionDialog && geofenceEnabled) {
+            AlertDialog(
+                onDismissRequest = { showNotificationPermissionDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showNotificationPermissionDialog = false
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        settingsLauncher.launch(intent)
+                    }) {
+                        Text("Open Settings")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showNotificationPermissionDialog = false
+                    }) {
+                        Text("Cancel")
+                    }
+                },
+                title = { Text("Notification permission required") },
+                text = {
+                    Text(
+                        buildString {
+                            appendLine("📍 For a smarter note-taking experience...")
+                            appendLine()
+                            appendLine("To receive notification a note from your app, you need to enable notification permission")
+                            appendLine()
+                            appendLine("You can always change anytime in Settings.")
+                            appendLine()
+                            appendLine("🔧 How to set it:")
+                            appendLine("1. Tap \"Open Settings\" below")
+                            appendLine("2. Tap \"Permissions\"")
+                            appendLine("3. Choose \"Notifications\"")
+                            appendLine("4. Select \"And turn on the notification\"")
+                        }
+                    )
+                }
+            )
+        }
+
         if (showPermissionDialog) {
             AlertDialog(
                 onDismissRequest = { showPermissionDialog = false },
@@ -514,6 +575,7 @@ fun handleNewNoteSave(
     noteText: String,
     geofenceEnabled: Boolean,
     backgroundLocationGranted: Boolean,
+    notificationPermissionGranted: Boolean,
     addressQuery: String,
     lat: Double?,
     lng: Double?,
@@ -525,7 +587,8 @@ fun handleNewNoteSave(
     savedAddressViewModel: SavedAddressViewModel,
     isFavoriteAddress: MutableState<Boolean>,
     favoriteAddressName: MutableState<String>,
-    onShowBackgroundDialog: () -> Unit
+    onShowBackgroundDialog: () -> Unit,
+    onShowNotificationDialog: () -> Unit
 ) {
     if (noteText.isBlank()) {
         Toast.makeText(context, "Write down something before saving!", Toast.LENGTH_SHORT).show()
@@ -534,6 +597,11 @@ fun handleNewNoteSave(
 
     if (geofenceEnabled && !backgroundLocationGranted) {
         onShowBackgroundDialog()
+        return
+    }
+
+    if (geofenceEnabled && !notificationPermissionGranted) {
+        onShowNotificationDialog()
         return
     }
 

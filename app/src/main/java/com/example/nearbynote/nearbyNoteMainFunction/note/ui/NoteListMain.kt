@@ -1,5 +1,6 @@
 package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 
+import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,8 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import java.text.DateFormat
 import java.util.Date
 
@@ -50,20 +54,15 @@ fun NoteListMain(
     navController: NavController,
     noteViewModel: NoteViewModel,
     geofenceViewModel: GeofenceViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val notes by noteViewModel.notes.collectAsState()
     val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
-    val locationPermissionsState = rememberMultiplePermissionsState(
-        listOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-    )
+
     var hasLaunchedPermissionRequest by rememberSaveable { mutableStateOf(false) }
 
     val notificationPermissionState = rememberPermissionState(
-        android.Manifest.permission.POST_NOTIFICATIONS
+        Manifest.permission.POST_NOTIFICATIONS
     )
     val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
@@ -71,21 +70,14 @@ fun NoteListMain(
     var noteToDelete by remember { mutableStateOf<NoteEntity?>(null) }
 
     LaunchedEffect(Unit) {
-        val allGranted = locationPermissionsState.allPermissionsGranted
-        val shouldShow = locationPermissionsState.permissions.any { it.status.shouldShowRationale }
+        if (!hasLaunchedPermissionRequest) {
+            hasLaunchedPermissionRequest = true
 
-        when {
-            allGranted -> Unit
-            !hasLaunchedPermissionRequest -> {
-                hasLaunchedPermissionRequest = true
-                locationPermissionsState.launchMultiplePermissionRequest()
+            if (isNotificationPermissionRequired &&
+                notificationPermissionState.status is PermissionStatus.Denied
+            ) {
+                notificationPermissionState.launchPermissionRequest()
             }
-
-            shouldShow -> locationPermissionsState.launchMultiplePermissionRequest()
-        }
-
-        if (isNotificationPermissionRequired && notificationPermissionState.status is PermissionStatus.Denied) {
-            notificationPermissionState.launchPermissionRequest()
         }
     }
 
