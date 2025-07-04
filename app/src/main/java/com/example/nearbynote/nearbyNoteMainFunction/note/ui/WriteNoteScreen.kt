@@ -93,7 +93,7 @@ fun WriteNoteScreen(
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val permissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
     var showPermissionDialog by remember { mutableStateOf(false) }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
 
@@ -103,6 +103,7 @@ fun WriteNoteScreen(
     val suggestions = noteViewModel.suggestions
 
     //val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val googleVoicePermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     var backgroundLocationGranted by remember { mutableStateOf(false) }
     var notificationPermissionGranted by remember { mutableStateOf(false) }
     val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -126,7 +127,7 @@ fun WriteNoteScreen(
 
             notificationPermissionGranted = ContextCompat.checkSelfPermission(
                 context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         }
 
@@ -201,10 +202,12 @@ fun WriteNoteScreen(
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
-        notificationPermissionGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
+        if (isNotificationPermissionRequired) {
+            notificationPermissionGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        }
     }
 
 
@@ -364,8 +367,6 @@ fun WriteNoteScreen(
                     favoriteAddressName = favoriteAddressName,
                     isFavoriteAddressDisable = isFavoriteAddressDisable,
                     shouldDisableSavedAddressRow = shouldDisableSavedAddressRow
-
-
                 )
             }
 
@@ -380,7 +381,7 @@ fun WriteNoteScreen(
 
         BottomFABRow(
             onVoiceClick = {
-                when (val status = permissionState.status) {
+                when (val status = googleVoicePermissionState.status) {
                     is PermissionStatus.Granted -> {
                         startVoiceRecognition()
                     }
@@ -388,9 +389,9 @@ fun WriteNoteScreen(
                     is PermissionStatus.Denied -> {
                         if (!hasRequestedPermission) {
                             hasRequestedPermission = true
-                            permissionState.launchPermissionRequest()
+                            googleVoicePermissionState.launchPermissionRequest()
                         } else if (status.shouldShowRationale) {
-                            permissionState.launchPermissionRequest()
+                            googleVoicePermissionState.launchPermissionRequest()
                         } else {
                             showPermissionDialog = true
                         }
@@ -406,6 +407,7 @@ fun WriteNoteScreen(
                         geofenceEnabled = geofenceEnabled,
                         backgroundLocationGranted = backgroundLocationGranted,
                         notificationPermissionGranted = notificationPermissionGranted,
+                        isNotificationPermissionRequired = isNotificationPermissionRequired,
                         addressQuery = noteViewModel.addressQuery,
                         lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
                         lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
@@ -511,17 +513,14 @@ fun WriteNoteScreen(
                 text = {
                     Text(
                         buildString {
-                            appendLine("📍 For a smarter note-taking experience...")
-                            appendLine()
-                            appendLine("To receive notification a note from your app, you need to enable notification permission")
+                            appendLine("To receive note notifications from your app, you need to enable notification permissions.")
                             appendLine()
                             appendLine("You can always change anytime in Settings.")
                             appendLine()
                             appendLine("🔧 How to set it:")
                             appendLine("1. Tap \"Open Settings\" below")
-                            appendLine("2. Tap \"Permissions\"")
-                            appendLine("3. Choose \"Notifications\"")
-                            appendLine("4. Select \"And turn on the notification\"")
+                            appendLine("2. Tap \"Notifications\"")
+                            appendLine("4. And turn the notification on")
                         }
                     )
                 }
@@ -576,6 +575,7 @@ fun handleNewNoteSave(
     geofenceEnabled: Boolean,
     backgroundLocationGranted: Boolean,
     notificationPermissionGranted: Boolean,
+    isNotificationPermissionRequired: Boolean,
     addressQuery: String,
     lat: Double?,
     lng: Double?,
@@ -600,7 +600,8 @@ fun handleNewNoteSave(
         return
     }
 
-    if (geofenceEnabled && !notificationPermissionGranted) {
+
+    if (geofenceEnabled && !notificationPermissionGranted && isNotificationPermissionRequired) {
         onShowNotificationDialog()
         return
     }

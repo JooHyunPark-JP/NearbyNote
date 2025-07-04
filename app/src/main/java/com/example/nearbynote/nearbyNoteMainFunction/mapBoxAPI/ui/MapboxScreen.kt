@@ -1,5 +1,6 @@
 package com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui
 
+import android.Manifest
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -33,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +54,9 @@ import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.SelectedNote
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import com.mapbox.common.Cancelable
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -69,6 +74,7 @@ import java.util.Date
 import kotlin.math.cos
 import kotlin.math.pow
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapboxScreen(
     navController: NavController,
@@ -93,13 +99,28 @@ fun MapboxScreen(
 
     var mapView by remember { mutableStateOf<MapView?>(null) }
 
+    var hasLaunchedPermissionRequest by rememberSaveable { mutableStateOf(false) }
 
+    val coarseLocationPermissionState = rememberPermissionState(
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
     LaunchedEffect(Unit) {
         noteViewModel.addressQuery = ""
         noteViewModel.suggestions = emptyList()
         mapboxViewModel.showMap = false
+
+        if (!hasLaunchedPermissionRequest) {
+            hasLaunchedPermissionRequest = true
+
+            if (
+                coarseLocationPermissionState.status is PermissionStatus.Denied
+            ) {
+                coarseLocationPermissionState.launchPermissionRequest()
+            }
+        }
     }
+
 
     Column(
         modifier = Modifier
@@ -114,10 +135,10 @@ fun MapboxScreen(
                 noteViewModel.addressQuery = suggestion.placeName
                 noteViewModel.suggestions = emptyList()
 
-                // 지도 보이기
+                // Show map
                 mapboxViewModel.toggleMap(true)
 
-                // 지도 중심을 주소 위치로 이동
+                // Move the map to the address
                 CoroutineScope(Dispatchers.Main).launch {
                     val address = geofenceManager.getLatLngFromAddress(suggestion.placeName)
                     if (address != null) {
@@ -198,7 +219,7 @@ fun MapboxScreen(
                                         context.resources,
                                         R.drawable.current_location_icon
                                     )
-                                        .scale(100, 100, false)
+                                        .scale(62, 62, false)
                                 )
                                 style.addImage(
                                     "location-marker-icon",
@@ -206,7 +227,7 @@ fun MapboxScreen(
                                         context.resources,
                                         R.drawable.location_pin
                                     )
-                                        .scale(62, 62, false)
+                                        .scale(100, 100, false)
                                 )
 
                                 style.addImage(
