@@ -26,7 +26,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        resValue("string", "mapbox_access_token", MAPBOX_API_KEY)
         buildConfigField("String", "MAPBOX_API_KEY", "\"${MAPBOX_API_KEY}\"")
+
+
     }
 
     buildTypes {
@@ -102,6 +105,9 @@ dependencies {
 
     //Accompanist
     implementation(libs.accompanist.jetpack.compose.permission)
+
+    //mapbox map
+    implementation(libs.mapbox.map)
 
     //Test
     testImplementation(libs.junit)

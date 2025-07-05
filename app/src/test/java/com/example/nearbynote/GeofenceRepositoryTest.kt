@@ -26,7 +26,7 @@ class GeofenceRepositoryTest {
     fun `save and retrieve geofence by id`() = runTest {
         val geofence = GeofenceEntity(
             id = "g1",
-            name = "Test",
+            addressName = "Test",
             latitude = 37.0,
             longitude = -122.0,
             radius = 100f,
@@ -43,7 +43,7 @@ class GeofenceRepositoryTest {
     fun `delete geofence and verify not present`() = runTest {
         val geofence = GeofenceEntity(
             id = "g2",
-            name = "ToDelete",
+            addressName = "ToDelete",
             latitude = 37.1,
             longitude = -122.1,
             radius = 200f,

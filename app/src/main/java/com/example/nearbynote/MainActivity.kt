@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
+import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.example.nearbynote.nearbyNoteNav.BottomNavBar
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
         val noteViewModel: NoteViewModel by viewModels()
         val geofenceViewModel: GeofenceViewModel by viewModels()
         val savedAddressViewModel: SavedAddressViewModel by viewModels()
+        val mapboxViewModel: MapboxViewModel by viewModels()
 
         val noteIdFromIntent = intent?.getLongExtra("noteId", -1L)
         val startDestination = if (noteIdFromIntent != null && noteIdFromIntent != -1L) {
@@ -66,9 +68,10 @@ class MainActivity : ComponentActivity() {
                             noteViewModel = noteViewModel,
                             geofenceViewModel = geofenceViewModel,
                             geofenceManager = geofenceManager,
-                            savedAddressViewModel = savedAddressViewModel
+                            savedAddressViewModel = savedAddressViewModel,
+                            mapboxViewModel = mapboxViewModel,
 
-                        )
+                            )
                     }
                 }
             }

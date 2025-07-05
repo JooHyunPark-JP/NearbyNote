@@ -31,14 +31,17 @@ fun SavedAddressAdd(
     noteViewModel: NoteViewModel,
 ) {
     val context = LocalContext.current
-    var addressQuery = noteViewModel.addressQuery
+    val addressQuery = noteViewModel.addressQuery
     val suggestions = noteViewModel.suggestions
 
     val favoriteName = remember { mutableStateOf("") }
     val selectedSuggestion = remember { mutableStateOf<AddressSuggestion?>(null) }
 
+    val isAddressSearching = noteViewModel.isSearching
+
     LaunchedEffect(Unit) {
-        addressQuery = ""
+        noteViewModel.addressQuery = ""
+        noteViewModel.suggestions = emptyList()
     }
 
     Column(
@@ -46,7 +49,7 @@ fun SavedAddressAdd(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("⭐ Add Favourite Address", style = MaterialTheme.typography.titleMedium)
+        Text("⭐ Add Favorite Address", style = MaterialTheme.typography.titleMedium)
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -54,12 +57,13 @@ fun SavedAddressAdd(
             addressQuery = addressQuery,
             onQueryChange = { noteViewModel.onQueryChanged(it) },
             suggestions = suggestions,
-            onSuggestionSelected = {
-                selectedSuggestion.value = it
-                noteViewModel.addressQuery = it.placeName
+            onSuggestionSelected = { suggestion ->
+                selectedSuggestion.value = suggestion
+                noteViewModel.addressQuery = suggestion.placeName
                 noteViewModel.suggestions = emptyList()
-            }
-        )
+            },
+            isAddressSearching = isAddressSearching,
+            )
 
         Spacer(modifier = Modifier.height(12.dp))
 

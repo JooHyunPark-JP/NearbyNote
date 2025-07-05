@@ -21,7 +21,7 @@
 
     <application
         android:name=".MyApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -49,6 +49,10 @@
         </receiver>
 
         <receiver android:name=".nearbyNoteMainFunction.geoFenceAPI.util.CancelNotificationReceiver" />
+
+        <meta-data
+            android:name="com.mapbox.access_token"
+            android:value="@string/mapbox_access_token" />
     </application>
 
 </manifest>

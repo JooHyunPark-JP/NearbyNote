@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -73,6 +74,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceMana
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressEntity
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
+import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -91,7 +93,7 @@ fun WriteNoteScreen(
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val permissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
     var showPermissionDialog by remember { mutableStateOf(false) }
     var hasRequestedPermission by rememberSaveable { mutableStateOf(false) }
 
@@ -101,8 +103,13 @@ fun WriteNoteScreen(
     val suggestions = noteViewModel.suggestions
 
     //val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val googleVoicePermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     var backgroundLocationGranted by remember { mutableStateOf(false) }
+    var notificationPermissionGranted by remember { mutableStateOf(false) }
+    val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
     var showBackgroundDialog by remember { mutableStateOf(false) }
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
 
     var hasExistingGeofence by remember { mutableStateOf(false) }
 
@@ -110,11 +117,17 @@ fun WriteNoteScreen(
         mutableStateOf(noteId != null && hasExistingGeofence)
     }
 
+    //app knows when permission state has changed when user access to setting from an app.
     val settingsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             backgroundLocationGranted = ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            notificationPermissionGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         }
 
@@ -130,12 +143,13 @@ fun WriteNoteScreen(
     var selectedAddress by remember { mutableStateOf<SavedAddressEntity?>(null) }
     var isSavedAddressClicked by remember { mutableStateOf(false) }
 
-
     val shouldDisableSavedAddressRow by remember(noteId, hasExistingGeofence) {
         mutableStateOf(noteId != null && hasExistingGeofence)
     }
 
     // val shouldDisableSavedAddressRow = noteId != null && hasExistingGeofence
+
+    val isAddressSearching = noteViewModel.isSearching
 
 
     val savedRowModifier = if (shouldDisableSavedAddressRow) {
@@ -146,11 +160,19 @@ fun WriteNoteScreen(
 
     fun resetNewNoteState() {
         noteText = ""
-        geofenceEnabled = false
-        noteViewModel.addressQuery = ""
-        geofenceViewModel.onLatitudeChanged("")
-        geofenceViewModel.onLongitudeChanged("")
-        geofenceViewModel.onRadiusChanged("1000")
+
+        //if user is coming from map
+        if (noteViewModel.preserveMapLocation) {
+            geofenceEnabled = true
+        } else {
+            geofenceEnabled = false
+            noteViewModel.addressQuery = ""
+            geofenceViewModel.onLatitudeChanged("")
+            geofenceViewModel.onLongitudeChanged("")
+            geofenceViewModel.onRadiusChanged("1000")
+        }
+
+        noteViewModel.preserveMapLocation = false
     }
 
     suspend fun loadExistingNote(noteId: Long) {
@@ -179,6 +201,13 @@ fun WriteNoteScreen(
             context,
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+
+        if (isNotificationPermissionRequired) {
+            notificationPermissionGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        }
     }
 
 
@@ -247,7 +276,9 @@ fun WriteNoteScreen(
                             geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
                             noteViewModel.suggestions = emptyList()
                         },
-                        enabled = !isGeofenceImmutable && !isSavedAddressClicked
+                        enabled = !isGeofenceImmutable && !isSavedAddressClicked,
+                        isAddressSearching = isAddressSearching,
+                        isSavedAddressClicked = isSavedAddressClicked,
                     )
                     if (isGeofenceImmutable) {
                         Text(
@@ -293,6 +324,7 @@ fun WriteNoteScreen(
                                 isSavedAddressClicked = false
                                 isFavoriteAddress.value = false
                                 favoriteAddressName.value = ""
+                                noteViewModel.suggestions = emptyList()
                             }
                         )
 
@@ -309,7 +341,6 @@ fun WriteNoteScreen(
                                     onClick = {
                                         selectedAddress = address
                                         expanded = false
-
                                         noteViewModel.addressQuery = address.placeName
                                         noteViewModel.addressLatitude = address.latitude
                                         noteViewModel.addressLongitude = address.longitude
@@ -319,6 +350,9 @@ fun WriteNoteScreen(
                                         isSavedAddressClicked = true
                                         isFavoriteAddress.value = false
                                         favoriteAddressName.value = ""
+                                        //remove the search bar result
+                                        noteViewModel.suggestions = emptyList()
+
                                     }
                                 )
                             }
@@ -333,8 +367,6 @@ fun WriteNoteScreen(
                     favoriteAddressName = favoriteAddressName,
                     isFavoriteAddressDisable = isFavoriteAddressDisable,
                     shouldDisableSavedAddressRow = shouldDisableSavedAddressRow
-
-
                 )
             }
 
@@ -349,7 +381,7 @@ fun WriteNoteScreen(
 
         BottomFABRow(
             onVoiceClick = {
-                when (val status = permissionState.status) {
+                when (val status = googleVoicePermissionState.status) {
                     is PermissionStatus.Granted -> {
                         startVoiceRecognition()
                     }
@@ -357,9 +389,9 @@ fun WriteNoteScreen(
                     is PermissionStatus.Denied -> {
                         if (!hasRequestedPermission) {
                             hasRequestedPermission = true
-                            permissionState.launchPermissionRequest()
+                            googleVoicePermissionState.launchPermissionRequest()
                         } else if (status.shouldShowRationale) {
-                            permissionState.launchPermissionRequest()
+                            googleVoicePermissionState.launchPermissionRequest()
                         } else {
                             showPermissionDialog = true
                         }
@@ -374,6 +406,8 @@ fun WriteNoteScreen(
                         noteText = noteText,
                         geofenceEnabled = geofenceEnabled,
                         backgroundLocationGranted = backgroundLocationGranted,
+                        notificationPermissionGranted = notificationPermissionGranted,
+                        isNotificationPermissionRequired = isNotificationPermissionRequired,
                         addressQuery = noteViewModel.addressQuery,
                         lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
                         lng = geofenceViewModel.longitude.value.toDoubleOrNull(),
@@ -385,7 +419,8 @@ fun WriteNoteScreen(
                         savedAddressViewModel = savedAddressViewModel,
                         isFavoriteAddress = isFavoriteAddress,
                         favoriteAddressName = favoriteAddressName,
-                        onShowBackgroundDialog = { showBackgroundDialog = true }
+                        onShowBackgroundDialog = { showBackgroundDialog = true },
+                        onShowNotificationDialog = { showNotificationPermissionDialog = true }
                     )
                 } else {
                     //Edit existed note
@@ -452,6 +487,46 @@ fun WriteNoteScreen(
             )
         }
 
+        //Pop up the background permission message to users
+        if (showNotificationPermissionDialog && geofenceEnabled) {
+            AlertDialog(
+                onDismissRequest = { showNotificationPermissionDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showNotificationPermissionDialog = false
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        settingsLauncher.launch(intent)
+                    }) {
+                        Text("Open Settings")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showNotificationPermissionDialog = false
+                    }) {
+                        Text("Cancel")
+                    }
+                },
+                title = { Text("Notification permission required") },
+                text = {
+                    Text(
+                        buildString {
+                            appendLine("To receive note notifications from your app, you need to enable notification permissions.")
+                            appendLine()
+                            appendLine("You can always change anytime in Settings.")
+                            appendLine()
+                            appendLine("🔧 How to set it:")
+                            appendLine("1. Tap \"Open Settings\" below")
+                            appendLine("2. Tap \"Notifications\"")
+                            appendLine("4. And turn the notification on")
+                        }
+                    )
+                }
+            )
+        }
+
         if (showPermissionDialog) {
             AlertDialog(
                 onDismissRequest = { showPermissionDialog = false },
@@ -499,6 +574,8 @@ fun handleNewNoteSave(
     noteText: String,
     geofenceEnabled: Boolean,
     backgroundLocationGranted: Boolean,
+    notificationPermissionGranted: Boolean,
+    isNotificationPermissionRequired: Boolean,
     addressQuery: String,
     lat: Double?,
     lng: Double?,
@@ -510,7 +587,8 @@ fun handleNewNoteSave(
     savedAddressViewModel: SavedAddressViewModel,
     isFavoriteAddress: MutableState<Boolean>,
     favoriteAddressName: MutableState<String>,
-    onShowBackgroundDialog: () -> Unit
+    onShowBackgroundDialog: () -> Unit,
+    onShowNotificationDialog: () -> Unit
 ) {
     if (noteText.isBlank()) {
         Toast.makeText(context, "Write down something before saving!", Toast.LENGTH_SHORT).show()
@@ -519,6 +597,12 @@ fun handleNewNoteSave(
 
     if (geofenceEnabled && !backgroundLocationGranted) {
         onShowBackgroundDialog()
+        return
+    }
+
+
+    if (geofenceEnabled && !notificationPermissionGranted && isNotificationPermissionRequired) {
+        onShowNotificationDialog()
         return
     }
 
@@ -564,7 +648,7 @@ fun handleNewNoteSave(
                 }
 
                 noteViewModel.addressQuery = ""
-                navController.popBackStack()
+                navController.navigate(Screen.Main.route)
             },
             onFailure = {
                 Toast.makeText(
@@ -612,7 +696,7 @@ fun handleExistingNoteUpdate(
 
         GeofenceEntity(
             id = "",
-            name = addressQuery,
+            addressName = addressQuery,
             latitude = lat,
             longitude = lng,
             radius = rad,
