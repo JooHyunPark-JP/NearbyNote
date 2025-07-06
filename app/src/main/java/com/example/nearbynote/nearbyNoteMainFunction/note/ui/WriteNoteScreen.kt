@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -279,10 +280,12 @@ fun WriteNoteScreen(
                         enabled = !isGeofenceImmutable && !isSavedAddressClicked,
                         isAddressSearching = isAddressSearching,
                         isSavedAddressClicked = isSavedAddressClicked,
+                        noteViewModel = noteViewModel
                     )
                     if (isGeofenceImmutable) {
                         Text(
                             text = "📍 This note has a location reminder. To change location, please create a new note.",
+                            textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
                         )
                     }

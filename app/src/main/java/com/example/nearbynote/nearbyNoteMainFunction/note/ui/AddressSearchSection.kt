@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 
 @Composable
@@ -34,7 +35,8 @@ fun AddressSearchSection(
     onSuggestionSelected: (AddressSuggestion) -> Unit,
     enabled: Boolean = true,
     isAddressSearching: Boolean,
-    isSavedAddressClicked: Boolean = false
+    isSavedAddressClicked: Boolean = false,
+    noteViewModel: NoteViewModel
 ) {
     var wasSuggestionManuallyCleared by remember { mutableStateOf(false) }
 
@@ -42,6 +44,7 @@ fun AddressSearchSection(
         TextField(
             value = addressQuery,
             onValueChange = {
+                noteViewModel.isAddressSelected = false
                 wasSuggestionManuallyCleared = false
                 onQueryChange(it)
             },
@@ -67,16 +70,18 @@ fun AddressSearchSection(
             suggestions.isEmpty() &&
             addressQuery.length >= 4 &&
             !isSavedAddressClicked &&
-            !wasSuggestionManuallyCleared
+            !wasSuggestionManuallyCleared &&
+            !noteViewModel.isAddressSelected
 
         ) {
             Text(
                 "📭 No address or check your internet connection!",
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(top = 4.dp)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                color = Color.Gray
+                color = Color.Gray,
+                fontSize = 12.sp
             )
         }
 
@@ -93,6 +98,7 @@ fun AddressSearchSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
+                            noteViewModel.isAddressSelected = true
                             wasSuggestionManuallyCleared = true
                             onSuggestionSelected(suggestion)
                         }
