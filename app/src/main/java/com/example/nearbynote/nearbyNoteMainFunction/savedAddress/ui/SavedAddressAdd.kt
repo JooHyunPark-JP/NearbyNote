@@ -63,6 +63,7 @@ fun SavedAddressAdd(
                 noteViewModel.suggestions = emptyList()
             },
             isAddressSearching = isAddressSearching,
+            noteViewModel = noteViewModel
             )
 
         Spacer(modifier = Modifier.height(12.dp))

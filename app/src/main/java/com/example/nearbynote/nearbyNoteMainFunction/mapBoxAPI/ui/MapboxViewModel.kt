@@ -39,6 +39,8 @@ class MapboxViewModel @Inject constructor(
 
     var tappedAnnotationManager: PointAnnotationManager? = null
 
+    var isUserInteractingWithMap by mutableStateOf(false)
+
 
     fun loadUserLocation(onSuccess: ((Point) -> Unit)? = null) {
         if (ContextCompat.checkSelfPermission(
@@ -77,4 +79,13 @@ class MapboxViewModel @Inject constructor(
     fun clearTappedLocation() {
         tappedLocation = null
     }
+
+    fun onUserInteractionStart() {
+        isUserInteractingWithMap = true
+    }
+
+    fun onUserInteractionEnd() {
+        isUserInteractingWithMap = false
+    }
+
 }
