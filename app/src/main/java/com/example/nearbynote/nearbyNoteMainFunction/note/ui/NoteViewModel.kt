@@ -49,6 +49,8 @@ class NoteViewModel @Inject constructor(
 
     var preserveMapLocation by mutableStateOf(false)
 
+    var isAddressSelected by mutableStateOf(false)
+
     init {
         viewModelScope.launch {
             noteRepository.allNotes.collectLatest {
