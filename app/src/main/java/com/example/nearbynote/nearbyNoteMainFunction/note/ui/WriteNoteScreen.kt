@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -248,7 +249,10 @@ fun WriteNoteScreen(
     }
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -296,7 +300,7 @@ fun WriteNoteScreen(
                 //Saved address section
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = savedRowModifier.padding(8.dp)
+                    modifier = savedRowModifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Icon(
                         imageVector = if (!isSavedAddressClicked) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
@@ -305,7 +309,7 @@ fun WriteNoteScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = selectedAddress?.name ?: "Click here to choose saved address",
+                        text = selectedAddress?.name ?: "Choose your favorite address",
                         color = if (!shouldDisableSavedAddressRow) Color.Black else Color.Gray
                     )
 
@@ -362,7 +366,7 @@ fun WriteNoteScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+
                 BasicGeofenceSetup(
                     geofenceViewModel = geofenceViewModel,
                     geofenceOptionsEnabled = !isGeofenceImmutable,
@@ -373,7 +377,7 @@ fun WriteNoteScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             NoteTextField(
                 noteText = noteText,
@@ -665,7 +669,7 @@ fun handleNewNoteSave(
         noteViewModel.saveNote(
             content = noteText,
             geofenceId = null,
-            locationName = null,
+            locationName = "Location hasn't been set",
             isVoice = false
         )
         navController.popBackStack()
@@ -780,7 +784,7 @@ fun NoteTextField(
         textStyle = LocalTextStyle.current.copy(lineHeight = 24.sp),
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 120.dp, max = 300.dp)
+            .heightIn(min = 120.dp, max = Dp.Infinity)
     )
 }
 

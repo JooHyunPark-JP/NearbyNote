@@ -9,6 +9,7 @@ import android.location.Geocoder
 import android.os.Build
 import android.util.Log
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.GeofenceBroadcastReceiver
+import com.example.nearbynote.util.isNetworkAvailable
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
@@ -27,8 +28,34 @@ class GeofenceManager @Inject constructor(
 
     private val activeGeofences = mutableListOf<String>()
 
-    suspend fun getAddressFromLatLng(lat: Double, lng: Double): String {
+    /*    suspend fun getAddressFromLatLng(lat: Double, lng: Double): String {
+            return withContext(Dispatchers.IO) {
+                try {
+                    val geocoder = Geocoder(context, Locale.getDefault())
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        suspendCancellableCoroutine { cont ->
+                            geocoder.getFromLocation(lat, lng, 1) { addresses ->
+                                val address = addresses.firstOrNull()?.getAddressLine(0)
+                                cont.resume(address ?: "No address found")
+                            }
+                        }
+                    } else {
+                        val addresses = geocoder.getFromLocation(lat, lng, 1)
+                        addresses?.firstOrNull()?.getAddressLine(0) ?: "No address found"
+                    }
+                } catch (e: Exception) {
+                    "Error: ${e.message}"
+                }
+            }
+        }*/
+
+
+    suspend fun getAddressFromLatLng(lat: Double, lng: Double): Result<String> {
         return withContext(Dispatchers.IO) {
+            if (!isNetworkAvailable(context)) {
+                return@withContext Result.failure(Exception("No Internet connection"))
+            }
             try {
                 val geocoder = Geocoder(context, Locale.getDefault())
 
@@ -36,21 +63,30 @@ class GeofenceManager @Inject constructor(
                     suspendCancellableCoroutine { cont ->
                         geocoder.getFromLocation(lat, lng, 1) { addresses ->
                             val address = addresses.firstOrNull()?.getAddressLine(0)
-                            cont.resume(address ?: "No address found")
+                            if (address != null) {
+                                cont.resume(Result.success(address))
+                            } else {
+                                cont.resume(Result.failure(Exception("No address found")))
+                            }
                         }
                     }
                 } else {
                     val addresses = geocoder.getFromLocation(lat, lng, 1)
-                    addresses?.firstOrNull()?.getAddressLine(0) ?: "No address found"
+                    val address = addresses?.firstOrNull()?.getAddressLine(0)
+                    if (address != null) {
+                        Result.success(address)
+                    } else {
+                        Result.failure(Exception("No address found"))
+                    }
                 }
             } catch (e: Exception) {
-                "Error: ${e.message}"
+                Result.failure(e)
             }
         }
     }
 
 
-    suspend fun getLatLngFromAddress(address: String): Address? {
+    suspend fun getLatLngFromAddress(address: String): Result<Address?> {
         return withContext(Dispatchers.IO) {
             try {
                 val geocoder = Geocoder(context, Locale.getDefault())
@@ -58,20 +94,26 @@ class GeofenceManager @Inject constructor(
                     suspendCancellableCoroutine { cont ->
                         geocoder.getFromLocationName(address, 1, object : Geocoder.GeocodeListener {
                             override fun onGeocode(addresses: MutableList<Address>) {
-                                cont.resume(addresses.firstOrNull())
+                                cont.resume(Result.success(addresses.firstOrNull()))
                             }
 
                             override fun onError(errorMessage: String?) {
-                                cont.resume(null)
+                                cont.resume(
+                                    Result.failure(
+                                        Exception(
+                                            errorMessage ?: "Geocode error"
+                                        )
+                                    )
+                                )
                             }
                         })
                     }
                 } else {
                     val results = geocoder.getFromLocationName(address, 1)
-                    results?.firstOrNull()
+                    Result.success(results?.firstOrNull())
                 }
             } catch (e: Exception) {
-                null
+                Result.failure(e)
             }
         }
     }
@@ -102,9 +144,9 @@ class GeofenceManager @Inject constructor(
 
         geofencingClient.addGeofences(geofencingRequest, getGeofencePendingIntent(context))
             .addOnSuccessListener {
-                Log.d("GeofenceManager", "✅ Geofence added: $geofenceId")
+                //  Log.d("GeofenceManager", "✅ Geofence added: $geofenceId")
                 activeGeofences.add(geofenceId)
-                Log.d("GeofenceManager", "📋 All registered geofences: $activeGeofences")
+                //   Log.d("GeofenceManager", "📋 All registered geofences: $activeGeofences")
                 onSuccess()
             }
             .addOnFailureListener { e ->
