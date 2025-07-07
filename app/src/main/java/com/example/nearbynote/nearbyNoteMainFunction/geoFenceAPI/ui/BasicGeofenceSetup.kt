@@ -106,7 +106,6 @@ fun BasicGeofenceSetup(
             text = "📏 Radius: $radiusDisplay",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
-                .padding(top = 4.dp)
                 .align(Alignment.CenterHorizontally)
         )
 
@@ -122,7 +121,9 @@ fun BasicGeofenceSetup(
                 },
                 valueRange = 100f..2000f,
                 steps = 18,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(36.dp),
                 enabled = geofenceOptionsEnabled
             )
 
@@ -147,14 +148,14 @@ fun BasicGeofenceSetup(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
-            text = "Recommended radius is 300m-1000m for better accuracy.",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray,
-            modifier = Modifier.fillMaxWidth()
-        )
+        /*        Text(
+                    text = "Recommended radius is 300m-1000m for better accuracy.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))*/
 
         /*        Button(
                     onClick = { geofenceViewModel.onRemoveAllGeofencesClick() },

@@ -40,7 +40,7 @@ fun AddressSearchSection(
 ) {
     var wasSuggestionManuallyCleared by remember { mutableStateOf(false) }
 
-    Column {
+    Column(modifier = Modifier.padding(top = 4.dp)) {
         TextField(
             value = addressQuery,
             onValueChange = {
