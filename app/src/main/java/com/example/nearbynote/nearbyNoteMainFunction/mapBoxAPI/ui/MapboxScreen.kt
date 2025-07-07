@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,6 +106,7 @@ fun MapboxScreen(
         noteViewModel.addressQuery = ""
         noteViewModel.suggestions = emptyList()
         mapboxViewModel.showMap = false
+        mapboxViewModel.tappedLocation = null
 
         if (!hasLaunchedPermissionRequest) {
             hasLaunchedPermissionRequest = true
@@ -136,17 +138,35 @@ fun MapboxScreen(
 
                 // Move the map to the address
                 CoroutineScope(Dispatchers.Main).launch {
-                    val address = geofenceManager.getLatLngFromAddress(suggestion.placeName)
-                    if (address != null) {
-                        val point = Point.fromLngLat(address.longitude, address.latitude)
-                        mapboxViewModel.tappedLocation = point
-                        mapView?.mapboxMap?.setCamera(
-                            CameraOptions.Builder()
-                                .center(point)
-                                .zoom(17.0)
-                                .build()
-                        )
-                    }
+                    val result = geofenceManager.getLatLngFromAddress(suggestion.placeName)
+
+                    result.fold(
+                        onSuccess = { address ->
+                            if (address != null) {
+                                val point = Point.fromLngLat(address.longitude, address.latitude)
+                                mapboxViewModel.tappedLocation = point
+                                mapView?.mapboxMap?.setCamera(
+                                    CameraOptions.Builder()
+                                        .center(point)
+                                        .zoom(17.0)
+                                        .build()
+                                )
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "No address found for this location.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                        onFailure = {
+                            Toast.makeText(
+                                context,
+                                "Failed to get address. Check your internet connection.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
                 }
             },
             isAddressSearching = isSearching,
@@ -365,32 +385,43 @@ fun MapboxScreen(
                             .background(Color.White, RoundedCornerShape(8.dp))
                             .padding(8.dp)
                     ) {
+
                         TextButton(onClick = {
                             val tappedPoint = mapboxViewModel.tappedLocation
                             if (tappedPoint != null) {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    val addressText = geofenceManager.getAddressFromLatLng(
+                                    val result = geofenceManager.getAddressFromLatLng(
                                         tappedPoint.latitude(),
                                         tappedPoint.longitude()
                                     )
 
-                                    noteViewModel.addressQuery = addressText
-                                    noteViewModel.addressLatitude = tappedPoint.latitude()
-                                    noteViewModel.addressLongitude = tappedPoint.longitude()
+                                    result.fold(
+                                        onSuccess = { addressText ->
+                                            noteViewModel.addressQuery = addressText
+                                            noteViewModel.addressLatitude = tappedPoint.latitude()
+                                            noteViewModel.addressLongitude = tappedPoint.longitude()
 
-                                    geofenceViewModel.onLatitudeChanged(
-                                        tappedPoint.latitude().toString()
-                                    )
-                                    geofenceViewModel.onLongitudeChanged(
-                                        tappedPoint.longitude().toString()
-                                    )
+                                            geofenceViewModel.onLatitudeChanged(
+                                                tappedPoint.latitude().toString()
+                                            )
+                                            geofenceViewModel.onLongitudeChanged(
+                                                tappedPoint.longitude().toString()
+                                            )
 
-                                    noteViewModel.preserveMapLocation = true
-                                    noteViewModel.isAddressSelected = true
-                                    navController.navigate(
-                                        Screen.WriteNoteScreen.routeWithNoteId(
-                                            null
-                                        )
+                                            noteViewModel.preserveMapLocation = true
+                                            noteViewModel.isAddressSelected = true
+
+                                            navController.navigate(
+                                                Screen.WriteNoteScreen.routeWithNoteId(null)
+                                            )
+                                        },
+                                        onFailure = {
+                                            Toast.makeText(
+                                                context,
+                                                "Check your internet connection to create a note here!",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
                                     )
                                 }
                             }

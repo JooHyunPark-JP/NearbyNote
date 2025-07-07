@@ -6,9 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -30,9 +33,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
@@ -40,11 +43,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import java.text.DateFormat
 import java.util.Date
 
@@ -102,14 +101,26 @@ fun NoteListMain(
                         .fillMaxWidth()
                         .padding(8.dp)
                         .clickable {
+                            noteViewModel.isAddressSelected = true
                             navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(text = note.content)
-                        Text(text = "Geofence ID: ${note.geofenceId}")
-                        Text(text = "Location: ${note.locationName}")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        //Text(text = "Geofence ID: ${note.geofenceId}")
+                        Text(
+                            text = "Location: ${note.locationName}",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        Text(
+                            "📅 Saved: ${
+                                DateFormat.getDateTimeInstance().format(Date(note.createdAt))
+                            }",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
                     }
 
                     IconButton(onClick = {
@@ -122,28 +133,28 @@ fun NoteListMain(
                 HorizontalDivider()
             }
 
-            item {
-                Text(
-                    "📍 Geofences",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
+            /*            item {
+                            Text(
+                                "📍 Geofences",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
 
-            items(allGeofences) { geofence ->
-                Column(modifier = Modifier.padding(8.dp)) {
-                    Text("ID: ${geofence.id}")
-                    Text("📍 ${geofence.addressName}")
-                    Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
-                    Text("Radius: ${geofence.radius}m")
-                    Text(
-                        "Created at: ${
-                            DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))
-                        }"
-                    )
-                    HorizontalDivider()
-                }
-            }
+                        items(allGeofences) { geofence ->
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                Text("ID: ${geofence.id}")
+                                Text("📍 ${geofence.addressName}")
+                                Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
+                                Text("Radius: ${geofence.radius}m")
+                                Text(
+                                    "Created at: ${
+                                        DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))
+                                    }"
+                                )
+                                HorizontalDivider()
+                            }
+                        }*/
         }
 
         FloatingActionButton(

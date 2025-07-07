@@ -49,6 +49,7 @@ class NoteViewModel @Inject constructor(
 
     var preserveMapLocation by mutableStateOf(false)
 
+    //checking condition if address is selected from else where, not by user from address search bar
     var isAddressSelected by mutableStateOf(false)
 
     init {
@@ -133,7 +134,7 @@ class NoteViewModel @Inject constructor(
                     oldNote.copy(
                         content = content,
                         geofenceId = null,
-                        locationName = null,
+                        locationName = "Location hasn't been set",
                         isVoice = false
                     )
                 )

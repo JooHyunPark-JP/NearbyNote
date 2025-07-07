@@ -47,19 +47,19 @@ class GeofenceViewModel @Inject constructor(
         _radius.value = value
     }
 
-    fun onFetchAddressClick() {
-        viewModelScope.launch {
-            val lat = latitude.value.toDoubleOrNull()
-            val lng = longitude.value.toDoubleOrNull()
+    /*    fun onFetchAddressClick() {
+            viewModelScope.launch {
+                val lat = latitude.value.toDoubleOrNull()
+                val lng = longitude.value.toDoubleOrNull()
 
-            if (lat != null && lng != null) {
-                val result = geofenceManager.getAddressFromLatLng(lat, lng)
-                _address.value = result
-            } else {
-                _address.value = "Invalid latitude/longitude"
+                if (lat != null && lng != null) {
+                    val result = geofenceManager.getAddressFromLatLng(lat, lng)
+                    _address.value = result
+                } else {
+                    _address.value = "Invalid latitude/longitude"
+                }
             }
-        }
-    }
+        }*/
 
     fun onRemoveAllGeofencesClick() {
         geofenceManager.removeAllGeofences(
