@@ -56,7 +56,12 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
-                        TopBar(navController)
+                        TopBar(
+                            navController = navController,
+                            noteViewModel = noteViewModel,
+                            geofenceViewModel = geofenceViewModel
+                        )
+
                     },
                     bottomBar = {
                         BottomNavBar(navController = navController)

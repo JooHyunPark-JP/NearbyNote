@@ -10,6 +10,7 @@ data class NoteEntity(
     val content: String,
     val isVoice: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = 0L,
     val locationName: String?,
     val geofenceId: String?,
 )

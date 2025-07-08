@@ -118,6 +118,7 @@ class NoteViewModel @Inject constructor(
         geofenceEntity: GeofenceEntity?,
         geofenceManager: GeofenceManager,
         geofenceViewModel: GeofenceViewModel,
+        updatedAt: Long,
         onSuccess: () -> Unit,
         onFailure: (Throwable) -> Unit
     ) {
@@ -135,7 +136,8 @@ class NoteViewModel @Inject constructor(
                         content = content,
                         geofenceId = null,
                         locationName = "Location hasn't been set",
-                        isVoice = false
+                        isVoice = false,
+                        updatedAt = updatedAt
                     )
                 )
                 onSuccess()
@@ -168,7 +170,8 @@ class NoteViewModel @Inject constructor(
                                 content = content,
                                 geofenceId = finalGeofenceId,
                                 locationName = geofenceEntity.addressName,
-                                isVoice = false
+                                isVoice = false,
+                                updatedAt = updatedAt
                             )
                         )
                         onSuccess()
@@ -180,6 +183,7 @@ class NoteViewModel @Inject constructor(
                     oldNote.copy(
                         content = content,
                         locationName = geofenceEntity.addressName,
+                        updatedAt = updatedAt,
                         isVoice = false
                     )
                 )

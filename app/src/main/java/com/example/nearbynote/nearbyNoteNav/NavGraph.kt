@@ -13,6 +13,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxViewMode
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteListMain
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.WriteNoteScreen
+import com.example.nearbynote.nearbyNoteMainFunction.permissionStatus.ui.PermissionStatusScreen
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressAdd
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressMain
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
@@ -84,6 +85,11 @@ fun NavGraph(
                 mapboxViewModel = mapboxViewModel,
                 geofenceManager = geofenceManager
             )
+        }
+
+
+        composable(Screen.PermissionStatusScreen.route) {
+            PermissionStatusScreen(navController)
         }
     }
 }
