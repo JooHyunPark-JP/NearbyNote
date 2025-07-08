@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -83,7 +82,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun WriteNoteScreen(
     navController: NavController,
@@ -642,7 +641,7 @@ fun handleNewNoteSave(
                     content = noteText,
                     geofenceId = geofenceId,
                     locationName = addressQuery,
-                    isVoice = false
+                    isVoice = false,
                 )
 
                 if (isFavoriteAddress.value) {
@@ -717,6 +716,7 @@ fun handleExistingNoteUpdate(
         geofenceEntity = geofenceEntity,
         geofenceManager = geofenceManager,
         geofenceViewModel = geofenceViewModel,
+        updatedAt = System.currentTimeMillis(),
         onSuccess = {
             noteViewModel.addressQuery = ""
             navController.popBackStack()
