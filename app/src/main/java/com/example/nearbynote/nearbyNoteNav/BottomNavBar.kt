@@ -20,7 +20,8 @@ fun BottomNavBar(navController: NavController) {
     val items = listOf(
         Screen.Main,
         Screen.SavedAddressScreen,
-        Screen.MapboxScreen
+        Screen.MapboxScreen,
+        Screen.PermissionStatusScreen
     )
     NavigationBar(
         containerColor = Color.White,
@@ -44,6 +45,11 @@ fun BottomNavBar(navController: NavController) {
                         )
 
                         is Screen.MapboxScreen -> Icon(
+                            painterResource(id = R.drawable.ic_map_search),
+                            contentDescription = null
+                        )
+
+                        is Screen.PermissionStatusScreen -> Icon(
                             painterResource(id = R.drawable.ic_map_search),
                             contentDescription = null
                         )

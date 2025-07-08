@@ -9,4 +9,5 @@ sealed class Screen(val route: String, val label: String) {
     data object SavedAddressScreen : Screen("saved_address_screen", "Favorite")
     data object SavedAddressAddScreen : Screen("saved_address_add_screen", "Add Favorite")
     data object MapboxScreen : Screen("mapbox_screen", "Map")
+    data object PermissionStatusScreen : Screen("permission_status_screen", "Permission")
 }

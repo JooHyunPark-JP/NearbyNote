@@ -11,13 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -81,59 +81,89 @@ fun NoteListMain(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
+        if (notes.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    "📝 Notes",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(8.dp)
+                    text = "There is no note! Create new one",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Gray
                 )
-            }
-
-            items(notes) { note ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable {
-                            noteViewModel.isAddressSelected = true
-                            navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
-                        },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = note.content)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        //Text(text = "Geofence ID: ${note.geofenceId}")
-                        Text(
-                            text = "Location: ${note.locationName}",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        Text(
-                            "📅 Saved: ${
-                                DateFormat.getDateTimeInstance().format(Date(note.createdAt))
-                            }",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
-                        )
-                    }
-
-                    IconButton(onClick = {
-                        noteToDelete = note
-                        showDeleteDialog = true
-                    }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete Note")
-                    }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = {
+                    navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(null))
+                }) {
+                    Text("Create Note")
                 }
-                HorizontalDivider()
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Text(
+                        "📝 Notes",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
 
-            /*            item {
+                items(notes) { note ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable {
+                                noteViewModel.isAddressSelected = true
+                                navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
+                            },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = note.content)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            //Text(text = "Geofence ID: ${note.geofenceId}")
+                            Text(
+                                text = "Location: ${note.locationName}",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                "✔\uFE0F Saved: ${
+                                    DateFormat.getDateTimeInstance().format(Date(note.createdAt))
+                                }",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
+                            )
+                            if (note.updatedAt != 0L) {
+                                Text(
+                                    "🛠️ Updated: ${
+                                        DateFormat.getDateTimeInstance()
+                                            .format(Date(note.updatedAt))
+                                    }",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                        IconButton(onClick = {
+                            noteToDelete = note
+                            showDeleteDialog = true
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete Note")
+                        }
+                    }
+                    HorizontalDivider()
+                }
+
+                /*            item {
                             Text(
                                 "📍 Geofences",
                                 style = MaterialTheme.typography.titleMedium,
@@ -155,51 +185,52 @@ fun NoteListMain(
                                 HorizontalDivider()
                             }
                         }*/
-        }
+            }
 
-        FloatingActionButton(
-            onClick = {
-                navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(null))
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
-        }
-
-
-        if (showDeleteDialog && noteToDelete != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    showDeleteDialog = false
-                    noteToDelete = null
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(null))
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        noteToDelete?.let {
-                            noteViewModel.deleteNoteAndGeofence(
-                                noteId = it.id,
-                                geofenceViewModel = geofenceViewModel
-                            )
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
+            }
+
+
+            if (showDeleteDialog && noteToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showDeleteDialog = false
+                        noteToDelete = null
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            noteToDelete?.let {
+                                noteViewModel.deleteNoteAndGeofence(
+                                    noteId = it.id,
+                                    geofenceViewModel = geofenceViewModel
+                                )
+                            }
+                            showDeleteDialog = false
+                            noteToDelete = null
+                        }) {
+                            Text("Delete")
                         }
-                        showDeleteDialog = false
-                        noteToDelete = null
-                    }) {
-                        Text("Delete")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showDeleteDialog = false
-                        noteToDelete = null
-                    }) {
-                        Text("Cancel")
-                    }
-                },
-                title = { Text("Delete note?") },
-                text = { Text("Are you sure you want to delete this note?") }
-            )
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showDeleteDialog = false
+                            noteToDelete = null
+                        }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Delete note?") },
+                    text = { Text("Are you sure you want to delete this note?") }
+                )
+            }
         }
     }
 }
