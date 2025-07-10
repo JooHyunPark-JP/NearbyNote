@@ -482,7 +482,7 @@ fun WriteNoteScreen(
                             appendLine("📌 Don’t worry — your location is never stored or shared.")
                             appendLine("You can always change anytime in Settings.")
                             appendLine()
-                            appendLine("🔧 How to set it:")
+                            appendLine("🔧 How to set:")
                             appendLine("1. Tap \"Open Settings\" below")
                             appendLine("2. Tap \"Permissions\"")
                             appendLine("3. Choose \"Location\"")
@@ -523,10 +523,10 @@ fun WriteNoteScreen(
                             appendLine()
                             appendLine("You can always change anytime in Settings.")
                             appendLine()
-                            appendLine("🔧 How to set it:")
+                            appendLine("🔧 How to set:")
                             appendLine("1. Tap \"Open Settings\" below")
                             appendLine("2. Tap \"Notifications\"")
-                            appendLine("4. And turn the notification on")
+                            appendLine("3. And turn the notification on")
                         }
                     )
                 }

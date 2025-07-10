@@ -14,12 +14,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,20 +62,60 @@ fun PermissionStatusScreen(navController: NavController) {
 
         PermissionRow(
             label = "Background Location",
-            status = backgroundLocationPermission.status,
-            onInfoClick = {})
+            description = buildString {
+                appendLine("Needed to trigger location alerts when the app is in the background.")
+                appendLine()
+                appendLine("ℹ️ Android requires users to enable background location manually.")
+                appendLine()
+                appendLine("How to enable:")
+                appendLine("1. Tap \"Open Settings\" below")
+                appendLine("2. Tap \"Permissions\"")
+                appendLine("3. Select \"Location\"")
+                appendLine("4. Choose \"Allow all the time\" (this includes both Fine + background location)")
+            },
+            status = backgroundLocationPermission.status
+        )
+
         PermissionRow(
             label = "Fine Location",
-            status = fineLocationPermission.status,
-            onInfoClick = {})
+            description = buildString {
+                appendLine("Provides precise location for geofencing and centering the map on your location.")
+                appendLine()
+                appendLine("How to enable:")
+                appendLine("1. Tap \"Open Settings\" below")
+                appendLine("2. Tap \"Permissions\"")
+                appendLine("3. Select \"Location\"")
+                appendLine("4. Choose \"Allow all the time\" or \"While using the app\"")
+            },
+            status = fineLocationPermission.status
+        )
+
         PermissionRow(
             label = "Notifications",
-            status = notificationPermission.status,
-            onInfoClick = {})
+            description = buildString {
+                appendLine("Sends alerts when you arrive at saved locations.")
+                appendLine()
+                appendLine("How to enable:")
+                appendLine("1. Tap \"Open Settings\" below")
+                appendLine("2. Tap \"Notifications\"")
+                appendLine("3. Turn notifications on")
+            },
+            status = notificationPermission.status
+        )
+
         PermissionRow(
             label = "Microphone",
-            status = microphonePermission.status,
-            onInfoClick = {})
+            description = buildString {
+                appendLine("Allows voice-to-text when creating notes.")
+                appendLine()
+                appendLine("How to enable:")
+                appendLine("1. Tap \"Open Settings\" below")
+                appendLine("2. Tap \"Permissions\"")
+                appendLine("3. Select \"Microphone\"")
+                appendLine("4. Choose \"Allow only while using the app\"")
+            },
+            status = microphonePermission.status
+        )
 
         Button(
             onClick = {
@@ -89,12 +135,25 @@ fun PermissionStatusScreen(navController: NavController) {
 @Composable
 fun PermissionRow(
     label: String,
-    status: PermissionStatus,
-    onInfoClick: () -> Unit
+    description: String,
+    status: PermissionStatus
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
     val icon = when (status) {
         is PermissionStatus.Granted -> "✔️"
         is PermissionStatus.Denied -> "❌"
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) { Text("OK") }
+            },
+            title = { Text(label) },
+            text = { Text(description) }
+        )
     }
 
     Row(
@@ -112,7 +171,7 @@ fun PermissionRow(
             Spacer(modifier = Modifier.width(4.dp))
 
             IconButton(
-                onClick = onInfoClick,
+                onClick = { showDialog = true },
                 modifier = Modifier.size(20.dp),
             ) {
                 Icon(
