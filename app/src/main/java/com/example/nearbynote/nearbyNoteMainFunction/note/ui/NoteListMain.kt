@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
@@ -127,11 +128,16 @@ fun NoteListMain(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = note.content)
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = note.content,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
                             //Text(text = "Geofence ID: ${note.geofenceId}")
                             Text(
-                                text = "Location: ${note.locationName}",
+                                text = "${note.locationName}",
                                 style = MaterialTheme.typography.labelSmall
                             )
                             Text(

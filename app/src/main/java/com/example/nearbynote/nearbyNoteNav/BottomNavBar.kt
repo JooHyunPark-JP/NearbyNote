@@ -19,8 +19,8 @@ import com.example.nearbynote.R
 fun BottomNavBar(navController: NavController) {
     val items = listOf(
         Screen.Main,
-        Screen.SavedAddressScreen,
         Screen.MapboxScreen,
+        Screen.SavedAddressScreen,
         Screen.PermissionStatusScreen
     )
     NavigationBar(
@@ -39,18 +39,18 @@ fun BottomNavBar(navController: NavController) {
                             contentDescription = null
                         )
 
-                        is Screen.SavedAddressScreen -> Icon(
-                            painterResource(id = R.drawable.ic_favorite_addresses),
-                            contentDescription = null
-                        )
-
                         is Screen.MapboxScreen -> Icon(
                             painterResource(id = R.drawable.ic_map_search),
                             contentDescription = null
                         )
 
+                        is Screen.SavedAddressScreen -> Icon(
+                            painterResource(id = R.drawable.ic_favorite_addresses),
+                            contentDescription = null
+                        )
+
                         is Screen.PermissionStatusScreen -> Icon(
-                            painterResource(id = R.drawable.ic_map_search),
+                            painterResource(id = R.drawable.ic_settings),
                             contentDescription = null
                         )
 

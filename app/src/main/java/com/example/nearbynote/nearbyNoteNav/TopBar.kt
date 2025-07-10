@@ -44,12 +44,10 @@ fun TopBar(navController: NavHostController,
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-
-
     when (currentDestination) {
         Screen.Main.route -> {
             CenterAlignedTopAppBar(
-                title = { Text("NearbyNote") },
+                title = { Text("Your Note List") },
                 colors = topBarColors
             )
         }
@@ -94,14 +92,14 @@ fun TopBar(navController: NavHostController,
 
         Screen.PermissionStatusScreen.route -> {
             CenterAlignedTopAppBar(
-                title = { Text("Permission Status Screen") },
+                title = { Text("Permission Status") },
                 colors = topBarColors
             )
         }
 
         else -> {
             CenterAlignedTopAppBar(
-                title = { Text("NearbyNote") },
+                title = { Text("NearbyNote Map") },
                 colors = topBarColors
             )
         }
