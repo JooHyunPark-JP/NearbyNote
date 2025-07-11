@@ -23,12 +23,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -69,6 +72,10 @@ fun NoteListMain(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<NoteEntity?>(null) }
 
+    val tabs = listOf("With Location", "Without Location")
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+
+
     LaunchedEffect(Unit) {
         if (!hasLaunchedPermissionRequest) {
             hasLaunchedPermissionRequest = true
@@ -102,74 +109,89 @@ fun NoteListMain(
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    Text(
-                        "📝 Notes",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(8.dp)
-                    )
+            Column {
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) }
+                        )
+                    }
                 }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        Text(
+                            "📝 Notes",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
 
-                items(notes) { note ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .clickable {
-                                noteViewModel.isAddressSelected = true
-                                navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
-                            },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = note.content,
-                                maxLines = 3,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            //Text(text = "Geofence ID: ${note.geofenceId}")
-                            Text(
-                                text = "${note.locationName}",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                            Text(
-                                "✔\uFE0F Saved: ${
-                                    DateFormat.getDateTimeInstance().format(Date(note.createdAt))
-                                }",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.Gray
-                            )
-                            if (note.updatedAt != 0L) {
+                    items(notes) { note ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .clickable {
+                                    noteViewModel.isAddressSelected = true
+                                    navController.navigate(
+                                        Screen.WriteNoteScreen.routeWithNoteId(
+                                            note.id
+                                        )
+                                    )
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "🛠️ Updated: ${
+                                    text = note.content,
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                //Text(text = "Geofence ID: ${note.geofenceId}")
+                                Text(
+                                    text = "${note.locationName}",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                                Text(
+                                    "✔\uFE0F Saved: ${
                                         DateFormat.getDateTimeInstance()
-                                            .format(Date(note.updatedAt))
+                                            .format(Date(note.createdAt))
                                     }",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Color.Gray
                                 )
+                                if (note.updatedAt != 0L) {
+                                    Text(
+                                        "🛠️ Updated: ${
+                                            DateFormat.getDateTimeInstance()
+                                                .format(Date(note.updatedAt))
+                                        }",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+
+                            IconButton(onClick = {
+                                noteToDelete = note
+                                showDeleteDialog = true
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Note")
                             }
                         }
-
-                        IconButton(onClick = {
-                            noteToDelete = note
-                            showDeleteDialog = true
-                        }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete Note")
-                        }
+                        HorizontalDivider()
                     }
-                    HorizontalDivider()
-                }
 
-                /*            item {
+                    /*            item {
                             Text(
                                 "📍 Geofences",
                                 style = MaterialTheme.typography.titleMedium,
@@ -191,6 +213,7 @@ fun NoteListMain(
                                 HorizontalDivider()
                             }
                         }*/
+                }
             }
 
             FloatingActionButton(
