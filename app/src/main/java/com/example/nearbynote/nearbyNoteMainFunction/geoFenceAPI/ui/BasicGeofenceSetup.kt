@@ -114,7 +114,7 @@ fun BasicGeofenceSetup(
             modifier = Modifier.fillMaxWidth()
         ) {
             Slider(
-                value = radiusSliderValue.coerceIn(100f, 2000f),
+                value = radiusSliderValue.coerceIn(0f, 2000f),
                 onValueChange = {
                     radiusSliderValue = it
                     geofenceViewModel.onRadiusChanged(it.toInt().toString())
