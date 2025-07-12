@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -66,7 +65,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
@@ -77,6 +75,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddr
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
@@ -105,8 +104,15 @@ fun WriteNoteScreen(
 
     //val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val googleVoicePermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
-    var backgroundLocationGranted by remember { mutableStateOf(false) }
-    var notificationPermissionGranted by remember { mutableStateOf(false) }
+
+
+    /*    var backgroundLocationGranted by remember { mutableStateOf(false) }
+        var notificationPermissionGranted by remember { mutableStateOf(false) }*/
+
+    val backgroundLocationPermission =
+        rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+    val notificationPermission = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+
     val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     var showBackgroundDialog by remember { mutableStateOf(false) }
@@ -118,19 +124,20 @@ fun WriteNoteScreen(
         mutableStateOf(noteId != null && hasExistingGeofence)
     }
 
-    //app knows when permission state has changed when user access to setting from an app.
-    val settingsLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            backgroundLocationGranted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+    /*    //app knows when permission state has changed when user access to setting from an app.
+        val settingsLauncher =
+            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                backgroundLocationGranted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
 
-            notificationPermissionGranted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+                notificationPermissionGranted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            }*/
+
 
     var isFavoriteAddress = remember { mutableStateOf(false) }
     var isFavoriteAddressDisable by remember { mutableStateOf(false) }
@@ -197,19 +204,19 @@ fun WriteNoteScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        backgroundLocationGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (isNotificationPermissionRequired) {
-            notificationPermissionGranted = ContextCompat.checkSelfPermission(
+    /*    LaunchedEffect(Unit) {
+            backgroundLocationGranted = ContextCompat.checkSelfPermission(
                 context,
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
+
+            if (isNotificationPermissionRequired) {
+                notificationPermissionGranted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            }
+        }*/
 
 
     LaunchedEffect(noteId) {
@@ -411,8 +418,8 @@ fun WriteNoteScreen(
                         context = context,
                         noteText = noteText,
                         geofenceEnabled = geofenceEnabled,
-                        backgroundLocationGranted = backgroundLocationGranted,
-                        notificationPermissionGranted = notificationPermissionGranted,
+                        backgroundLocationPermission = backgroundLocationPermission,
+                        notificationPermission = notificationPermission,
                         isNotificationPermissionRequired = isNotificationPermissionRequired,
                         addressQuery = noteViewModel.addressQuery,
                         lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
@@ -459,7 +466,8 @@ fun WriteNoteScreen(
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                             data = Uri.fromParts("package", context.packageName, null)
                         }
-                        settingsLauncher.launch(intent)
+                        // settingsLauncher.launch(intent)
+                        context.startActivity(intent)
                     }) {
                         Text("Open Settings")
                     }
@@ -503,7 +511,8 @@ fun WriteNoteScreen(
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                             data = Uri.fromParts("package", context.packageName, null)
                         }
-                        settingsLauncher.launch(intent)
+                        //    settingsLauncher.launch(intent)
+                        context.startActivity(intent)
                     }) {
                         Text("Open Settings")
                     }
@@ -575,12 +584,13 @@ fun createVoiceRecognitionIntent(language: String): Intent {
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 fun handleNewNoteSave(
     context: Context,
     noteText: String,
     geofenceEnabled: Boolean,
-    backgroundLocationGranted: Boolean,
-    notificationPermissionGranted: Boolean,
+    backgroundLocationPermission: PermissionState,
+    notificationPermission: PermissionState,
     isNotificationPermissionRequired: Boolean,
     addressQuery: String,
     lat: Double?,
@@ -601,16 +611,28 @@ fun handleNewNoteSave(
         return
     }
 
-    if (geofenceEnabled && !backgroundLocationGranted) {
+    /*    if (geofenceEnabled && !backgroundLocationGranted) {
+            onShowBackgroundDialog()
+            return
+        }
+
+
+        if (geofenceEnabled && !notificationPermissionGranted && isNotificationPermissionRequired) {
+            onShowNotificationDialog()
+            return
+        }*/
+
+
+    if (geofenceEnabled && backgroundLocationPermission.status !is PermissionStatus.Granted) {
         onShowBackgroundDialog()
         return
     }
 
-
-    if (geofenceEnabled && !notificationPermissionGranted && isNotificationPermissionRequired) {
+    if (geofenceEnabled && notificationPermission.status !is PermissionStatus.Granted && isNotificationPermissionRequired) {
         onShowNotificationDialog()
         return
     }
+
 
     if (geofenceEnabled) {
         if (lat == null || lng == null || rad == null || addressQuery.isBlank()) {

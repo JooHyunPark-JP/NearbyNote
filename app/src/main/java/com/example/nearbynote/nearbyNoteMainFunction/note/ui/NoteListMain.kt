@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -39,11 +41,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
+import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -58,9 +63,12 @@ fun NoteListMain(
     noteViewModel: NoteViewModel,
     geofenceViewModel: GeofenceViewModel,
     modifier: Modifier = Modifier,
+    savedAddressViewModel: SavedAddressViewModel
 ) {
     val notes by noteViewModel.notes.collectAsState()
     val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
+
+    val savedAddresses by savedAddressViewModel.savedAddresses.collectAsState()
 
     var hasLaunchedPermissionRequest by rememberSaveable { mutableStateOf(false) }
 
@@ -74,6 +82,12 @@ fun NoteListMain(
 
     val tabs = listOf("With Location", "Without Location")
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val filteredNotes = when (selectedTabIndex) {
+        0 -> notes.filter { it.geofenceId != null }  // With Location
+        1 -> notes.filter { it.geofenceId == null } // Without Location
+        else -> notes
+    }
 
 
     LaunchedEffect(Unit) {
@@ -127,13 +141,14 @@ fun NoteListMain(
                 ) {
                     item {
                         Text(
-                            "📝 Notes",
+                            if (selectedTabIndex == 0)
+                                "📝 Notes with Location" else "\uD83D\uDCDD Notes without Location",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(8.dp)
                         )
                     }
 
-                    items(notes) { note ->
+                    items(filteredNotes) { note ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -149,6 +164,11 @@ fun NoteListMain(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
+
+                                val addressName =
+                                    savedAddresses.find { it.placeName == note.locationName }?.name
+                                        ?: note.locationName
+
                                 Text(
                                     text = note.content,
                                     maxLines = 3,
@@ -157,10 +177,25 @@ fun NoteListMain(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 //Text(text = "Geofence ID: ${note.geofenceId}")
-                                Text(
-                                    text = "${note.locationName}",
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+
+                                if (addressName != null) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (savedAddresses.any { it.placeName == note.locationName }) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_favorite_addresses),
+                                                contentDescription = "Favorite Address",
+                                                modifier = Modifier.size(12.dp),
+                                                tint = Color.Red
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                        }
+
+                                        Text(
+                                            text = addressName,
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                }
                                 Text(
                                     "✔\uFE0F Saved: ${
                                         DateFormat.getDateTimeInstance()

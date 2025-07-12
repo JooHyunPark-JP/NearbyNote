@@ -34,6 +34,7 @@ fun NavGraph(
                 navController = navController,
                 noteViewModel = noteViewModel,
                 geofenceViewModel = geofenceViewModel,
+                savedAddressViewModel = savedAddressViewModel
             )
         }
 
