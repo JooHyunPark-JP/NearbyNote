@@ -2,11 +2,6 @@
 
 **NearbyNote** is a smart location-based memo app that reminds you of your notes when you arrive at a specific location.
 
-- Quickly create notes using voice recognition or typing  
-- Set location-based alerts with customizable geofence radius  
-- See your saved notes directly on the map  
-- Get notified automatically when you enter a saved location zone — even when the app is not running
-
 ---
 
 ## Key Features
