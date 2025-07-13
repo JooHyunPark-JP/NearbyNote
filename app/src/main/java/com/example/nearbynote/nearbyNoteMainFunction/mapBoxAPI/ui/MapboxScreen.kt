@@ -142,7 +142,7 @@ fun MapboxScreen(
                 noteViewModel.suggestions = emptyList()
 
                 // Show map
-                //   mapboxViewModel.toggleMap(true)
+                mapboxViewModel.toggleMap(true)
 
                 // Move the map to the address
                 CoroutineScope(Dispatchers.Main).launch {
@@ -416,6 +416,7 @@ fun MapboxScreen(
                             )
                         }
                     },
+                    shape = CircleShape,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)

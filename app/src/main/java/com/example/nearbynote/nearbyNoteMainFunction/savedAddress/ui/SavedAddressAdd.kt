@@ -64,7 +64,7 @@ fun SavedAddressAdd(
             },
             isAddressSearching = isAddressSearching,
             noteViewModel = noteViewModel
-            )
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -82,6 +82,7 @@ fun SavedAddressAdd(
             onClick = {
                 val suggestion = selectedSuggestion.value
                 val name = favoriteName.value.trim()
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
                 if (suggestion == null) {
                     Toast.makeText(context, "Please select an address.", Toast.LENGTH_SHORT).show()
