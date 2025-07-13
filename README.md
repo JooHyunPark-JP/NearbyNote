@@ -16,21 +16,17 @@
 - Automatically sends notifications and opens the related note
 - Geofences are restored after device reboot (WorkManager + BootCompleteReceiver)
 
-### Voice-to-Text Notes
-- Leverages Google Speech Recognition to create notes with your voice
-- Fast and hands-free note creation
+### Notes
+- Leverages Google Speech Recognition to create notes with your voice (Voice-to-text note)
+- General Note or note with location setup
 
 ### Map-Driven Note Management
 - Search locations with Mapbox Places API autocomplete
 - View and manage notes directly on the map
 - Tap any location on the map to add a note instantly
 
-### General Notes (No Location)
-- Create, edit, and delete notes without location data
-- Mix regular notes and geofenced notes seamlessly
-
 ### Smart Notifications
-- Keeps detecting location in the background (Foreground Service)
+- Keeps detecting location in the background and foreground
 - Automatically notifies and displays the memo even when app is closed
 
 ### Permission UX
