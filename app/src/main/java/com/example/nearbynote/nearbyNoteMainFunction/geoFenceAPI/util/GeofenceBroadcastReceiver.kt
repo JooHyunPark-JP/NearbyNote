@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.example.nearbynote.MainActivity
+import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.di.NoteDaoEntryPoint
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteRepository
@@ -73,8 +74,13 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        /*        val title = if (isInside)
+                    "📍 Arrived: ${note.locationName.orEmpty()}"
+                else
+                    "📍 Left: ${note.locationName.orEmpty()}"*/
+
         val title = if (isInside)
-            "📍 Arrived: ${note.locationName.orEmpty()}"
+            "📍 Your Saved Note!"
         else
             "📍 Left: ${note.locationName.orEmpty()}"
 
@@ -90,7 +96,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(note.content)
             .setSubText("Created: $formattedDate")

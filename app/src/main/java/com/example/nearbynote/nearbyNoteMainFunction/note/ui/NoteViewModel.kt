@@ -62,7 +62,7 @@ class NoteViewModel @Inject constructor(
         viewModelScope.launch {
             queryFlow
                 .onEach { isSearching = true }
-                .debounce(1500)
+                .debounce(1000)
                 .distinctUntilChanged()
                 .collectLatest { rawQuery ->
                     val query = rawQuery.trim().lowercase()
