@@ -12,6 +12,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxScreen
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteListMain
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
+import com.example.nearbynote.nearbyNoteMainFunction.note.ui.ReadNoteScreen
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.WriteNoteScreen
 import com.example.nearbynote.nearbyNoteMainFunction.permissionStatus.ui.PermissionStatusScreen
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressAdd
@@ -90,7 +91,22 @@ fun NavGraph(
 
 
         composable(Screen.PermissionStatusScreen.route) {
-            PermissionStatusScreen(navController)
+            PermissionStatusScreen(navController = navController)
+        }
+
+        composable(
+            route = Screen.ReadNoteScreen.route, arguments = listOf(navArgument("noteId") {
+                type = NavType.LongType
+                defaultValue = -1L
+            })
+        ) { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getLong("noteId")
+            ReadNoteScreen(
+                navController = navController,
+                noteViewModel = noteViewModel,
+                noteId = if (noteId == -1L) null else noteId,
+                savedAddressViewModel = savedAddressViewModel
+            )
         }
     }
 }

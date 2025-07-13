@@ -43,7 +43,8 @@ class MainActivity : ComponentActivity() {
         val noteIdFromIntent = intent?.getLongExtra("noteId", -1L)
         val startDestination = if (noteIdFromIntent != null && noteIdFromIntent != -1L) {
             noteViewModel.isAddressSelected = true
-            Screen.WriteNoteScreen.routeWithNoteId(noteIdFromIntent)
+           // Screen.WriteNoteScreen.routeWithNoteId(noteIdFromIntent)
+            Screen.ReadNoteScreen.routeWithNoteId(noteIdFromIntent)
         } else {
             Screen.Main.route
         }

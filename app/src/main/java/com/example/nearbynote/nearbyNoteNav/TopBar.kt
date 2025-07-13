@@ -26,9 +26,10 @@ import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavHostController,
-           noteViewModel: NoteViewModel,
-           geofenceViewModel: GeofenceViewModel
+fun TopBar(
+    navController: NavHostController,
+    noteViewModel: NoteViewModel,
+    geofenceViewModel: GeofenceViewModel
 ) {
 
     val context = LocalContext.current
@@ -94,6 +95,18 @@ fun TopBar(navController: NavHostController,
             CenterAlignedTopAppBar(
                 title = { Text("Permission Status") },
                 colors = topBarColors
+            )
+        }
+
+        Screen.ReadNoteScreen.route -> {
+            CenterAlignedTopAppBar(
+                title = { Text("Your Saved Note") },
+                colors = topBarColors,
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
         }
 

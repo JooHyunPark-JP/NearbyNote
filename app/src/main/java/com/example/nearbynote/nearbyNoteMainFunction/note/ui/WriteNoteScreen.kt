@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -388,7 +389,8 @@ fun WriteNoteScreen(
             NoteTextField(
                 noteText = noteText,
                 onNoteChange = { noteText = it },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                noteViewModel = noteViewModel
             )
         }
 
@@ -455,6 +457,7 @@ fun WriteNoteScreen(
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+
 
         //Pop up the background permission message to users
         if (showBackgroundDialog && geofenceEnabled) {
@@ -668,7 +671,9 @@ fun handleNewNoteSave(
 
                 if (isFavoriteAddress.value) {
                     savedAddressViewModel.saveAddress(
-                        name = favoriteAddressName.value.ifBlank { "Unnamed" },
+                        name = favoriteAddressName.value
+                            .ifBlank { "Unnamed" }
+                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                         placeName = addressQuery,
                         lat = lat,
                         lng = lng
@@ -797,12 +802,13 @@ fun GeofenceToggleRow(
 fun NoteTextField(
     noteText: String,
     onNoteChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    noteViewModel: NoteViewModel
 ) {
     TextField(
         value = noteText,
         onValueChange = onNoteChange,
-        placeholder = { Text("Write down anything!") },
+        placeholder = { Text("Write your note here.") },
         textStyle = LocalTextStyle.current.copy(lineHeight = 24.sp),
         modifier = modifier
             .fillMaxWidth()
@@ -824,13 +830,21 @@ fun BottomFABRow(
     ) {
 
         //mic (voice recognition)
-        FloatingActionButton(onClick = onVoiceClick, modifier = Modifier.size(56.dp)) {
+        FloatingActionButton(
+            onClick = onVoiceClick,
+            shape = CircleShape,
+            modifier = Modifier.size(56.dp)
+        ) {
             Icon(painterResource(R.drawable.ic_microphone), contentDescription = "Voice Input")
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        FloatingActionButton(onClick = onSaveClick, modifier = Modifier.size(56.dp)) {
+        FloatingActionButton(
+            onClick = onSaveClick,
+            shape = CircleShape,
+            modifier = Modifier.size(56.dp)
+        ) {
             Icon(Icons.Default.Add, contentDescription = "Save")
         }
     }
