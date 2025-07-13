@@ -1,62 +1,70 @@
-# 📱 NearbyNote - Location-Based Notification App
+# NearbyNote
 
-**_Currently developing_**...
+**NearbyNote** is a smart location-based memo app that reminds you of your notes when you arrive at a specific location.
 
----
-
-## 🌟 Overview
-NearbyNote is a location-based note notification application that allows users to set specific locations and write notes related to those places.  
-When the user approaches the designated location, an automatic notification pops up, displaying the corresponding note.  
-For example, if you set a note saying **"Open the window"** when you arrive home, the app will automatically remind you when you get near your house.  
+- Quickly create notes using voice recognition or typing  
+- Set location-based alerts with customizable geofence radius  
+- See your saved notes directly on the map  
+- Get notified automatically when you enter a saved location zone — even when the app is not running
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 📍 Location-Based Notifications
-- Uses the **Geofencing API** to detect a specified location range and display notifications when entering.  
-- Alternatively, utilizes **Geofence + BroadcastReceiver + WorkManager** for efficient management.  
-- Combines **GPS and Wi-Fi signals** to minimize battery consumption.  
-- The **location range** can be customized by the user.  
+### Location-Based Reminders
+- Uses Geofencing API to detect when entering a defined area
+- Automatically sends notifications and opens the related note
+- Geofences are restored after device reboot (WorkManager + BootCompleteReceiver)
 
----
+### Voice-to-Text Notes
+- Leverages Google Speech Recognition to create notes with your voice
+- Fast and hands-free note creation
 
-### 🗺️ Address Autocomplete
-- Integrates **Mapbox Places API** to provide address autocomplete functionality.  
-- Users can **manually enter or select an address** from the suggestions.  
+### Map-Driven Note Management
+- Search locations with Mapbox Places API autocomplete
+- View and manage notes directly on the map
+- Tap any location on the map to add a note instantly
 
----
+### General Notes (No Location)
+- Create, edit, and delete notes without location data
+- Mix regular notes and geofenced notes seamlessly
 
-### 🗣️ Voice and Text Notes
-- Allows users to write notes using **voice or text** and group them by location.  
-- The created notes are displayed as **notifications** when the location is detected.  
+### Smart Notifications
+- Keeps detecting location in the background (Foreground Service)
+- Automatically notifies and displays the memo even when app is closed
 
----
-
-### 🔔 Notification and Note Management
-- Manages notes for each **configured location** and displays them as a list.  
-- When a notification occurs, the app **reopens and displays the note** on the screen.  
-
----
-
-### ⚡ User Convenience
-- Operates in **low-power mode** to reduce battery consumption.  
-- Ensures continuity using **WorkManager**, even when the app is closed.  
+### Permission UX
+- Clear separation and request flow for foreground & background location permissions
+- Custom permission status page for transparency
+- Fully supports Android 11+ UX constraints (via Accompanist)
 
 ---
 
-## 💻 Skill Tech Stack
-- **Jetpack Compose:** Modern, reactive UI.  
-- **MVVM Architecture:** Clean separation of concerns.  
-- **Hilt:** Dependency injection for modular code.  
-- **Room Database:** Offline data storage.  
-- **Coroutines + Flow:** Asynchronous programming for smooth performance.
-- **Ktor**
-- **Kotlinx Serialization**
-- JUnit + MockK
-- Api: Geofencing API, mapbox places api
-- BroadcastManager + Workmanager
+## Tech Stack
+
+| Category | Technology |
+|---------|------------|
+| UI | Jetpack Compose |
+| Architecture | MVVM, Hilt (DI) |
+| Storage | Room Database |
+| Async | Kotlin Coroutines, Flow |
+| Maps & Location | Mapbox Places API, Geofencing API |
+| Voice | Google Speech API |
+| Permissions | Accompanist Permissions |
+| Network | Ktor + kotlinx.serialization |
+| Background Tasks | WorkManager, ForegroundService, BootCompleteReceiver |
+| Testing | JUnit, MockK |
+| CI/CD | GitHub Actions (automated testing & APK build)
+
+
+## 📸 Screenshots (Coming Soon)
+
+Screenshots of the app UI will be added here.
 
 ---
 
+## 📦 Installation
+
+```bash
+# APK download or Play Store link will be added soon
 
