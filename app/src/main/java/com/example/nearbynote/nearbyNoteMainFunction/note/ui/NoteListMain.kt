@@ -81,14 +81,22 @@ fun NoteListMain(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<NoteEntity?>(null) }
 
-    val tabs = listOf("With Location", "Without Location")
+
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
+    val notesWithLocation = notes.filter { it.geofenceId != null }
+    val notesWithoutLocation = notes.filter { it.geofenceId == null }
+
     val filteredNotes = when (selectedTabIndex) {
-        0 -> notes.filter { it.geofenceId != null }  // With Location
-        1 -> notes.filter { it.geofenceId == null } // Without Location
+        0 -> notesWithLocation
+        1 -> notesWithoutLocation
         else -> notes
     }
+
+    val tabs = listOf(
+        "With Location (${notesWithLocation.size})",
+        "Without Location (${notesWithoutLocation.size})"
+    )
 
 
     LaunchedEffect(Unit) {
@@ -216,7 +224,6 @@ fun NoteListMain(
                                     )
                                 }
                             }
-
                             IconButton(onClick = {
                                 noteToDelete = note
                                 showDeleteDialog = true
@@ -227,28 +234,30 @@ fun NoteListMain(
                         HorizontalDivider()
                     }
 
-                    /*            item {
-                            Text(
-                                "📍 Geofences",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
+                    /*                    //For testing purposes
+                                        item {
+                                            Text(
+                                                "📍 Geofences",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                modifier = Modifier.padding(8.dp)
+                                            )
+                                        }
 
-                        items(allGeofences) { geofence ->
-                            Column(modifier = Modifier.padding(8.dp)) {
-                                Text("ID: ${geofence.id}")
-                                Text("📍 ${geofence.addressName}")
-                                Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
-                                Text("Radius: ${geofence.radius}m")
-                                Text(
-                                    "Created at: ${
-                                        DateFormat.getDateTimeInstance().format(Date(geofence.createdAt))
-                                    }"
-                                )
-                                HorizontalDivider()
-                            }
-                        }*/
+                                        items(allGeofences) { geofence ->
+                                            Column(modifier = Modifier.padding(8.dp)) {
+                                                Text("ID: ${geofence.id}")
+                                                Text("📍 ${geofence.addressName}")
+                                                Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
+                                                Text("Radius: ${geofence.radius}m")
+                                                Text(
+                                                    "Created at: ${
+                                                        DateFormat.getDateTimeInstance()
+                                                            .format(Date(geofence.createdAt))
+                                                    }"
+                                                )
+                                                HorizontalDivider()
+                                            }
+                                        }*/
                 }
             }
 

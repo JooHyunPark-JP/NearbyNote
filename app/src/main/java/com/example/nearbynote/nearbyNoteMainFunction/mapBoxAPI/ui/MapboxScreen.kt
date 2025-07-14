@@ -1,6 +1,8 @@
 package com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui
 
 import android.Manifest
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -110,6 +112,9 @@ fun MapboxScreen(
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    val canOpenMapBoxMap = remember { mutableStateOf(false) }
+    val mapViewHolder = remember { mutableStateOf<MapView?>(null) }
+
     LaunchedEffect(Unit) {
         noteViewModel.addressQuery = ""
         noteViewModel.suggestions = emptyList()
@@ -123,6 +128,16 @@ fun MapboxScreen(
                 coarseLocationPermissionState.status is PermissionStatus.Denied
             ) {
                 coarseLocationPermissionState.launchPermissionRequest()
+            }
+        }
+    }
+
+    LaunchedEffect(showMap) {
+        if (showMap && mapViewHolder.value == null) {
+            if (isOpenGL3Supported(context)) {
+                mapViewHolder.value = MapView(context)
+            } else {
+                canOpenMapBoxMap.value = true
             }
         }
     }
@@ -216,84 +231,100 @@ fun MapboxScreen(
                     )
                 }
             }
+        } else if (canOpenMapBoxMap.value) {
+            // Show message that this device can't open the map
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "⚠️ Map couldn't be loaded. This device may not support OpenGL ES 3.0.",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                AndroidView(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    factory = { context ->
-                        MapView(context).also { mv ->
-                            mapView = mv
-                            mv.mapboxMap.loadStyle(Style.STANDARD) { style ->
-                                mv.gestures.addOnMapClickListener { point ->
-                                    mapboxViewModel.tappedLocation = point
-                                    true
-                                }
+                mapViewHolder.value?.let { safeMapView ->
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        factory = { context ->
+                            safeMapView.also { mv ->
+                                mapView = mv
+                                mv.mapboxMap.loadStyle(Style.STANDARD) { style ->
+                                    mv.gestures.addOnMapClickListener { point ->
+                                        mapboxViewModel.tappedLocation = point
+                                        true
+                                    }
 
-                                mv.gestures.addOnMoveListener(
-                                    object : OnMoveListener {
-                                        override fun onMoveBegin(detector: MoveGestureDetector) {
-                                            mapboxViewModel.onUserInteractionStart()
+                                    mv.gestures.addOnMoveListener(
+                                        object : OnMoveListener {
+                                            override fun onMoveBegin(detector: MoveGestureDetector) {
+                                                mapboxViewModel.onUserInteractionStart()
+                                            }
+
+                                            override fun onMove(detector: MoveGestureDetector): Boolean =
+                                                false
+
+                                            override fun onMoveEnd(detector: MoveGestureDetector) {
+                                                mapboxViewModel.onUserInteractionEnd()
+                                            }
                                         }
+                                    )
 
-                                        override fun onMove(detector: MoveGestureDetector): Boolean =
-                                            false
-
-                                        override fun onMoveEnd(detector: MoveGestureDetector) {
-                                            mapboxViewModel.onUserInteractionEnd()
+                                    // clear the message "Create a note here" on map when zoom in/out or move map
+                                    cameraSubscription = mv.mapboxMap.subscribeCameraChanged {
+                                        if (mapboxViewModel.isUserInteractingWithMap) {
+                                            mapboxViewModel.clearTappedLocation()
                                         }
                                     }
-                                )
 
-                                // clear the message "Create a note here" on map when zoom in/out or move map
-                                cameraSubscription = mv.mapboxMap.subscribeCameraChanged {
-                                    if (mapboxViewModel.isUserInteractingWithMap) {
-                                        mapboxViewModel.clearTappedLocation()
+
+                                    style.addImage(
+                                        "current-location-icon",
+                                        BitmapFactory.decodeResource(
+                                            context.resources,
+                                            R.drawable.current_location_icon
+                                        )
+                                            .scale(62, 62, false)
+                                    )
+                                    style.addImage(
+                                        "location-marker-icon",
+                                        BitmapFactory.decodeResource(
+                                            context.resources,
+                                            R.drawable.location_pin
+                                        )
+                                            .scale(100, 100, false)
+                                    )
+
+                                    style.addImage(
+                                        "note-marker-icon",
+                                        BitmapFactory.decodeResource(
+                                            context.resources,
+                                            R.drawable.note_icon
+                                        )
+                                            .scale(62, 62, false)
+                                    )
+
+                                    mapboxViewModel.loadUserLocation { point ->
+                                        mapView?.mapboxMap?.setCamera(
+                                            CameraOptions.Builder().center(point).zoom(17.0)
+                                                .build()
+                                        )
                                     }
+
                                 }
-
-
-                                style.addImage(
-                                    "current-location-icon",
-                                    BitmapFactory.decodeResource(
-                                        context.resources,
-                                        R.drawable.current_location_icon
-                                    )
-                                        .scale(62, 62, false)
-                                )
-                                style.addImage(
-                                    "location-marker-icon",
-                                    BitmapFactory.decodeResource(
-                                        context.resources,
-                                        R.drawable.location_pin
-                                    )
-                                        .scale(100, 100, false)
-                                )
-
-                                style.addImage(
-                                    "note-marker-icon",
-                                    BitmapFactory.decodeResource(
-                                        context.resources,
-                                        R.drawable.note_icon
-                                    )
-                                        .scale(62, 62, false)
-                                )
-
-                                mapboxViewModel.loadUserLocation { point ->
-                                    mapView?.mapboxMap?.setCamera(
-                                        CameraOptions.Builder().center(point).zoom(17.0)
-                                            .build()
-                                    )
-                                }
-
                             }
                         }
-                    }
-                )
+                    )
+                }
 
                 //top right icon explanation on the map
                 Column(
@@ -584,6 +615,13 @@ fun MapboxScreen(
             }
         )
     }
+}
+
+//If device does not support OpenGL ES 3.0, mapbox map doesn't work. So checking openGL version here
+fun isOpenGL3Supported(context: Context): Boolean {
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val configInfo = activityManager.deviceConfigurationInfo
+    return configInfo.reqGlEsVersion >= 0x30000
 }
 
 fun convertMetersToPixelsAtLatitude(

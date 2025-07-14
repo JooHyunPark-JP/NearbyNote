@@ -48,7 +48,7 @@ fun AddressSearchSection(
                 wasSuggestionManuallyCleared = false
                 onQueryChange(it)
             },
-            placeholder = { Text("Enter location name or address") },
+            placeholder = { Text("Enter the address") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled
         )
