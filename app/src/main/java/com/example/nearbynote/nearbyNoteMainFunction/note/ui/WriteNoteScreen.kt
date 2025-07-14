@@ -12,9 +12,7 @@ import android.speech.SpeechRecognizer
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,20 +31,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -54,22 +50,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
-import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.BasicGeofenceSetup
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressEntity
@@ -82,7 +78,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun WriteNoteScreen(
     navController: NavController,
@@ -101,14 +97,7 @@ fun WriteNoteScreen(
     var noteText by remember { mutableStateOf("") }
     var geofenceEnabled by remember { mutableStateOf(false) }
 
-    val suggestions = noteViewModel.suggestions
-
-    //val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val googleVoicePermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
-
-
-    /*    var backgroundLocationGranted by remember { mutableStateOf(false) }
-        var notificationPermissionGranted by remember { mutableStateOf(false) }*/
 
     val backgroundLocationPermission =
         rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
@@ -125,23 +114,9 @@ fun WriteNoteScreen(
         mutableStateOf(noteId != null && hasExistingGeofence)
     }
 
-    /*    //app knows when permission state has changed when user access to setting from an app.
-        val settingsLauncher =
-            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                backgroundLocationGranted = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-                notificationPermissionGranted = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            }*/
-
 
     var isFavoriteAddress = remember { mutableStateOf(false) }
-    var isFavoriteAddressDisable by remember { mutableStateOf(false) }
+    var isFavoriteAddressDisable = remember { mutableStateOf(false) }
     val favoriteAddressName = remember { mutableStateOf("") }
 
 
@@ -150,7 +125,7 @@ fun WriteNoteScreen(
 
 
     var selectedAddress by remember { mutableStateOf<SavedAddressEntity?>(null) }
-    var isSavedAddressClicked by remember { mutableStateOf(false) }
+    val isSavedAddressClicked = remember { mutableStateOf(false) }
 
     val shouldDisableSavedAddressRow by remember(noteId, hasExistingGeofence) {
         mutableStateOf(noteId != null && hasExistingGeofence)
@@ -160,12 +135,20 @@ fun WriteNoteScreen(
 
     val isAddressSearching = noteViewModel.isSearching
 
+    val sheetState = rememberModalBottomSheetState(
+        confirmValueChange = { false },// Disable swipe to dismiss
+        skipPartiallyExpanded = true //expand bottomsheet to full screen.
+    )
+    val coroutineScope = rememberCoroutineScope()
 
-    val savedRowModifier = if (shouldDisableSavedAddressRow) {
-        Modifier
-    } else {
-        Modifier.clickable { expanded = true }
-    }
+    val showGeofenceSheet = rememberSaveable { mutableStateOf(false) }
+
+
+    /*    val savedRowModifier = if (shouldDisableSavedAddressRow) {
+            Modifier
+        } else {
+            Modifier.clickable { expanded = true }
+        }*/
 
     fun resetNewNoteState() {
         noteText = ""
@@ -204,21 +187,6 @@ fun WriteNoteScreen(
             geofenceViewModel.onRadiusChanged("1000")
         }
     }
-
-    /*    LaunchedEffect(Unit) {
-            backgroundLocationGranted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-
-            if (isNotificationPermissionRequired) {
-                notificationPermissionGranted = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-        }*/
-
 
     LaunchedEffect(noteId) {
         if (noteId != null) {
@@ -267,122 +235,199 @@ fun WriteNoteScreen(
                 .verticalScroll(scrollState)
         ) {
 
-            GeofenceToggleRow(
+/*            GeofenceToggleRow(
                 geofenceEnabled = geofenceEnabled,
                 isGeofenceImmutable = !isGeofenceImmutable,
                 onToggle = { geofenceEnabled = it }
-            )
+            )*/
 
-            AnimatedVisibility(visible = geofenceEnabled) {
-                Column {
-                    AddressSearchSection(
-                        addressQuery = noteViewModel.addressQuery,
-                        onQueryChange = { noteViewModel.onQueryChanged(it) },
-                        suggestions = noteViewModel.suggestions,
-                        onSuggestionSelected = { suggestion ->
-                            geofenceViewModel.onSuggestionSelected(suggestion)
-                            noteViewModel.addressQuery = suggestion.placeName
-                            noteViewModel.addressLatitude = suggestion.latitude
-                            geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
-                            noteViewModel.addressLongitude = suggestion.longitude
-                            geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
-                            noteViewModel.suggestions = emptyList()
-                        },
-                        enabled = !isGeofenceImmutable && !isSavedAddressClicked,
-                        isAddressSearching = isAddressSearching,
-                        isSavedAddressClicked = isSavedAddressClicked,
-                        noteViewModel = noteViewModel
-                    )
-                    if (isGeofenceImmutable) {
-                        Text(
-                            text = "📍 This note has a location reminder. To change location, please create a new note.",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
-                        )
-                    }
-                }
-            }
-
-            if (geofenceEnabled) {
-                //Saved address section
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = savedRowModifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Icon(
-                        imageVector = if (!isSavedAddressClicked) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
-                        contentDescription = "Select Favorite Address",
-                        tint = if (isSavedAddressClicked) Color.Red else Color.Gray
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = selectedAddress?.name ?: "Choose your favorite address",
-                        color = if (!shouldDisableSavedAddressRow) Color.Black else Color.Gray
-                    )
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("No favorite address") },
-                            onClick = {
-                                selectedAddress = null
-                                expanded = false
-                                noteViewModel.addressQuery = ""
-                                noteViewModel.addressLatitude = 0.0
-                                noteViewModel.addressLongitude = 0.0
-                                geofenceViewModel.onLatitudeChanged("")
-                                geofenceViewModel.onLongitudeChanged("")
-                                isFavoriteAddressDisable = false
-                                isSavedAddressClicked = false
-                                isFavoriteAddress.value = false
-                                favoriteAddressName.value = ""
-                                noteViewModel.suggestions = emptyList()
-                            }
-                        )
-
-                        if (savedAddresses.isNotEmpty()) {
-                            DropdownMenuItem(
-                                text = { HorizontalDivider() },
-                                onClick = {},
-                                enabled = false
-                            )
-
-                            savedAddresses.forEach { address ->
-                                DropdownMenuItem(
-                                    text = { Text(address.name) },
-                                    onClick = {
-                                        selectedAddress = address
-                                        expanded = false
-                                        noteViewModel.addressQuery = address.placeName
-                                        noteViewModel.addressLatitude = address.latitude
-                                        noteViewModel.addressLongitude = address.longitude
-                                        geofenceViewModel.onLatitudeChanged(address.latitude.toString())
-                                        geofenceViewModel.onLongitudeChanged(address.longitude.toString())
-                                        isFavoriteAddressDisable = true
-                                        isSavedAddressClicked = true
-                                        isFavoriteAddress.value = false
-                                        favoriteAddressName.value = ""
-                                        //remove the search bar result
-                                        noteViewModel.suggestions = emptyList()
-
-                                    }
-                                )
-                            }
+            GeofenceToggleRow(
+                geofenceEnabled = geofenceEnabled,
+                isGeofenceImmutable = !isGeofenceImmutable,
+                onToggle = { enabled ->
+                    geofenceEnabled = enabled
+                    if (enabled) {
+                        coroutineScope.launch {
+                            sheetState.show()
+                            showGeofenceSheet.value = true
                         }
                     }
-                }
+                },
+            )
 
-                BasicGeofenceSetup(
-                    geofenceViewModel = geofenceViewModel,
-                    geofenceOptionsEnabled = !isGeofenceImmutable,
-                    isFavoriteAddress = isFavoriteAddress,
-                    favoriteAddressName = favoriteAddressName,
-                    isFavoriteAddressDisable = isFavoriteAddressDisable,
-                    shouldDisableSavedAddressRow = shouldDisableSavedAddressRow
+            if (geofenceEnabled) {
+                TextButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            sheetState.show()
+                            showGeofenceSheet.value = true
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(end = 16.dp),
+                ) {
+                    Text(
+                        text = "Click here to edit location",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+
+            if (isGeofenceImmutable) {
+                Text(
+                    text = "📍 This note already has a location reminder. To change location, please create a new note.",
+                    style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray),
                 )
             }
+
+            /*            AnimatedVisibility(visible = geofenceEnabled) {
+                            Column {
+                                AddressSearchSection(
+                                    addressQuery = noteViewModel.addressQuery,
+                                    onQueryChange = { noteViewModel.onQueryChanged(it) },
+                                    suggestions = noteViewModel.suggestions,
+                                    onSuggestionSelected = { suggestion ->
+                                        geofenceViewModel.onSuggestionSelected(suggestion)
+                                        noteViewModel.addressQuery = suggestion.placeName
+                                        noteViewModel.addressLatitude = suggestion.latitude
+                                        geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
+                                        noteViewModel.addressLongitude = suggestion.longitude
+                                        geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
+                                        noteViewModel.suggestions = emptyList()
+                                    },
+                                    enabled = !isGeofenceImmutable && !isSavedAddressClicked,
+                                    isAddressSearching = isAddressSearching,
+                                    isSavedAddressClicked = isSavedAddressClicked,
+                                    noteViewModel = noteViewModel
+                                )
+                                if (isGeofenceImmutable) {
+                                    Text(
+                                        text = "📍 This note has a location reminder. To change location, please create a new note.",
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+                                    )
+                                }
+                            }
+                        }*/
+
+            if (showGeofenceSheet.value) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        coroutineScope.launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion {
+                            showGeofenceSheet.value = false
+                        }
+                    },
+                    sheetState = sheetState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 1000.dp, max = LocalConfiguration.current.screenHeightDp.dp * 0.95f)
+                ) {
+                    GeofenceSheetContent(
+                        isGeofenceImmutable = isGeofenceImmutable,
+                        isSavedAddressClicked = isSavedAddressClicked,
+                        noteViewModel = noteViewModel,
+                        geofenceViewModel = geofenceViewModel,
+                        savedAddresses = savedAddresses,
+                        selectedAddress = selectedAddress,
+                        onSelectAddress = { selectedAddress = it },
+                        isFavoriteAddress = isFavoriteAddress,
+                        isFavoriteAddressDisable = isFavoriteAddressDisable,
+                        favoriteAddressName = favoriteAddressName,
+                        shouldDisableSavedAddressRow = shouldDisableSavedAddressRow,
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                        coroutineScope = coroutineScope,
+                        sheetState = sheetState,
+                        showGeofenceSheet = showGeofenceSheet,
+                        geofenceEnabled = geofenceEnabled
+                    )
+                }
+            }
+
+            /*            if (geofenceEnabled) {
+                            //Saved address section
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = savedRowModifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (!isSavedAddressClicked.value) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
+                                    contentDescription = "Select Favorite Address",
+                                    tint = if (isSavedAddressClicked.value) Color.Red else Color.Gray
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = selectedAddress?.name ?: "Choose your favorite address",
+                                    color = if (!shouldDisableSavedAddressRow) Color.Black else Color.Gray
+                                )
+
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("No favorite address") },
+                                        onClick = {
+                                            selectedAddress = null
+                                            expanded = false
+                                            noteViewModel.addressQuery = ""
+                                            noteViewModel.addressLatitude = 0.0
+                                            noteViewModel.addressLongitude = 0.0
+                                            geofenceViewModel.onLatitudeChanged("")
+                                            geofenceViewModel.onLongitudeChanged("")
+                                            isFavoriteAddressDisable.value = false
+                                            isSavedAddressClicked.value = false
+                                            isFavoriteAddress.value = false
+                                            favoriteAddressName.value = ""
+                                            noteViewModel.suggestions = emptyList()
+                                        }
+                                    )
+
+                                    if (savedAddresses.isNotEmpty()) {
+                                        DropdownMenuItem(
+                                            text = { HorizontalDivider() },
+                                            onClick = {},
+                                            enabled = false
+                                        )
+
+                                        savedAddresses.forEach { address ->
+                                            DropdownMenuItem(
+                                                text = { Text(address.name) },
+                                                onClick = {
+                                                    selectedAddress = address
+                                                    expanded = false
+                                                    noteViewModel.addressQuery = address.placeName
+                                                    noteViewModel.addressLatitude = address.latitude
+                                                    noteViewModel.addressLongitude = address.longitude
+                                                    geofenceViewModel.onLatitudeChanged(address.latitude.toString())
+                                                    geofenceViewModel.onLongitudeChanged(address.longitude.toString())
+                                                    isFavoriteAddressDisable.value = true
+                                                    isSavedAddressClicked.value = true
+                                                    isFavoriteAddress.value = false
+                                                    favoriteAddressName.value = ""
+                                                    //remove the search bar result
+                                                    noteViewModel.suggestions = emptyList()
+
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            BasicGeofenceSetup(
+                                geofenceViewModel = geofenceViewModel,
+                                geofenceOptionsEnabled = !isGeofenceImmutable,
+                                isFavoriteAddress = isFavoriteAddress,
+                                favoriteAddressName = favoriteAddressName,
+                                isFavoriteAddressDisable = isFavoriteAddressDisable,
+                                shouldDisableSavedAddressRow = shouldDisableSavedAddressRow
+                            )
+                        }*/
 
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -390,7 +435,6 @@ fun WriteNoteScreen(
                 noteText = noteText,
                 onNoteChange = { noteText = it },
                 modifier = Modifier.weight(1f),
-                noteViewModel = noteViewModel
             )
         }
 
@@ -803,7 +847,6 @@ fun NoteTextField(
     noteText: String,
     onNoteChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    noteViewModel: NoteViewModel
 ) {
     TextField(
         value = noteText,
@@ -848,7 +891,6 @@ fun BottomFABRow(
             Icon(Icons.Default.Add, contentDescription = "Save")
         }
     }
-
 
 }
 

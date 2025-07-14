@@ -85,8 +85,8 @@ fun SavedAddressMain(
                         }
                     }
 
-                    Text("📍 ${address.placeName}", style = MaterialTheme.typography.bodyMedium)
-                    //  Text("🧭 Lat: ${address.latitude}, Lng: ${address.longitude}")
+                    Text(address.placeName, style = MaterialTheme.typography.bodyMedium)
+                    //  Text(" Lat: ${address.latitude}, Lng: ${address.longitude}")
                     Text(
                         "✔\uFE0F Saved: ${
                             DateFormat.getDateTimeInstance().format(Date(address.createdAt))

@@ -36,8 +36,9 @@ fun BasicGeofenceSetup(
     geofenceOptionsEnabled: Boolean = false,
     isFavoriteAddress: MutableState<Boolean>,
     favoriteAddressName: MutableState<String>,
-    isFavoriteAddressDisable: Boolean,
-    shouldDisableSavedAddressRow: Boolean
+    isFavoriteAddressDisable: MutableState<Boolean>,
+    shouldDisableSavedAddressRow: Boolean,
+    isGeofenceImmutable: Boolean
 ) {
     val radius by geofenceViewModel.radius.collectAsState()
     //   val geofenceStatus by geofenceViewModel.geofenceMessage.collectAsState()
@@ -52,7 +53,7 @@ fun BasicGeofenceSetup(
         }
     }
 
-    val clickableModifier = if (isFavoriteAddressDisable || shouldDisableSavedAddressRow) {
+    val clickableModifier = if (isFavoriteAddressDisable.value || shouldDisableSavedAddressRow) {
         Modifier
     } else {
         Modifier.clickable { isFavoriteAddress.value = !isFavoriteAddress.value }
@@ -80,7 +81,7 @@ fun BasicGeofenceSetup(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "Add to favorite addresses",
-                color = if (!isFavoriteAddressDisable && !shouldDisableSavedAddressRow) Color.Black else Color.Gray
+                color = if (!isFavoriteAddressDisable.value && !shouldDisableSavedAddressRow) Color.Black else Color.Gray
             )
         }
 
@@ -88,7 +89,7 @@ fun BasicGeofenceSetup(
             OutlinedTextField(
                 value = favoriteAddressName.value,
                 onValueChange = { if (it.length <= 20) favoriteAddressName.value = it },
-                label = { Text("Name for this favorite address?") },
+                label = { Text("Name for this address?") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
@@ -104,7 +105,7 @@ fun BasicGeofenceSetup(
 
         Text(
             text = "📏 Radius: $radiusDisplay",
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
         )
@@ -124,7 +125,7 @@ fun BasicGeofenceSetup(
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp),
-                enabled = geofenceOptionsEnabled
+                enabled = !isGeofenceImmutable
             )
 
             Spacer(modifier = Modifier.width(12.dp))
