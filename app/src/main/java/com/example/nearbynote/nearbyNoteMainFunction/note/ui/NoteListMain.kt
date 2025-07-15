@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -205,14 +206,23 @@ fun NoteListMain(
                                         )
                                     }
                                 }
-                                Text(
-                                    "✔\uFE0F Saved: ${
-                                        DateFormat.getDateTimeInstance()
-                                            .format(Date(note.createdAt))
-                                    }",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.Gray
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Saved",
+                                        tint = Color(0xFF81C784), // Light Green
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Saved: ${
+                                            DateFormat.getDateTimeInstance()
+                                                .format(Date(note.createdAt))
+                                        }",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.Gray
+                                    )
+                                }
                                 if (note.updatedAt != 0L) {
                                     Text(
                                         "🛠️ Updated: ${
@@ -234,30 +244,30 @@ fun NoteListMain(
                         HorizontalDivider()
                     }
 
-                    /*                    //For testing purposes
-                                        item {
-                                            Text(
-                                                "📍 Geofences",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                modifier = Modifier.padding(8.dp)
-                                            )
-                                        }
+/*                    //For testing purposes
+                    item {
+                        Text(
+                            "📍 Geofences",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
 
-                                        items(allGeofences) { geofence ->
-                                            Column(modifier = Modifier.padding(8.dp)) {
-                                                Text("ID: ${geofence.id}")
-                                                Text("📍 ${geofence.addressName}")
-                                                Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
-                                                Text("Radius: ${geofence.radius}m")
-                                                Text(
-                                                    "Created at: ${
-                                                        DateFormat.getDateTimeInstance()
-                                                            .format(Date(geofence.createdAt))
-                                                    }"
-                                                )
-                                                HorizontalDivider()
-                                            }
-                                        }*/
+                    items(allGeofences) { geofence ->
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            Text("ID: ${geofence.id}")
+                            Text("📍 ${geofence.addressName}")
+                            Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
+                            Text("Radius: ${geofence.radius}m")
+                            Text(
+                                "Created at: ${
+                                    DateFormat.getDateTimeInstance()
+                                        .format(Date(geofence.createdAt))
+                                }"
+                            )
+                            HorizontalDivider()
+                        }
+                    }*/
                 }
             }
 

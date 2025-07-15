@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
@@ -578,14 +579,22 @@ fun MapboxScreen(
                         style = MaterialTheme.typography.labelSmall,
                     )
 
-                    Text(
-                        "✔\uFE0F Saved: ${
-                            DateFormat.getDateTimeInstance()
-                                .format(Date(note.createdAt))
-                        }",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Saved",
+                            tint = Color(0xFF81C784), // Light Green
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Saved: ${
+                                DateFormat.getDateTimeInstance().format(Date(note.createdAt))
+                            }",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
 
                     if (note.updateAt != 0L) {
                         Text(
