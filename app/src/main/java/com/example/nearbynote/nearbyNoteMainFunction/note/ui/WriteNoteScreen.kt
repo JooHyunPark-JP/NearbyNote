@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,10 +24,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -35,10 +34,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -55,11 +57,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -156,6 +158,11 @@ fun WriteNoteScreen(
         //if user is coming from map
         if (noteViewModel.preserveMapLocation) {
             geofenceEnabled = true
+            coroutineScope.launch {
+                sheetState.show()
+                showGeofenceSheet.value = true
+            }
+
         } else {
             geofenceEnabled = false
             noteViewModel.addressQuery = ""
@@ -231,18 +238,10 @@ fun WriteNoteScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp)
                 .verticalScroll(scrollState)
         ) {
-
-/*            GeofenceToggleRow(
-                geofenceEnabled = geofenceEnabled,
-                isGeofenceImmutable = !isGeofenceImmutable,
-                onToggle = { geofenceEnabled = it }
-            )*/
-
-            GeofenceToggleRow(
-                geofenceEnabled = geofenceEnabled,
+            GeofenceToggleSwitch(
+                enabled = geofenceEnabled,
                 isGeofenceImmutable = !isGeofenceImmutable,
                 onToggle = { enabled ->
                     geofenceEnabled = enabled
@@ -255,8 +254,16 @@ fun WriteNoteScreen(
                 },
             )
 
+            if (isGeofenceImmutable) {
+                Text(
+                    text = "📍 This note already has a location reminder. To change location, please create a new note.",
+                    style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray),
+                    textAlign = TextAlign.Center,
+                )
+            }
+
             if (geofenceEnabled) {
-                TextButton(
+                OutlinedButton(
                     onClick = {
                         coroutineScope.launch {
                             sheetState.show()
@@ -264,53 +271,12 @@ fun WriteNoteScreen(
                         }
                     },
                     modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(end = 16.dp),
+                        .align(Alignment.CenterHorizontally)
+                        .padding(horizontal = 8.dp)
                 ) {
-                    Text(
-                        text = "Click here to edit location",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    Text("Edit Location")
                 }
             }
-
-            if (isGeofenceImmutable) {
-                Text(
-                    text = "📍 This note already has a location reminder. To change location, please create a new note.",
-                    style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray),
-                )
-            }
-
-            /*            AnimatedVisibility(visible = geofenceEnabled) {
-                            Column {
-                                AddressSearchSection(
-                                    addressQuery = noteViewModel.addressQuery,
-                                    onQueryChange = { noteViewModel.onQueryChanged(it) },
-                                    suggestions = noteViewModel.suggestions,
-                                    onSuggestionSelected = { suggestion ->
-                                        geofenceViewModel.onSuggestionSelected(suggestion)
-                                        noteViewModel.addressQuery = suggestion.placeName
-                                        noteViewModel.addressLatitude = suggestion.latitude
-                                        geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
-                                        noteViewModel.addressLongitude = suggestion.longitude
-                                        geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
-                                        noteViewModel.suggestions = emptyList()
-                                    },
-                                    enabled = !isGeofenceImmutable && !isSavedAddressClicked,
-                                    isAddressSearching = isAddressSearching,
-                                    isSavedAddressClicked = isSavedAddressClicked,
-                                    noteViewModel = noteViewModel
-                                )
-                                if (isGeofenceImmutable) {
-                                    Text(
-                                        text = "📍 This note has a location reminder. To change location, please create a new note.",
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
-                                    )
-                                }
-                            }
-                        }*/
 
             if (showGeofenceSheet.value) {
                 ModalBottomSheet(
@@ -324,111 +290,66 @@ fun WriteNoteScreen(
                     sheetState = sheetState,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 1000.dp, max = LocalConfiguration.current.screenHeightDp.dp * 0.95f)
+                        .heightIn(
+                            min = 1000.dp,
+                            max = LocalConfiguration.current.screenHeightDp.dp * 0.95f
+                        )
                 ) {
-                    GeofenceSheetContent(
-                        isGeofenceImmutable = isGeofenceImmutable,
-                        isSavedAddressClicked = isSavedAddressClicked,
-                        noteViewModel = noteViewModel,
-                        geofenceViewModel = geofenceViewModel,
-                        savedAddresses = savedAddresses,
-                        selectedAddress = selectedAddress,
-                        onSelectAddress = { selectedAddress = it },
-                        isFavoriteAddress = isFavoriteAddress,
-                        isFavoriteAddressDisable = isFavoriteAddressDisable,
-                        favoriteAddressName = favoriteAddressName,
-                        shouldDisableSavedAddressRow = shouldDisableSavedAddressRow,
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                        coroutineScope = coroutineScope,
-                        sheetState = sheetState,
-                        showGeofenceSheet = showGeofenceSheet,
-                        geofenceEnabled = geofenceEnabled
-                    )
-                }
-            }
 
-            /*            if (geofenceEnabled) {
-                            //Saved address section
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = savedRowModifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .background(MaterialTheme.colorScheme.inversePrimary)
+                        ) {
+
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch { sheetState.hide() }
+                                        .invokeOnCompletion { showGeofenceSheet.value = false }
+                                },
+                                modifier = Modifier.align(Alignment.CenterEnd)
                             ) {
                                 Icon(
-                                    imageVector = if (!isSavedAddressClicked.value) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
-                                    contentDescription = "Select Favorite Address",
-                                    tint = if (isSavedAddressClicked.value) Color.Red else Color.Gray
+                                    Icons.Default.Check,
+                                    contentDescription = "Close",
                                 )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = selectedAddress?.name ?: "Choose your favorite address",
-                                    color = if (!shouldDisableSavedAddressRow) Color.Black else Color.Gray
-                                )
-
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("No favorite address") },
-                                        onClick = {
-                                            selectedAddress = null
-                                            expanded = false
-                                            noteViewModel.addressQuery = ""
-                                            noteViewModel.addressLatitude = 0.0
-                                            noteViewModel.addressLongitude = 0.0
-                                            geofenceViewModel.onLatitudeChanged("")
-                                            geofenceViewModel.onLongitudeChanged("")
-                                            isFavoriteAddressDisable.value = false
-                                            isSavedAddressClicked.value = false
-                                            isFavoriteAddress.value = false
-                                            favoriteAddressName.value = ""
-                                            noteViewModel.suggestions = emptyList()
-                                        }
-                                    )
-
-                                    if (savedAddresses.isNotEmpty()) {
-                                        DropdownMenuItem(
-                                            text = { HorizontalDivider() },
-                                            onClick = {},
-                                            enabled = false
-                                        )
-
-                                        savedAddresses.forEach { address ->
-                                            DropdownMenuItem(
-                                                text = { Text(address.name) },
-                                                onClick = {
-                                                    selectedAddress = address
-                                                    expanded = false
-                                                    noteViewModel.addressQuery = address.placeName
-                                                    noteViewModel.addressLatitude = address.latitude
-                                                    noteViewModel.addressLongitude = address.longitude
-                                                    geofenceViewModel.onLatitudeChanged(address.latitude.toString())
-                                                    geofenceViewModel.onLongitudeChanged(address.longitude.toString())
-                                                    isFavoriteAddressDisable.value = true
-                                                    isSavedAddressClicked.value = true
-                                                    isFavoriteAddress.value = false
-                                                    favoriteAddressName.value = ""
-                                                    //remove the search bar result
-                                                    noteViewModel.suggestions = emptyList()
-
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
                             }
 
-                            BasicGeofenceSetup(
-                                geofenceViewModel = geofenceViewModel,
-                                geofenceOptionsEnabled = !isGeofenceImmutable,
-                                isFavoriteAddress = isFavoriteAddress,
-                                favoriteAddressName = favoriteAddressName,
-                                isFavoriteAddressDisable = isFavoriteAddressDisable,
-                                shouldDisableSavedAddressRow = shouldDisableSavedAddressRow
+                            Text(
+                                "Set location for this Note",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.align(Alignment.Center)
                             )
-                        }*/
+                        }
 
+
+                        GeofenceSheetContent(
+                            isGeofenceImmutable = isGeofenceImmutable,
+                            isSavedAddressClicked = isSavedAddressClicked,
+                            noteViewModel = noteViewModel,
+                            geofenceViewModel = geofenceViewModel,
+                            savedAddresses = savedAddresses,
+                            selectedAddress = selectedAddress,
+                            onSelectAddress = { selectedAddress = it },
+                            isFavoriteAddress = isFavoriteAddress,
+                            isFavoriteAddressDisable = isFavoriteAddressDisable,
+                            favoriteAddressName = favoriteAddressName,
+                            shouldDisableSavedAddressRow = shouldDisableSavedAddressRow,
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it },
+                            coroutineScope = coroutineScope,
+                            sheetState = sheetState,
+                            showGeofenceSheet = showGeofenceSheet,
+                            geofenceEnabled = geofenceEnabled
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
 
             NoteTextField(
@@ -802,43 +723,37 @@ fun handleExistingNoteUpdate(
     )
 }
 
-
 @Composable
-fun GeofenceToggleRow(
-    geofenceEnabled: Boolean,
+fun GeofenceToggleSwitch(
+    enabled: Boolean,
     isGeofenceImmutable: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .size(24.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(
-                    if (geofenceEnabled)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        Color.Gray
-                )
-        ) {
-            IconToggleButton(
-                checked = geofenceEnabled,
-                onCheckedChange = onToggle,
-                modifier = Modifier.fillMaxSize(),
-                enabled = isGeofenceImmutable
-            ) {
-                if (geofenceEnabled) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = "Enabled",
-                        tint = Color.White
-                    )
-                }
-            }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text("Location-based Reminder", style = MaterialTheme.typography.titleSmall)
+            Text(
+                if (enabled) "Alert will trigger when arriving at saved location"
+                else "Enable to set location reminder",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Enable location alert", fontSize = 16.sp)
+        Switch(
+            checked = enabled,
+            onCheckedChange = onToggle,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.inversePrimary,
+                uncheckedThumbColor = Color.LightGray
+            ),
+            enabled = isGeofenceImmutable
+        )
     }
 }
 
