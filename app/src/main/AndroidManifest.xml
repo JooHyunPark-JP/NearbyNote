@@ -53,6 +53,15 @@
         <meta-data
             android:name="com.mapbox.access_token"
             android:value="@string/mapbox_access_token" />
+
+        <receiver
+            android:name=".nearbyNoteMainFunction.geoFenceAPI.util.BootCompleteReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

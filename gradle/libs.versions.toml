@@ -20,6 +20,7 @@ ksp = "2.1.21-2.0.1"
 hilt = "2.56.2"
 
 coroutines = "1.10.1"
+coroutinePlayService = "1.10.2"
 
 ktorVersion = "3.1.2"
 serialization = "1.8.0"
@@ -35,6 +36,8 @@ hiltNavigationCompose = "1.2.0"
 accompanist = "0.37.3"
 
 mapboxmaps = "11.13.1"
+
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,6 +69,8 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+kotlinx-coroutines-play-service = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinePlayService" }
 
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktorVersion" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktorVersion" }

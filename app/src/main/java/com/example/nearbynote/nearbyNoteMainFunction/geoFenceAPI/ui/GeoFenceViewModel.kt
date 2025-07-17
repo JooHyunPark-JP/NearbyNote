@@ -133,5 +133,14 @@ class GeofenceViewModel @Inject constructor(
         }
     }
 
+    /*    fun getOnlyRegisteredGeofences(context: Context): Flow<List<GeofenceEntity>> {
+            return geofenceRepository.getAllGeofences()
+                .map { list ->
+                    val prefs = context.getSharedPreferences("geofence_prefs", Context.MODE_PRIVATE)
+                    list.filter { prefs.getBoolean(it.id, false) }
+                }
+                .flowOn(Dispatchers.IO)
+        }*/
+
 
 }

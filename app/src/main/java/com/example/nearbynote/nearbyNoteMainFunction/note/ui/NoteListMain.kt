@@ -99,6 +99,10 @@ fun NoteListMain(
         "Without Location (${notesWithoutLocation.size})"
     )
 
+    /*    val onlyRegisteredGeofences by geofenceViewModel
+        .getOnlyRegisteredGeofences(LocalContext.current)
+        .collectAsState(initial = emptyList())*/
+
 
     LaunchedEffect(Unit) {
         if (!hasLaunchedPermissionRequest) {
@@ -244,7 +248,7 @@ fun NoteListMain(
                         HorizontalDivider()
                     }
 
-/*                    //For testing purposes
+                    //For testing purposes
                     item {
                         Text(
                             "📍 Geofences",
@@ -252,6 +256,22 @@ fun NoteListMain(
                             modifier = Modifier.padding(8.dp)
                         )
                     }
+
+                    /*                    items(onlyRegisteredGeofences) {geofence ->
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            Text("ID: ${geofence.id}")
+                            Text("📍 ${geofence.addressName}")
+                            Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
+                            Text("Radius: ${geofence.radius}m")
+                            Text(
+                                "Created at: ${
+                                    DateFormat.getDateTimeInstance()
+                                        .format(Date(geofence.createdAt))
+                                }"
+                            )
+                            HorizontalDivider()
+                        }
+                    }*/
 
                     items(allGeofences) { geofence ->
                         Column(modifier = Modifier.padding(8.dp)) {
@@ -267,7 +287,7 @@ fun NoteListMain(
                             )
                             HorizontalDivider()
                         }
-                    }*/
+                    }
                 }
             }
 
@@ -319,3 +339,4 @@ fun NoteListMain(
         }
     }
 }
+
