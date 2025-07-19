@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.di.GeofenceRebuildEntryPoint
@@ -50,6 +51,7 @@ class BootCompleteReceiver : BroadcastReceiver() {
                         .addGeofence(geofence)
                         .build()
 
+                    //Todo: don't we need background permission check here?
                     if (ActivityCompat.checkSelfPermission(
                             context,
                             Manifest.permission.ACCESS_FINE_LOCATION
@@ -72,6 +74,11 @@ class BootCompleteReceiver : BroadcastReceiver() {
                             "Location permission not granted, skipping geofence ${entity.id}"
                         )
                     }
+
+
+/*                    val serviceIntent = Intent(appContext, NearbyNoteForegroundService::class.java)
+                    Log.d("BootReceiverforground1", "Boot completed - attempting to start foreground service")
+                    appContext.startForegroundService(serviceIntent)*/
                 }
             }
         }
