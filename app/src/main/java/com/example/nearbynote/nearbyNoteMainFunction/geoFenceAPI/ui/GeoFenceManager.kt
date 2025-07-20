@@ -20,7 +20,6 @@ import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import androidx.core.content.edit
 
 class GeofenceManager @Inject constructor(
     @ApplicationContext val context: Context,
@@ -147,7 +146,6 @@ class GeofenceManager @Inject constructor(
             .addOnSuccessListener {
                 //  Log.d("GeofenceManager", "✅ Geofence added: $geofenceId")
                 activeGeofences.add(geofenceId)
-         //       markGeofenceAsRegistered(context, geofenceId)
                 //   Log.d("GeofenceManager", "📋 All registered geofences: $activeGeofences")
                 onSuccess()
             }
@@ -200,14 +198,4 @@ class GeofenceManager @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
     }
-
-/*    private fun markGeofenceAsRegistered(context: Context, id: String) {
-        val prefs = context.getSharedPreferences("geofence_prefs", Context.MODE_PRIVATE)
-        prefs.edit { putBoolean(id, true) }
-    }
-
-    private fun isGeofenceRegistered(context: Context, id: String): Boolean {
-        val prefs = context.getSharedPreferences("geofence_prefs", Context.MODE_PRIVATE)
-        return prefs.getBoolean(id, false)
-    }*/
 }
