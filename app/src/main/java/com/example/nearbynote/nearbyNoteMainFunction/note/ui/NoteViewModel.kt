@@ -15,6 +15,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.example.nearbynote.nearbyNoteMainFunction.note.data.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -110,6 +111,10 @@ class NoteViewModel @Inject constructor(
 
     suspend fun getNoteById(id: Long): NoteEntity? {
         return noteRepository.getNoteById(id)
+    }
+
+    suspend fun getNotesByLocationName(locationName: String): Flow<List<NoteEntity>> {
+        return noteRepository.getNotesByLocation(locationName)
     }
 
     fun updateNoteWithGeofence(

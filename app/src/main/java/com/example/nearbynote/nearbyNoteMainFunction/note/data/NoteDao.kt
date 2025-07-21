@@ -28,4 +28,7 @@ interface NoteDao {
 
     @Delete
     suspend fun delete(note: NoteEntity)
+
+    @Query("SELECT * FROM notes WHERE locationName = :locationName ORDER BY createdAt DESC")
+    fun getNotesByLocation(locationName: String): Flow<List<NoteEntity>>
 }

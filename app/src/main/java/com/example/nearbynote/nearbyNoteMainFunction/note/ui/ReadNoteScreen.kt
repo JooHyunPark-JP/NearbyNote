@@ -3,12 +3,16 @@ package com.example.nearbynote.nearbyNoteMainFunction.note.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,13 +44,26 @@ fun ReadNoteScreen(
     noteId: Long?
 ) {
     var note by remember { mutableStateOf<NoteEntity?>(null) }
+
+    //val notesAtSameLocation by noteViewModel.getNotesByLocationName(note.locationName).collectAsState(emptyList())
     val scrollState = rememberScrollState()
 
     val savedAddresses by savedAddressViewModel.savedAddresses.collectAsState()
 
+    var sameLocationNotes by remember { mutableStateOf<List<NoteEntity>>(emptyList()) }
+
     LaunchedEffect(noteId) {
         if (noteId != null) {
-            note = noteViewModel.getNoteById(noteId)
+            val loadedNote = noteViewModel.getNoteById(noteId)
+            note = loadedNote
+
+            // get the other note on this location
+            loadedNote?.locationName?.let { location ->
+                noteViewModel.getNotesByLocationName(location)
+                    .collect { notes ->
+                        sameLocationNotes = notes.filter { it.id != loadedNote.id }
+                    }
+            }
         }
     }
 
@@ -62,7 +79,7 @@ fun ReadNoteScreen(
 
             Text(note.content, style = MaterialTheme.typography.bodyLarge)
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
             HorizontalDivider()
             Spacer(Modifier.height(8.dp))
             if (addressName != null) {
@@ -97,6 +114,46 @@ fun ReadNoteScreen(
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )
+            }
+
+            if (sameLocationNotes.isNotEmpty()) {
+                Spacer(Modifier.height(24.dp))
+                Text("Other Notes at Same Location:", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+
+                sameLocationNotes.forEach {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(it.content, style = MaterialTheme.typography.bodyMedium)
+                            Spacer(Modifier.height(8.dp))
+                            HorizontalDivider()
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                "✔\uFE0F ${
+                                    DateFormat.getDateTimeInstance().format(Date(it.createdAt))
+                                }",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
+                            )
+                            if (it.updatedAt != 0L) {
+                                Text(
+                                    "🛠️ Updated: ${
+                                        DateFormat.getDateTimeInstance()
+                                            .format(Date(it.updatedAt))
+                                    }",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

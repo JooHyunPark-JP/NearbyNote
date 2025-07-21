@@ -49,46 +49,54 @@ class MainActivity : ComponentActivity() {
         val noteIdFromIntent = intent?.getLongExtra("noteId", -1L)
         val startDestination = if (noteIdFromIntent != null && noteIdFromIntent != -1L) {
             noteViewModel.isAddressSelected = true
-           // Screen.WriteNoteScreen.routeWithNoteId(noteIdFromIntent)
+            // Screen.WriteNoteScreen.routeWithNoteId(noteIdFromIntent)
             Screen.ReadNoteScreen.routeWithNoteId(noteIdFromIntent)
         } else {
             Screen.Main.route
         }
 
+        lifecycleScope.launch {
+            val hasGeofence = geofenceViewModel.hasAnyGeofenceRegistered()
+            if (hasGeofence) {
+                val serviceIntent =
+                    Intent(applicationContext, NearbyNoteForegroundService::class.java)
+                ContextCompat.startForegroundService(applicationContext, serviceIntent)
+            }
 
-        setContent {
-            NearbyNoteTheme {
-                val navController = rememberNavController()
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopBar(
-                            navController = navController,
-                            noteViewModel = noteViewModel,
-                            geofenceViewModel = geofenceViewModel
-                        )
+            setContent {
+                NearbyNoteTheme {
+                    val navController = rememberNavController()
 
-                    },
-                    bottomBar = {
-                        BottomNavBar(navController = navController)
-
-                    }) { innerPadding ->
-                    Column(modifier = Modifier.padding(innerPadding)) {
-                        NavGraph(
-                            startDestination = startDestination,
-                            navController = navController,
-                            noteViewModel = noteViewModel,
-                            geofenceViewModel = geofenceViewModel,
-                            geofenceManager = geofenceManager,
-                            savedAddressViewModel = savedAddressViewModel,
-                            mapboxViewModel = mapboxViewModel,
-
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        topBar = {
+                            TopBar(
+                                navController = navController,
+                                noteViewModel = noteViewModel,
+                                geofenceViewModel = geofenceViewModel
                             )
+
+                        },
+                        bottomBar = {
+                            BottomNavBar(navController = navController)
+
+                        }) { innerPadding ->
+                        Column(modifier = Modifier.padding(innerPadding)) {
+                            NavGraph(
+                                startDestination = startDestination,
+                                navController = navController,
+                                noteViewModel = noteViewModel,
+                                geofenceViewModel = geofenceViewModel,
+                                geofenceManager = geofenceManager,
+                                savedAddressViewModel = savedAddressViewModel,
+                                mapboxViewModel = mapboxViewModel,
+
+                                )
+                        }
                     }
                 }
             }
         }
     }
-
 }

@@ -8,4 +8,5 @@ interface GeofenceRepository {
     fun getAllGeofences(): Flow<List<GeofenceEntity>>
     suspend fun deleteGeofence(geofence: GeofenceEntity)
     suspend fun deleteAllGeofences()
+    suspend fun getAllGeofencesOnce(): List<GeofenceEntity>
 }
