@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.di.GeofenceRebuildEntryPoint
@@ -36,6 +35,14 @@ class BootCompleteReceiver : BroadcastReceiver() {
 
             scope.launch {
                 val geofences = geofenceDao.getAllGeofencesOnce()
+
+                //if geofence is exist, enable the foreground services as well
+                if (geofences.isNotEmpty()) {
+                    val serviceIntent = Intent(appContext, NearbyNoteForegroundService::class.java)
+                    appContext.startForegroundService(serviceIntent)
+                    Log.d("BootReceivertest", "Foreground service started after reboot.")
+                }
+
                 geofences.forEach { entity ->
                     val geofence = Geofence.Builder()
                         .setRequestId(entity.id)
@@ -74,11 +81,6 @@ class BootCompleteReceiver : BroadcastReceiver() {
                             "Location permission not granted, skipping geofence ${entity.id}"
                         )
                     }
-
-
-/*                    val serviceIntent = Intent(appContext, NearbyNoteForegroundService::class.java)
-                    Log.d("BootReceiverforground1", "Boot completed - attempting to start foreground service")
-                    appContext.startForegroundService(serviceIntent)*/
                 }
             }
         }

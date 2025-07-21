@@ -30,4 +30,8 @@ class FakeGeofenceRepository : GeofenceRepository {
     override suspend fun deleteAllGeofences() {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getAllGeofencesOnce(): List<GeofenceEntity> {
+        TODO("Not yet implemented")
+    }
 }
