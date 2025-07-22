@@ -45,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -172,20 +173,27 @@ fun NoteListMain(
                                     //  .offset(y = (-8).dp)
                                     .zIndex(1f)
                             )
-
                             Card(
                                 modifier = Modifier
+                                    .padding(16.dp)
                                     .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                                    .shadow(
+                                        elevation = 10.dp,
+                                        shape = RoundedCornerShape(20.dp),
+                                        ambientColor = Color.Black.copy(alpha = 0.08f),
+                                        spotColor = Color.Black.copy(alpha = 1.00f)
+                                    )
                                     .clickable {
                                         noteViewModel.isAddressSelected = true
                                         navController.navigate(
                                             Screen.WriteNoteScreen.routeWithNoteId(note.id)
                                         )
                                     },
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                shape = RoundedCornerShape(12.dp),
-                            ) {
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                            )
+                            {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -271,355 +279,61 @@ fun NoteListMain(
                                     }
                                 }
                             }
+
                         }
 
                         Spacer(modifier = Modifier.height(4.dp))
                     }
-
-                    /*                    items(filteredNotes) { note ->
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(8.dp)
-                                                    .clickable {
-                                                        noteViewModel.isAddressSelected = true
-                                                        navController.navigate(
-                                                            Screen.WriteNoteScreen.routeWithNoteId(
-                                                                note.id
-                                                            )
-                                                        )
-                                                    },
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Column(modifier = Modifier.weight(1f)) {
-
-                                                    val addressName =
-                                                        savedAddresses.find { it.placeName == note.locationName }?.name
-                                                            ?: note.locationName
-
-                                                    Text(
-                                                        text = note.content,
-                                                        maxLines = 3,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        style = MaterialTheme.typography.bodyLarge
-                                                    )
-                                                    Spacer(modifier = Modifier.height(12.dp))
-                                                    //Text(text = "Geofence ID: ${note.geofenceId}")
-
-                                                    if (addressName != null) {
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            if (savedAddresses.any { it.placeName == note.locationName }) {
-                                                                Icon(
-                                                                    painter = painterResource(id = R.drawable.ic_favorite_addresses),
-                                                                    contentDescription = "Favorite Address",
-                                                                    modifier = Modifier.size(12.dp),
-                                                                    tint = Color.Red
-                                                                )
-                                                                Spacer(modifier = Modifier.width(4.dp))
-                                                            }
-
-                                                            Text(
-                                                                text = addressName,
-                                                                style = MaterialTheme.typography.labelSmall
-                                                            )
-                                                        }
-                                                    }
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Icon(
-                                                            imageVector = Icons.Default.Check,
-                                                            contentDescription = "Saved",
-                                                            tint = Color(0xFF81C784), // Light Green
-                                                            modifier = Modifier.size(16.dp)
-                                                        )
-                                                        Spacer(modifier = Modifier.width(4.dp))
-                                                        Text(
-                                                            text = "Saved: ${
-                                                                DateFormat.getDateTimeInstance()
-                                                                    .format(Date(note.createdAt))
-                                                            }",
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = Color.Gray
-                                                        )
-                                                    }
-                                                    if (note.updatedAt != 0L) {
-                                                        Text(
-                                                            "🛠️ Updated: ${
-                                                                DateFormat.getDateTimeInstance()
-                                                                    .format(Date(note.updatedAt))
-                                                            }",
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = Color.Gray
-                                                        )
-                                                    }
-                                                }
-                                                IconButton(onClick = {
-                                                    noteToDelete = note
-                                                    showDeleteDialog = true
-                                                }) {
-                                                    Icon(Icons.Default.Delete, contentDescription = "Delete Note")
-                                                }
-                                            }
-                                            HorizontalDivider()
-                                        }*/
-
-                    /*                    items(filteredNotes) { note ->
-                                            val addressName =
-                                                savedAddresses.find { it.placeName == note.locationName }?.name
-                                                    ?: note.locationName
-
-                                            Card(
-                                                modifier = Modifier
-                                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                                                    .fillMaxWidth()
-                                                    .clickable {
-                                                        noteViewModel.isAddressSelected = true
-                                                        navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
-                                                    },
-                                                shape = RoundedCornerShape(16.dp),
-                                                elevation = CardDefaults.cardElevation(4.dp)
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Column(
-                                                        modifier = Modifier
-                                                            .weight(1f)
-                                                    ) {
-                                                        Text(
-                                                            text = note.content,
-                                                            style = MaterialTheme.typography.bodyLarge,
-                                                            maxLines = 4,
-                                                            overflow = TextOverflow.Ellipsis
-                                                        )
-
-                                                        Spacer(modifier = Modifier.height(8.dp))
-
-                                                        if (!addressName.isNullOrBlank()) {
-                                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                                if (savedAddresses.any { it.placeName == note.locationName }) {
-                                                                    Icon(
-                                                                        painter = painterResource(id = R.drawable.ic_favorite_addresses),
-                                                                        contentDescription = "Favorite Address",
-                                                                        modifier = Modifier.size(14.dp),
-                                                                        tint = Color.Red
-                                                                    )
-                                                                    Spacer(modifier = Modifier.width(4.dp))
-                                                                }
-
-                                                                Text(
-                                                                    text = addressName,
-                                                                    style = MaterialTheme.typography.labelSmall
-                                                                )
-                                                            }
-                                                        }
-
-                                                        Spacer(modifier = Modifier.height(4.dp))
-
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            Icon(
-                                                                imageVector = Icons.Default.Check,
-                                                                contentDescription = "Saved",
-                                                                tint = Color(0xFF81C784),
-                                                                modifier = Modifier.size(16.dp)
-                                                            )
-                                                            Spacer(modifier = Modifier.width(4.dp))
-                                                            Text(
-                                                                text = "Saved: ${DateFormat.getDateTimeInstance().format(Date(note.createdAt))}",
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                color = Color.Gray
-                                                            )
-                                                        }
-
-                                                        if (note.updatedAt != 0L) {
-                                                            Text(
-                                                                text = "🛠️ Updated: ${
-                                                                    DateFormat.getDateTimeInstance().format(Date(note.updatedAt))
-                                                                }",
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                color = Color.Gray
-                                                            )
-                                                        }
-                                                    }
-
-                                                    IconButton(
-                                                        onClick = {
-                                                            noteToDelete = note
-                                                            showDeleteDialog = true
-                                                        },
-                                                        modifier = Modifier.size(36.dp)
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = Icons.Default.Delete,
-                                                            contentDescription = "Delete Note",
-                                                            tint = Color.Gray
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }*/
-
-                    /*                    items(filteredNotes) { note ->
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(8.dp)
-                                                    .clickable {
-                                                        noteViewModel.isAddressSelected = true
-                                                        navController.navigate(
-                                                            Screen.WriteNoteScreen.routeWithNoteId(
-                                                                note.id
-                                                            )
-                                                        )
-                                                    },
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Column(modifier = Modifier.weight(1f)) {
-
-                                                    val addressName =
-                                                        savedAddresses.find { it.placeName == note.locationName }?.name
-                                                            ?: note.locationName
-
-                                                    Text(
-                                                        text = note.content,
-                                                        maxLines = 3,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        style = MaterialTheme.typography.bodyLarge
-                                                    )
-                                                    Spacer(modifier = Modifier.height(12.dp))
-                                                    //Text(text = "Geofence ID: ${note.geofenceId}")
-
-                                                    if (addressName != null) {
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            if (savedAddresses.any { it.placeName == note.locationName }) {
-                                                                Icon(
-                                                                    painter = painterResource(id = R.drawable.ic_favorite_addresses),
-                                                                    contentDescription = "Favorite Address",
-                                                                    modifier = Modifier.size(12.dp),
-                                                                    tint = Color.Red
-                                                                )
-                                                                Spacer(modifier = Modifier.width(4.dp))
-                                                            }
-
-                                                            Text(
-                                                                text = addressName,
-                                                                style = MaterialTheme.typography.labelSmall
-                                                            )
-                                                        }
-                                                    }
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Icon(
-                                                            imageVector = Icons.Default.Check,
-                                                            contentDescription = "Saved",
-                                                            tint = Color(0xFF81C784), // Light Green
-                                                            modifier = Modifier.size(16.dp)
-                                                        )
-                                                        Spacer(modifier = Modifier.width(4.dp))
-                                                        Text(
-                                                            text = "Saved: ${
-                                                                DateFormat.getDateTimeInstance()
-                                                                    .format(Date(note.createdAt))
-                                                            }",
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = Color.Gray
-                                                        )
-                                                    }
-                                                    if (note.updatedAt != 0L) {
-                                                        Text(
-                                                            "🛠️ Updated: ${
-                                                                DateFormat.getDateTimeInstance()
-                                                                    .format(Date(note.updatedAt))
-                                                            }",
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = Color.Gray
-                                                        )
-                                                    }
-                                                }
-                                                IconButton(onClick = {
-                                                    noteToDelete = note
-                                                    showDeleteDialog = true
-                                                }) {
-                                                    Icon(Icons.Default.Delete, contentDescription = "Delete Note")
-                                                }
-                                            }
-                                            HorizontalDivider()
-                                        }*/
-
-                    /*                    //For testing purposes
-                                        item {
-                                            Text(
-                                                "📍 Geofences",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                modifier = Modifier.padding(8.dp)
-                                            )
-                                        }
-
-                                        items(allGeofences) { geofence ->
-                                            Column(modifier = Modifier.padding(8.dp)) {
-                                                Text("ID: ${geofence.id}")
-                                                Text("📍 ${geofence.addressName}")
-                                                Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
-                                                Text("Radius: ${geofence.radius}m")
-                                                Text(
-                                                    "Created at: ${
-                                                        DateFormat.getDateTimeInstance()
-                                                            .format(Date(geofence.createdAt))
-                                                    }"
-                                                )
-                                                HorizontalDivider()
-                                            }
-                                        }*/
                 }
             }
+        }
 
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(null))
+        FloatingActionButton(
+            onClick = {
+                navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(null))
+            },
+            shape = CircleShape,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
+        }
+
+
+        if (showDeleteDialog && noteToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    noteToDelete = null
                 },
-                shape = CircleShape,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Note")
-            }
-
-
-            if (showDeleteDialog && noteToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = {
+                confirmButton = {
+                    TextButton(onClick = {
+                        noteToDelete?.let {
+                            noteViewModel.deleteNoteAndGeofence(
+                                noteId = it.id,
+                                geofenceViewModel = geofenceViewModel
+                            )
+                        }
                         showDeleteDialog = false
                         noteToDelete = null
-                    },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            noteToDelete?.let {
-                                noteViewModel.deleteNoteAndGeofence(
-                                    noteId = it.id,
-                                    geofenceViewModel = geofenceViewModel
-                                )
-                            }
-                            showDeleteDialog = false
-                            noteToDelete = null
-                        }) {
-                            Text("Delete")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {
-                            showDeleteDialog = false
-                            noteToDelete = null
-                        }) {
-                            Text("Cancel")
-                        }
-                    },
-                    title = { Text("Delete note?") },
-                    text = { Text("Are you sure you want to delete this note?") }
-                )
-            }
+                    }) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDeleteDialog = false
+                        noteToDelete = null
+                    }) {
+                        Text("Cancel")
+                    }
+                },
+                title = { Text("Delete note?") },
+                text = { Text("Are you sure you want to delete this note?") }
+            )
         }
     }
 }
+
 

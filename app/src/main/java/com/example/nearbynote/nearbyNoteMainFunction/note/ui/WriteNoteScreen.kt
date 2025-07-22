@@ -711,7 +711,7 @@ fun handleExistingNoteUpdate(
         updatedAt = System.currentTimeMillis(),
         onSuccess = {
             noteViewModel.addressQuery = ""
-            navController.popBackStack()
+            navController.navigate(Screen.Main.route)
         },
         onFailure = {
             Toast.makeText(

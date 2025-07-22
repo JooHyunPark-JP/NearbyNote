@@ -614,7 +614,7 @@ fun MapboxScreen(
                     navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
                     mapboxViewModel.clearSelectedNote()
                 }) {
-                    Text("Go to note")
+                    Text("Edit note")
                 }
             },
             dismissButton = {
