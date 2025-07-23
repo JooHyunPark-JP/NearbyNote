@@ -606,7 +606,7 @@ fun handleNewNoteSave(
         if (lat == null || lng == null || rad == null || addressQuery.isBlank()) {
             Toast.makeText(
                 context,
-                "Please add address to register the location",
+                "Please choose an address from the list that appears as you type.",
                 Toast.LENGTH_SHORT
             ).show()
             return

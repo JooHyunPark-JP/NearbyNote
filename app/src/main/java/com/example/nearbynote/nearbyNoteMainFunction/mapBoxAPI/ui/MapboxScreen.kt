@@ -194,7 +194,8 @@ fun MapboxScreen(
                 }
             },
             isAddressSearching = isSearching,
-            noteViewModel = noteViewModel
+            noteViewModel = noteViewModel,
+            geofenceViewModel = geofenceViewModel
         )
 
         Spacer(modifier = Modifier.height(32.dp))

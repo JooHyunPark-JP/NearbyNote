@@ -75,14 +75,14 @@ fun GeofenceSheetContent(
                 noteViewModel.addressQuery = suggestion.placeName
                 noteViewModel.addressLatitude = suggestion.latitude
                 noteViewModel.addressLongitude = suggestion.longitude
-                geofenceViewModel.onLatitudeChanged(suggestion.latitude.toString())
-                geofenceViewModel.onLongitudeChanged(suggestion.longitude.toString())
                 noteViewModel.suggestions = emptyList()
             },
             enabled = !isGeofenceImmutable && !isSavedAddressClicked.value,
             isAddressSearching = isAddressSearching,
             isSavedAddressClicked = isSavedAddressClicked.value,
-            noteViewModel = noteViewModel
+            noteViewModel = noteViewModel,
+            geofenceViewModel = geofenceViewModel
+
         )
 
         if (isGeofenceImmutable) {
