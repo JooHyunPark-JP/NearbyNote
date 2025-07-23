@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 
 @Composable
@@ -36,7 +37,8 @@ fun AddressSearchSection(
     enabled: Boolean = true,
     isAddressSearching: Boolean,
     isSavedAddressClicked: Boolean = false,
-    noteViewModel: NoteViewModel
+    noteViewModel: NoteViewModel,
+    geofenceViewModel: GeofenceViewModel
 ) {
     var wasSuggestionManuallyCleared by remember { mutableStateOf(false) }
 
@@ -47,6 +49,8 @@ fun AddressSearchSection(
                 noteViewModel.isAddressSelected = false
                 wasSuggestionManuallyCleared = false
                 onQueryChange(it)
+                geofenceViewModel.onLatitudeChanged("")
+                geofenceViewModel.onLongitudeChanged("")
             },
             placeholder = { Text("Enter the address") },
             modifier = Modifier.fillMaxWidth(),
