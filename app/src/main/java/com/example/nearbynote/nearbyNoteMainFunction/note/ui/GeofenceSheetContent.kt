@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -143,24 +144,31 @@ fun GeofenceSheetContent(
                         enabled = false
                     )
 
-                    savedAddresses.forEach { address ->
-                        DropdownMenuItem(
-                            text = { Text(address.name) },
-                            onClick = {
-                                onSelectAddress(address)
-                                onExpandedChange(false)
-                                noteViewModel.addressQuery = address.placeName
-                                noteViewModel.addressLatitude = address.latitude
-                                noteViewModel.addressLongitude = address.longitude
-                                geofenceViewModel.onLatitudeChanged(address.latitude.toString())
-                                geofenceViewModel.onLongitudeChanged(address.longitude.toString())
-                                isFavoriteAddressDisable.value = true
-                                isSavedAddressClicked.value = true
-                                isFavoriteAddress.value = false
-                                favoriteAddressName.value = ""
-                                noteViewModel.suggestions = emptyList()
-                            }
-                        )
+                    Column(
+                        modifier = Modifier
+                            .heightIn(max = 300.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+
+                        savedAddresses.forEach { address ->
+                            DropdownMenuItem(
+                                text = { Text(address.name) },
+                                onClick = {
+                                    onSelectAddress(address)
+                                    onExpandedChange(false)
+                                    noteViewModel.addressQuery = address.placeName
+                                    noteViewModel.addressLatitude = address.latitude
+                                    noteViewModel.addressLongitude = address.longitude
+                                    geofenceViewModel.onLatitudeChanged(address.latitude.toString())
+                                    geofenceViewModel.onLongitudeChanged(address.longitude.toString())
+                                    isFavoriteAddressDisable.value = true
+                                    isSavedAddressClicked.value = true
+                                    isFavoriteAddress.value = false
+                                    favoriteAddressName.value = ""
+                                    noteViewModel.suggestions = emptyList()
+                                }
+                            )
+                        }
                     }
                 }
             }

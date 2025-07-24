@@ -79,7 +79,7 @@ fun AddressSearchSection(
 
         ) {
             Text(
-                "📭 No address or check your internet connection!",
+                "📭 No address or please check your network and try again.",
                 modifier = Modifier
                     .padding(top = 4.dp)
                     .fillMaxWidth(),

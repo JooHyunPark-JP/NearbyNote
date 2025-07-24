@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
@@ -116,61 +117,74 @@ fun ReadNoteScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
+
                             Column(
                                 modifier = Modifier
-                                    .padding(16.dp)
-                                    .align(Alignment.TopStart)
-                            ) {
-                                Text(note.content, style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
+                                    .fillMaxSize()
                                     .padding(16.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    if (savedAddresses.any { it.placeName == note.locationName }) {
+                                val innerScrollState = rememberScrollState()
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .verticalScroll(innerScrollState)
+                                ) {
+                                    Text(
+                                        text = note.content,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Column {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (savedAddresses.any { it.placeName == note.locationName }) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_favorite_addresses),
+                                                contentDescription = "Favorite Address",
+                                                modifier = Modifier.size(12.dp),
+                                                tint = Color.Red
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                        }
+                                        if (addressName != null) {
+                                            Text(
+                                                text = addressName,
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
+                                    }
+
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
-                                            painter = painterResource(id = R.drawable.ic_favorite_addresses),
-                                            contentDescription = "Favorite Address",
-                                            modifier = Modifier.size(12.dp),
-                                            tint = Color.Red
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Saved",
+                                            tint = Color(0xFF81C784),
+                                            modifier = Modifier.size(12.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
-                                    }
-                                    if (addressName != null) {
                                         Text(
-                                            text = addressName,
-                                            style = MaterialTheme.typography.labelSmall
+                                            text = "Saved: ${
+                                                DateFormat.getDateTimeInstance()
+                                                    .format(Date(note.createdAt))
+                                            }",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.Gray
                                         )
                                     }
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Saved",
-                                        tint = Color(0xFF81C784),
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Saved: ${
-                                            DateFormat.getDateTimeInstance()
-                                                .format(Date(note.createdAt))
-                                        }",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color.Gray
-                                    )
-                                }
-                                if (note.updatedAt != 0L) {
-                                    Text(
-                                        text = "🛠️ Updated: ${
-                                            DateFormat.getDateTimeInstance()
-                                                .format(Date(note.updatedAt))
-                                        }",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color.Gray
-                                    )
+
+                                    if (note.updatedAt != 0L) {
+                                        Text(
+                                            text = "🛠️ Updated: ${
+                                                DateFormat.getDateTimeInstance()
+                                                    .format(Date(note.updatedAt))
+                                            }",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = Color.Gray
+                                        )
+                                    }
                                 }
                             }
                         }

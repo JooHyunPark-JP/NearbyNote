@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
@@ -135,7 +136,6 @@ fun WriteNoteScreen(
 
     // val shouldDisableSavedAddressRow = noteId != null && hasExistingGeofence
 
-    val isAddressSearching = noteViewModel.isSearching
 
     val sheetState = rememberModalBottomSheetState(
         confirmValueChange = { false },// Disable swipe to dismiss
@@ -307,6 +307,26 @@ fun WriteNoteScreen(
                                 .background(MaterialTheme.colorScheme.inversePrimary)
                         ) {
 
+                            if (!isGeofenceImmutable) {
+                                IconButton(
+                                    onClick = {
+                                        coroutineScope.launch { sheetState.hide() }
+                                            .invokeOnCompletion {
+                                                showGeofenceSheet.value = false
+                                                noteViewModel.addressQuery = ""
+                                                geofenceViewModel.onLatitudeChanged("")
+                                                geofenceViewModel.onLongitudeChanged("")
+                                            }
+                                    },
+                                    modifier = Modifier.align(Alignment.CenterStart)
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Done",
+                                    )
+                                }
+                            }
+
                             IconButton(
                                 onClick = {
                                     coroutineScope.launch { sheetState.hide() }
@@ -316,7 +336,7 @@ fun WriteNoteScreen(
                             ) {
                                 Icon(
                                     Icons.Default.Check,
-                                    contentDescription = "Close",
+                                    contentDescription = "Done",
                                 )
                             }
 

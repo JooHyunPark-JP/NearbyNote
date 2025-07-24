@@ -60,6 +60,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.SelectedNote
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
+import com.example.nearbynote.util.isNetworkAvailable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -79,8 +80,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
-import kotlin.math.cos
-import kotlin.math.pow
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -219,6 +218,13 @@ fun MapboxScreen(
             ) {
                 IconButton(
                     onClick = {
+                        if (!isNetworkAvailable(context)) {
+                            Toast.makeText(
+                                context,
+                                "No internet connection. Please check your network and try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                         mapboxViewModel.toggleMap(true)
                         mapboxViewModel.loadUserLocation()
                     },
@@ -443,6 +449,14 @@ fun MapboxScreen(
 
                 FloatingActionButton(
                     onClick = {
+                        if (!isNetworkAvailable(context)) {
+                            Toast.makeText(
+                                context,
+                                "No internet connection. Please check your network and try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@FloatingActionButton
+                        }
                         mapboxViewModel.loadUserLocation { point ->
                             mapView?.mapboxMap?.setCamera(
                                 CameraOptions.Builder().center(point).zoom(17.0).build()
@@ -634,13 +648,3 @@ fun isOpenGL3Supported(context: Context): Boolean {
     return configInfo.reqGlEsVersion >= 0x30000
 }
 
-fun convertMetersToPixelsAtLatitude(
-    radius: Double,
-    latitude: Double,
-    zoom: Double
-): Double {
-    val earthCircumference = 40075017.0 // meters
-    val latitudeRadians = Math.toRadians(latitude)
-    val metersPerPixel = earthCircumference * cos(latitudeRadians) / (256 * 2.0.pow(zoom))
-    return radius / metersPerPixel
-}
