@@ -29,17 +29,22 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent?.hasError() == true) return
 
+
         val triggeringGeofenceId =
             geofencingEvent?.triggeringGeofences?.firstOrNull()?.requestId ?: return
         //val isInside = geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER
         val geofenceTransition = geofencingEvent.geofenceTransition
+        if (geofenceTransition != Geofence.GEOFENCE_TRANSITION_ENTER) return
+
         val isInside = when (geofenceTransition) {
             // DWELL is trigger when user is stay in the location for some time.
             //  Geofence.GEOFENCE_TRANSITION_DWELL -> true
             Geofence.GEOFENCE_TRANSITION_ENTER -> true
-            Geofence.GEOFENCE_TRANSITION_EXIT -> false
+            //     Geofence.GEOFENCE_TRANSITION_EXIT -> false
             else -> false
         }
+
+
         CoroutineScope(Dispatchers.IO).launch {
             val appContext = context.applicationContext
             val hiltEntryPoint = EntryPointAccessors.fromApplication(
@@ -50,8 +55,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             val noteRepository = NoteRepository(noteDao)
             val note = noteRepository.getNoteByGeofenceId(triggeringGeofenceId)
 
-            val message =
-                if (isInside) "📍 You've arrived at '${note?.locationName}'" else "You're leaving ${note?.locationName}"
+            /*            val message =
+                            if (isInside) " You've arrived at '${note?.locationName}'" else "You're leaving ${note?.locationName}"*/
 
             withContext(Dispatchers.Main) {
                 note?.let {
@@ -70,12 +75,13 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
 
         val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
+            context, note.id.toInt(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+
         /*        val title = if (isInside)
-                    "📍 Arrived: ${note.locationName.orEmpty()}"
+                    "📍 Your Saved Note!"
                 else
                     "📍 Left: ${note.locationName.orEmpty()}"*/
 
