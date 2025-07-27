@@ -65,10 +65,3 @@ and easily save locations using the interactive map.
 ## Screenshots (Coming Soon)
 
 Screenshots of the app UI will be added here.
-
-
-## 📸 Screenshots (Coming Soon)
-
-Screenshots of the app UI will be added here.
-
-
