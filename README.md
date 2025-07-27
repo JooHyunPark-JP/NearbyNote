@@ -14,7 +14,7 @@ It helps you remember important tasks based on where you are.
 - When you get to the grocery store: "Buy fruits and eggs"
 - When you get home: "Open the windows"
 
-You can quickly create notes via **voice recognition** or **text input**,  
+You can quickly create notes via voice recognition or text input,  
 and easily save locations using the interactive map.
 
 ---
@@ -25,17 +25,17 @@ and easily save locations using the interactive map.
 - Create notes via text or voice input *(currently supports English only)*
 - Converts voice to text using the Google Speech API
 
-### 2. Location-Based notes Notifications
+### 2. Location-Based Notes Notifications
 - Set a location and geofence radius for each note
 - Get notified automatically when you enter the defined area
 
 ### 3. Map Integration
 - Map UI powered by Mapbox
-- Create notes by clicking on the map or searching an address
+- Create notes by clicking on the map or searching for an address
 - View notes by saved location
 
 ### 4. Accurate Location Detection & Recovery
-- Continues location tracking even after app termination, reboot, or in background
+- Continues location tracking even after app termination, reboot, or in the background
 - ForegroundService (Only runs when at least one location-based note exists) ensures consistent and accurate location updates
 - Uses optimized Android APIs (Geofencing, Location Services), resulting in low battery usage
 
