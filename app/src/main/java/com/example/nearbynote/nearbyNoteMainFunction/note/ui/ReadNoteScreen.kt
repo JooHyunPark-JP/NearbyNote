@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
@@ -65,6 +66,15 @@ fun ReadNoteScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
+    val pinImages = listOf(
+        R.drawable.note_pin_red,
+        R.drawable.note_pin_green,
+        R.drawable.note_pin_lightpurple,
+        R.drawable.note_pin_green,
+        R.drawable.note_pin_skyblue,
+        R.drawable.note_pin_yellow
+    )
+
     LaunchedEffect(noteId) {
         if (noteId != null) {
             val loadedNote = noteViewModel.getNoteById(noteId)
@@ -92,12 +102,16 @@ fun ReadNoteScreen(
                     savedAddresses.find { it.placeName == note.locationName }?.name
                         ?: note.locationName
 
+                val pinForNote = remember(note.id) {
+                    pinImages[(note.id % pinImages.size).toInt()]
+                }
+
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Image(
-                        painter = painterResource(id = R.drawable.note_pin2),
+                        painter = painterResource(id = pinForNote),
                         contentDescription = "Pin",
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(28.dp)
                             .align(Alignment.TopCenter)
                             .zIndex(1f)
                     )
@@ -132,7 +146,8 @@ fun ReadNoteScreen(
                                 ) {
                                     Text(
                                         text = note.content,
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontStyle = FontStyle.Italic
                                     )
                                 }
 
