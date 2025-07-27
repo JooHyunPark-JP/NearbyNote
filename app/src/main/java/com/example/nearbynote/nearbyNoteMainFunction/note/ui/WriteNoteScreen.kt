@@ -26,9 +26,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
@@ -36,7 +36,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -45,6 +44,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,14 +58,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.nearbynote.R
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
@@ -306,27 +306,6 @@ fun WriteNoteScreen(
                                 .height(56.dp)
                                 .background(MaterialTheme.colorScheme.inversePrimary)
                         ) {
-
-                            if (!isGeofenceImmutable) {
-                                IconButton(
-                                    onClick = {
-                                        coroutineScope.launch { sheetState.hide() }
-                                            .invokeOnCompletion {
-                                                showGeofenceSheet.value = false
-                                                noteViewModel.addressQuery = ""
-                                                geofenceViewModel.onLatitudeChanged("")
-                                                geofenceViewModel.onLongitudeChanged("")
-                                            }
-                                    },
-                                    modifier = Modifier.align(Alignment.CenterStart)
-                                ) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Done",
-                                    )
-                                }
-                            }
-
                             IconButton(
                                 onClick = {
                                     coroutineScope.launch { sheetState.hide() }
@@ -777,7 +756,7 @@ fun GeofenceToggleSwitch(
     }
 }
 
-@Composable
+/*@Composable
 fun NoteTextField(
     noteText: String,
     onNoteChange: (String) -> Unit,
@@ -791,6 +770,45 @@ fun NoteTextField(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp, max = Dp.Infinity)
+    )
+}*/
+
+@Composable
+fun NoteTextField(
+    noteText: String,
+    onNoteChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val paperColor = Color(0xFFFFFDE7) // 연노랑 종이 느낌
+
+    TextField(
+        value = noteText,
+        onValueChange = onNoteChange,
+        placeholder = {
+            Text(
+                "Write your note here...",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray
+                )
+            )
+        },
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            fontStyle = FontStyle.Italic
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .shadow(4.dp, shape = RoundedCornerShape(12.dp)),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = paperColor,
+            unfocusedContainerColor = paperColor,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = MaterialTheme.colorScheme.primary
+        ),
+        shape = RoundedCornerShape(12.dp),
+        maxLines = Int.MAX_VALUE
     )
 }
 

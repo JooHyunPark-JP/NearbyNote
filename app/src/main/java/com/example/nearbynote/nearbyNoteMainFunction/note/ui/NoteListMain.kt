@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -103,6 +104,17 @@ fun NoteListMain(
         "With Location (${notesWithLocation.size})",
         "Without Location (${notesWithoutLocation.size})"
     )
+
+    val pinImages = listOf(
+        R.drawable.note_pin_red,
+        R.drawable.note_pin_green,
+        R.drawable.note_pin_lightpurple,
+        R.drawable.note_pin_green,
+        R.drawable.note_pin_skyblue,
+        R.drawable.note_pin_yellow
+    )
+
+
 
     LaunchedEffect(Unit) {
         if (!hasLaunchedPermissionRequest) {
@@ -163,16 +175,23 @@ fun NoteListMain(
                     }
 
                     items(filteredNotes) { note ->
+
+                        val pinForNote = remember(note.id) {
+                            pinImages[(note.id % pinImages.size).toInt()]
+                        }
+
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Image(
-                                painter = painterResource(id = R.drawable.note_pin3),
+                                painter = painterResource(id = pinForNote),
                                 contentDescription = "Pin",
                                 modifier = Modifier
-                                    .size(32.dp)
+                                    .size(28.dp)
                                     .align(Alignment.TopCenter)
-                                    //  .offset(y = (-8).dp)
+                                    //.offset(y = (8).dp)
                                     .zIndex(1f)
+
                             )
+
                             Card(
                                 modifier = Modifier
                                     .padding(16.dp)
@@ -212,7 +231,8 @@ fun NoteListMain(
                                             text = note.content,
                                             maxLines = 3,
                                             overflow = TextOverflow.Ellipsis,
-                                            style = MaterialTheme.typography.bodyLarge
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontStyle = FontStyle.Italic
                                         )
 
                                         Spacer(modifier = Modifier.height(12.dp))
