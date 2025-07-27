@@ -1,6 +1,8 @@
 package com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui
 
 import android.Manifest
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
@@ -57,6 +60,7 @@ import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.SelectedNote
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.example.nearbynote.nearbyNoteNav.Screen
+import com.example.nearbynote.util.isNetworkAvailable
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -76,8 +80,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
-import kotlin.math.cos
-import kotlin.math.pow
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -110,6 +112,9 @@ fun MapboxScreen(
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    val canOpenMapBoxMap = remember { mutableStateOf(false) }
+    val mapViewHolder = remember { mutableStateOf<MapView?>(null) }
+
     LaunchedEffect(Unit) {
         noteViewModel.addressQuery = ""
         noteViewModel.suggestions = emptyList()
@@ -123,6 +128,16 @@ fun MapboxScreen(
                 coarseLocationPermissionState.status is PermissionStatus.Denied
             ) {
                 coarseLocationPermissionState.launchPermissionRequest()
+            }
+        }
+    }
+
+    LaunchedEffect(showMap) {
+        if (showMap && mapViewHolder.value == null) {
+            if (isOpenGL3Supported(context)) {
+                mapViewHolder.value = MapView(context)
+            } else {
+                canOpenMapBoxMap.value = true
             }
         }
     }
@@ -178,7 +193,8 @@ fun MapboxScreen(
                 }
             },
             isAddressSearching = isSearching,
-            noteViewModel = noteViewModel
+            noteViewModel = noteViewModel,
+            geofenceViewModel = geofenceViewModel
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -202,6 +218,13 @@ fun MapboxScreen(
             ) {
                 IconButton(
                     onClick = {
+                        if (!isNetworkAvailable(context)) {
+                            Toast.makeText(
+                                context,
+                                "No internet connection. Please check your network and try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                         mapboxViewModel.toggleMap(true)
                         mapboxViewModel.loadUserLocation()
                     },
@@ -216,84 +239,100 @@ fun MapboxScreen(
                     )
                 }
             }
+        } else if (canOpenMapBoxMap.value) {
+            // Show message that this device can't open the map
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "⚠️ Map couldn't be loaded. This device may not support OpenGL ES 3.0.",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                AndroidView(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    factory = { context ->
-                        MapView(context).also { mv ->
-                            mapView = mv
-                            mv.mapboxMap.loadStyle(Style.STANDARD) { style ->
-                                mv.gestures.addOnMapClickListener { point ->
-                                    mapboxViewModel.tappedLocation = point
-                                    true
-                                }
+                mapViewHolder.value?.let { safeMapView ->
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        factory = { context ->
+                            safeMapView.also { mv ->
+                                mapView = mv
+                                mv.mapboxMap.loadStyle(Style.STANDARD) { style ->
+                                    mv.gestures.addOnMapClickListener { point ->
+                                        mapboxViewModel.tappedLocation = point
+                                        true
+                                    }
 
-                                mv.gestures.addOnMoveListener(
-                                    object : OnMoveListener {
-                                        override fun onMoveBegin(detector: MoveGestureDetector) {
-                                            mapboxViewModel.onUserInteractionStart()
+                                    mv.gestures.addOnMoveListener(
+                                        object : OnMoveListener {
+                                            override fun onMoveBegin(detector: MoveGestureDetector) {
+                                                mapboxViewModel.onUserInteractionStart()
+                                            }
+
+                                            override fun onMove(detector: MoveGestureDetector): Boolean =
+                                                false
+
+                                            override fun onMoveEnd(detector: MoveGestureDetector) {
+                                                mapboxViewModel.onUserInteractionEnd()
+                                            }
                                         }
+                                    )
 
-                                        override fun onMove(detector: MoveGestureDetector): Boolean =
-                                            false
-
-                                        override fun onMoveEnd(detector: MoveGestureDetector) {
-                                            mapboxViewModel.onUserInteractionEnd()
+                                    // clear the message "Create a note here" on map when zoom in/out or move map
+                                    cameraSubscription = mv.mapboxMap.subscribeCameraChanged {
+                                        if (mapboxViewModel.isUserInteractingWithMap) {
+                                            mapboxViewModel.clearTappedLocation()
                                         }
                                     }
-                                )
 
-                                // clear the message "Create a note here" on map when zoom in/out or move map
-                                cameraSubscription = mv.mapboxMap.subscribeCameraChanged {
-                                    if (mapboxViewModel.isUserInteractingWithMap) {
-                                        mapboxViewModel.clearTappedLocation()
+
+                                    style.addImage(
+                                        "current-location-icon",
+                                        BitmapFactory.decodeResource(
+                                            context.resources,
+                                            R.drawable.current_location_icon
+                                        )
+                                            .scale(62, 62, false)
+                                    )
+                                    style.addImage(
+                                        "location-marker-icon",
+                                        BitmapFactory.decodeResource(
+                                            context.resources,
+                                            R.drawable.location_pin
+                                        )
+                                            .scale(100, 100, false)
+                                    )
+
+                                    style.addImage(
+                                        "note-marker-icon",
+                                        BitmapFactory.decodeResource(
+                                            context.resources,
+                                            R.drawable.note_icon
+                                        )
+                                            .scale(62, 62, false)
+                                    )
+
+                                    mapboxViewModel.loadUserLocation { point ->
+                                        mapView?.mapboxMap?.setCamera(
+                                            CameraOptions.Builder().center(point).zoom(17.0)
+                                                .build()
+                                        )
                                     }
+
                                 }
-
-
-                                style.addImage(
-                                    "current-location-icon",
-                                    BitmapFactory.decodeResource(
-                                        context.resources,
-                                        R.drawable.current_location_icon
-                                    )
-                                        .scale(62, 62, false)
-                                )
-                                style.addImage(
-                                    "location-marker-icon",
-                                    BitmapFactory.decodeResource(
-                                        context.resources,
-                                        R.drawable.location_pin
-                                    )
-                                        .scale(100, 100, false)
-                                )
-
-                                style.addImage(
-                                    "note-marker-icon",
-                                    BitmapFactory.decodeResource(
-                                        context.resources,
-                                        R.drawable.note_icon
-                                    )
-                                        .scale(62, 62, false)
-                                )
-
-                                mapboxViewModel.loadUserLocation { point ->
-                                    mapView?.mapboxMap?.setCamera(
-                                        CameraOptions.Builder().center(point).zoom(17.0)
-                                            .build()
-                                    )
-                                }
-
                             }
                         }
-                    }
-                )
+                    )
+                }
 
                 //top right icon explanation on the map
                 Column(
@@ -410,6 +449,14 @@ fun MapboxScreen(
 
                 FloatingActionButton(
                     onClick = {
+                        if (!isNetworkAvailable(context)) {
+                            Toast.makeText(
+                                context,
+                                "No internet connection. Please check your network and try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@FloatingActionButton
+                        }
                         mapboxViewModel.loadUserLocation { point ->
                             mapView?.mapboxMap?.setCamera(
                                 CameraOptions.Builder().center(point).zoom(17.0).build()
@@ -547,14 +594,22 @@ fun MapboxScreen(
                         style = MaterialTheme.typography.labelSmall,
                     )
 
-                    Text(
-                        "✔\uFE0F Saved: ${
-                            DateFormat.getDateTimeInstance()
-                                .format(Date(note.createdAt))
-                        }",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Saved",
+                            tint = Color(0xFF81C784), // Light Green
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Saved: ${
+                                DateFormat.getDateTimeInstance().format(Date(note.createdAt))
+                            }",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
 
                     if (note.updateAt != 0L) {
                         Text(
@@ -574,7 +629,7 @@ fun MapboxScreen(
                     navController.navigate(Screen.WriteNoteScreen.routeWithNoteId(note.id))
                     mapboxViewModel.clearSelectedNote()
                 }) {
-                    Text("Go to note")
+                    Text("Edit note")
                 }
             },
             dismissButton = {
@@ -586,13 +641,10 @@ fun MapboxScreen(
     }
 }
 
-fun convertMetersToPixelsAtLatitude(
-    radius: Double,
-    latitude: Double,
-    zoom: Double
-): Double {
-    val earthCircumference = 40075017.0 // meters
-    val latitudeRadians = Math.toRadians(latitude)
-    val metersPerPixel = earthCircumference * cos(latitudeRadians) / (256 * 2.0.pow(zoom))
-    return radius / metersPerPixel
+//If device does not support OpenGL ES 3.0, mapbox map doesn't work. So checking openGL version here
+fun isOpenGL3Supported(context: Context): Boolean {
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val configInfo = activityManager.deviceConfigurationInfo
+    return configInfo.reqGlEsVersion >= 0x30000
 }
+

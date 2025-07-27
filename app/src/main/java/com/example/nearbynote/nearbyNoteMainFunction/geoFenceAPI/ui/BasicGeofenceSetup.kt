@@ -1,19 +1,25 @@
 package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -36,8 +42,9 @@ fun BasicGeofenceSetup(
     geofenceOptionsEnabled: Boolean = false,
     isFavoriteAddress: MutableState<Boolean>,
     favoriteAddressName: MutableState<String>,
-    isFavoriteAddressDisable: Boolean,
-    shouldDisableSavedAddressRow: Boolean
+    isFavoriteAddressDisable: MutableState<Boolean>,
+    shouldDisableSavedAddressRow: Boolean,
+    isGeofenceImmutable: Boolean
 ) {
     val radius by geofenceViewModel.radius.collectAsState()
     //   val geofenceStatus by geofenceViewModel.geofenceMessage.collectAsState()
@@ -52,7 +59,7 @@ fun BasicGeofenceSetup(
         }
     }
 
-    val clickableModifier = if (isFavoriteAddressDisable || shouldDisableSavedAddressRow) {
+    val clickableModifier = if (isFavoriteAddressDisable.value || shouldDisableSavedAddressRow) {
         Modifier
     } else {
         Modifier.clickable { isFavoriteAddress.value = !isFavoriteAddress.value }
@@ -80,7 +87,7 @@ fun BasicGeofenceSetup(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "Add to favorite addresses",
-                color = if (!isFavoriteAddressDisable && !shouldDisableSavedAddressRow) Color.Black else Color.Gray
+                color = if (!isFavoriteAddressDisable.value && !shouldDisableSavedAddressRow) Color.Black else Color.Gray
             )
         }
 
@@ -88,7 +95,7 @@ fun BasicGeofenceSetup(
             OutlinedTextField(
                 value = favoriteAddressName.value,
                 onValueChange = { if (it.length <= 20) favoriteAddressName.value = it },
-                label = { Text("Name for this favorite address?") },
+                label = { Text("Name for this address?") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
@@ -102,9 +109,11 @@ fun BasicGeofenceSetup(
             )
         }
 
+        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
         Text(
             text = "📏 Radius: $radiusDisplay",
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
         )
@@ -124,7 +133,7 @@ fun BasicGeofenceSetup(
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp),
-                enabled = geofenceOptionsEnabled
+                enabled = !isGeofenceImmutable
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -142,8 +151,30 @@ fun BasicGeofenceSetup(
                 singleLine = true,
                 modifier = Modifier.width(100.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                enabled = geofenceOptionsEnabled
+                enabled = !isGeofenceImmutable
             )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            listOf(100, 300, 500, 700).forEach { preset ->
+                OutlinedButton(
+                    onClick = {
+                        radiusSliderValue = preset.toFloat()
+                        geofenceViewModel.onRadiusChanged(preset.toString())
+                    },
+                    shape = RoundedCornerShape(20),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    enabled = !isGeofenceImmutable
+                ) {
+                    Text("$preset m", style = MaterialTheme.typography.labelMedium)
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))

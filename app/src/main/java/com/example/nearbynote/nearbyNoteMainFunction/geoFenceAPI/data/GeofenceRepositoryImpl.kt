@@ -28,4 +28,8 @@ class GeofenceRepositoryImpl @Inject constructor(
     override suspend fun deleteAllGeofences() {
         geofenceDao.deleteAll()
     }
+
+    override suspend fun getAllGeofencesOnce(): List<GeofenceEntity> {
+        return geofenceDao.getAllGeofencesOnce()
+    }
 }

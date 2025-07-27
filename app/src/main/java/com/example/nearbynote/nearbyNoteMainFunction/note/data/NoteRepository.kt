@@ -19,4 +19,8 @@ class NoteRepository @Inject constructor(
     suspend fun getNoteByGeofenceId(geofenceId: String): NoteEntity? {
         return dao.getNotesByGeofence(geofenceId).firstOrNull()
     }
+
+    suspend fun getNotesByLocation(note: String) = dao.getNotesByLocation(note)
+
+
 }

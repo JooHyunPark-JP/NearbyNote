@@ -19,11 +19,16 @@ interface GeofenceDao {
     @Query("SELECT * FROM geofences")
     fun getAllGeofences(): Flow<List<GeofenceEntity>>
 
+    //suspend function to get all geofences for bootcompleteReceiver
+    @Query("SELECT * FROM geofences")
+    suspend fun getAllGeofencesOnce(): List<GeofenceEntity>
+
     @Query("DELETE FROM geofences")
     suspend fun deleteAll()
 
     @Delete
     suspend fun delete(geofence: GeofenceEntity)
+
 
 
 }

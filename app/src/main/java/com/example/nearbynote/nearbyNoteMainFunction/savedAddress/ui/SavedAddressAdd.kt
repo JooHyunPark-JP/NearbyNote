@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.example.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
@@ -29,6 +30,7 @@ fun SavedAddressAdd(
     navController: NavController,
     savedAddressViewModel: SavedAddressViewModel,
     noteViewModel: NoteViewModel,
+    geofenceViewModel: GeofenceViewModel
 ) {
     val context = LocalContext.current
     val addressQuery = noteViewModel.addressQuery
@@ -55,7 +57,11 @@ fun SavedAddressAdd(
 
         AddressSearchSection(
             addressQuery = addressQuery,
-            onQueryChange = { noteViewModel.onQueryChanged(it) },
+            onQueryChange = {
+                noteViewModel.onQueryChanged(it)
+                selectedSuggestion.value = null
+            },
+
             suggestions = suggestions,
             onSuggestionSelected = { suggestion ->
                 selectedSuggestion.value = suggestion
@@ -63,7 +69,8 @@ fun SavedAddressAdd(
                 noteViewModel.suggestions = emptyList()
             },
             isAddressSearching = isAddressSearching,
-            noteViewModel = noteViewModel
+            noteViewModel = noteViewModel,
+            geofenceViewModel = geofenceViewModel
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -85,12 +92,12 @@ fun SavedAddressAdd(
                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
                 if (suggestion == null) {
-                    Toast.makeText(context, "Please select an address.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Please select a valid address from the suggestions list.", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 
                 if (name.isBlank()) {
-                    Toast.makeText(context, "Please enter a name.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Please enter a name of this address.", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
 

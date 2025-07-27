@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -140,9 +143,20 @@ fun PermissionRow(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    val icon = when (status) {
-        is PermissionStatus.Granted -> "✔️"
-        is PermissionStatus.Denied -> "❌"
+
+    val iconImage: ImageVector
+    val iconColor: Color
+
+    when (status) {
+        is PermissionStatus.Granted -> {
+            iconImage = Icons.Default.Check
+            iconColor = Color(0xFF81C784)
+        }
+
+        is PermissionStatus.Denied -> {
+            iconImage = Icons.Default.Close
+            iconColor = Color(0xFFFF2C2C)
+        }
     }
 
     if (showDialog) {
@@ -181,6 +195,10 @@ fun PermissionRow(
                 )
             }
         }
-        Text(icon)
+        Icon(
+            imageVector = iconImage,
+            contentDescription = null,
+            tint = iconColor,
+        )
     }
 }

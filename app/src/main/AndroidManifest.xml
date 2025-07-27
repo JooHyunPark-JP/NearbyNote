@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 
+
     <application
         android:name=".MyApplication"
         android:allowBackup="false"
@@ -53,6 +54,22 @@
         <meta-data
             android:name="com.mapbox.access_token"
             android:value="@string/mapbox_access_token" />
+
+        <receiver
+            android:name=".nearbyNoteMainFunction.geoFenceAPI.util.BootCompleteReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".nearbyNoteMainFunction.geoFenceAPI.util.NearbyNoteForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
     </application>
 
 </manifest>

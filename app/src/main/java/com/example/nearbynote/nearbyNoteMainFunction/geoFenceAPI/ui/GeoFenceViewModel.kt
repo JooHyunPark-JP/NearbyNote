@@ -1,9 +1,12 @@
 package com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui
 
+import android.content.Intent
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
 import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceRepository
+import com.example.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.NearbyNoteForegroundService
 import com.example.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -61,20 +64,23 @@ class GeofenceViewModel @Inject constructor(
             }
         }*/
 
-    fun onRemoveAllGeofencesClick() {
-        geofenceManager.removeAllGeofences(
-            onSuccess = {
-                viewModelScope.launch {
-                    geofenceRepository.deleteAllGeofences()
-                }
-                _geofenceMessage.value = "🗑️ All geofences removed."
-            },
-            onFailure = {
-                _geofenceMessage.value = "❌ Failed to remove geofences: ${it.message}"
-            },
-            context = geofenceManager.context
-        )
-    }
+    /*    fun onRemoveAllGeofencesClick() {
+            geofenceManager.removeAllGeofences(
+                onSuccess = {
+                    viewModelScope.launch {
+                        geofenceRepository.deleteAllGeofences()
+
+                        val stopIntent = Intent(geofenceManager.context, NearbyNoteForegroundService::class.java)
+                        geofenceManager.context.stopService(stopIntent)
+                    }
+                    _geofenceMessage.value = "🗑️ All geofences removed."
+                },
+                onFailure = {
+                    _geofenceMessage.value = "❌ Failed to remove geofences: ${it.message}"
+                },
+                context = geofenceManager.context
+            )
+        }*/
 
     fun onSuggestionSelected(suggestion: AddressSuggestion) {
         _latitude.value = suggestion.latitude.toString()
@@ -104,6 +110,11 @@ class GeofenceViewModel @Inject constructor(
                 createdAt = System.currentTimeMillis()
             )
             geofenceRepository.saveGeofence(entity)
+
+            //enable foreground service
+            val serviceIntent =
+                Intent(geofenceManager.context, NearbyNoteForegroundService::class.java)
+            ContextCompat.startForegroundService(geofenceManager.context, serviceIntent)
         }
     }
 
@@ -122,6 +133,16 @@ class GeofenceViewModel @Inject constructor(
                         viewModelScope.launch {
                             geofenceRepository.deleteGeofence(entity)
                             _geofenceMessage.value = "✅ Geofence removed for ID: $geofenceId"
+
+                            //remove foreground service if there is no geofence saved on the app
+                            val remaining = geofenceRepository.getAllGeofencesOnce().size
+                            if (remaining == 0) {
+                                val stopIntent = Intent(
+                                    geofenceManager.context,
+                                    NearbyNoteForegroundService::class.java
+                                )
+                                geofenceManager.context.stopService(stopIntent)
+                            }
                         }
                     },
                     onFailure = {
@@ -134,4 +155,7 @@ class GeofenceViewModel @Inject constructor(
     }
 
 
+    suspend fun hasAnyGeofenceRegistered(): Boolean {
+        return geofenceRepository.getAllGeofencesOnce().isNotEmpty()
+    }
 }

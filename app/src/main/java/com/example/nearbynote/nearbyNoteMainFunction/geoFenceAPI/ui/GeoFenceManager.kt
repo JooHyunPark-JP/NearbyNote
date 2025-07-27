@@ -155,21 +155,21 @@ class GeofenceManager @Inject constructor(
             }
     }
 
-    fun removeAllGeofences(
-        onSuccess: () -> Unit = {},
-        onFailure: (Throwable) -> Unit = {},
-        context: Context
-    ) {
-        geofencingClient.removeGeofences(getGeofencePendingIntent(context))
-            .addOnSuccessListener {
-                Log.d("GeofenceManager", "All geofences removed.")
-                onSuccess()
-            }
-            .addOnFailureListener { e ->
-                Log.e("GeofenceManager", "Failed to remove geofences: ${e.message}")
-                onFailure(e)
-            }
-    }
+    /*    fun removeAllGeofences(
+            onSuccess: () -> Unit = {},
+            onFailure: (Throwable) -> Unit = {},
+            context: Context
+        ) {
+            geofencingClient.removeGeofences(getGeofencePendingIntent(context))
+                .addOnSuccessListener {
+                    Log.d("GeofenceManager", "All geofences removed.")
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("GeofenceManager", "Failed to remove geofences: ${e.message}")
+                    onFailure(e)
+                }
+        }*/
 
     fun removeGeofenceById(
         geofenceId: String,
@@ -198,4 +198,6 @@ class GeofenceManager @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
     }
+
+
 }

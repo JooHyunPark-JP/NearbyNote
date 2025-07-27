@@ -82,6 +82,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
+    //Coroutine play service
+    implementation(libs.kotlinx.coroutines.play.service)
+
     //Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

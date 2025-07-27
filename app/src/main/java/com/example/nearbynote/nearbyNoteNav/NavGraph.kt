@@ -67,15 +67,8 @@ fun NavGraph(
             SavedAddressAdd(
                 navController = navController,
                 savedAddressViewModel = savedAddressViewModel,
-                noteViewModel = noteViewModel
-            )
-        }
-
-        composable(Screen.SavedAddressAddScreen.route) {
-            SavedAddressAdd(
-                navController = navController,
-                savedAddressViewModel = savedAddressViewModel,
-                noteViewModel = noteViewModel
+                noteViewModel = noteViewModel,
+                geofenceViewModel = geofenceViewModel
             )
         }
 
