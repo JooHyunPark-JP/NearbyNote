@@ -64,7 +64,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.nearbynote.R
@@ -253,14 +252,6 @@ fun WriteNoteScreen(
                     }
                 },
             )
-
-            if (isGeofenceImmutable) {
-                Text(
-                    text = "📍 This note already has a location reminder. To change location, please create a new note.",
-                    style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray),
-                    textAlign = TextAlign.Center,
-                )
-            }
 
             if (geofenceEnabled) {
                 OutlinedButton(
@@ -779,7 +770,7 @@ fun NoteTextField(
     onNoteChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val paperColor = Color(0xFFFFFDE7) // 연노랑 종이 느낌
+    val paperColor = Color(0xFFFFFDE7)
 
     TextField(
         value = noteText,

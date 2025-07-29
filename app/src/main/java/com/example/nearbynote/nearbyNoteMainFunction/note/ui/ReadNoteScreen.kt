@@ -119,7 +119,7 @@ fun ReadNoteScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 12.dp)
-                            .height(screenHeight * 0.4f)
+                            .height(screenHeight * 0.5f)
                             .shadow(
                                 elevation = 10.dp,
                                 shape = RoundedCornerShape(20.dp),
@@ -127,7 +127,7 @@ fun ReadNoteScreen(
                                 spotColor = Color.Black.copy(alpha = 1.00f)
                             ),
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDE7)),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
@@ -215,9 +215,12 @@ fun ReadNoteScreen(
                     )
                 }
                 items(sameLocationNotes) { it ->
+                    val pinForNote = remember(it.id) {
+                        pinImages[(it.id % pinImages.size).toInt()]
+                    }
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Image(
-                            painter = painterResource(id = R.drawable.note_pin2),
+                            painter = painterResource(pinForNote),
                             contentDescription = "Pin",
                             modifier = Modifier
                                 .size(32.dp)
