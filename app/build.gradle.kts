@@ -11,7 +11,10 @@ plugins {
 
 }
 
-val MAPBOX_API_KEY: String by project
+val MAPBOX_API_KEY = project.findProperty("MAPBOX_API_KEY") as String
+
+val keystorePassword = project.findProperty("KEYSTORE_PASSWORD") as String
+val keyPassword = project.findProperty("KEY_PASSWORD") as String
 
 android {
     namespace = "com.example.nearbynote"
@@ -28,12 +31,21 @@ android {
 
         resValue("string", "mapbox_access_token", MAPBOX_API_KEY)
         buildConfigField("String", "MAPBOX_API_KEY", "\"${MAPBOX_API_KEY}\"")
+    }
 
-
+    signingConfigs {
+        create("release") {
+            storeFile = file("app/keystore/nearbynote-release.jks")
+            storePassword = keystorePassword
+            keyAlias = "nearbynote"
+            keyPassword = keyPassword
+        }
     }
 
     buildTypes {
-        release {
+
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -41,6 +53,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
