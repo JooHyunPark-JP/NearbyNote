@@ -19,3 +19,26 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+
+-keep class androidx.lifecycle.ViewModel { *; }
+-keep class androidx.lifecycle.ViewModelProvider { *; }
+
+
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+
+
+-keep class kotlin.** { *; }
+
+
+-keep class kotlinx.serialization.** { *; }
+
+
+-keep class com.example.nearbynote.MainActivity { *; }
+
+
+-keep class androidx.navigation.** { *; }
+
+
+-keep class com.mapbox.** { *; }
