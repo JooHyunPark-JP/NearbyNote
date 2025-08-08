@@ -40,7 +40,6 @@ class BootCompleteReceiver : BroadcastReceiver() {
                 if (geofences.isNotEmpty()) {
                     val serviceIntent = Intent(appContext, NearbyNoteForegroundService::class.java)
                     appContext.startForegroundService(serviceIntent)
-                    Log.d("BootReceivertest", "Foreground service started after reboot.")
                 }
 
                 geofences.forEach { entity ->
@@ -70,10 +69,10 @@ class BootCompleteReceiver : BroadcastReceiver() {
                                 getGeofencePendingIntent(appContext)
                             ).await()
                         } catch (e: Exception) {
-                            Log.e(
+/*                            Log.e(
                                 "BootReceiver",
                                 "Failed to re-add geofence ${entity.id}: ${e.message}"
-                            )
+                            )*/
                         }
                     } else {
                         Log.w(

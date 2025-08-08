@@ -21,7 +21,6 @@ class NearbyNoteForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("onTaskRemovedWorks9", "ForegroundService started")
         startForeground(NOTIFICATION_ID, createNotification())
     }
 

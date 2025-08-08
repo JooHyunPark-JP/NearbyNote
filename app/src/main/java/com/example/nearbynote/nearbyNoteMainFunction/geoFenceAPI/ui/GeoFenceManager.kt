@@ -179,12 +179,12 @@ class GeofenceManager @Inject constructor(
     ) {
         geofencingClient.removeGeofences(listOf(geofenceId))
             .addOnSuccessListener {
-                Log.d("GeofenceManager", "✅ Geofence removed: $geofenceId")
+        //        Log.d("GeofenceManager", "✅ Geofence removed: $geofenceId")
                 activeGeofences.remove(geofenceId)
                 onSuccess()
             }
             .addOnFailureListener { e ->
-                Log.e("GeofenceManager", "❌ Failed to remove geofence $geofenceId: ${e.message}")
+         //       Log.e("GeofenceManager", "❌ Failed to remove geofence $geofenceId: ${e.message}")
                 onFailure(e)
             }
     }
