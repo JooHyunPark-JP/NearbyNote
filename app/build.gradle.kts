@@ -11,18 +11,10 @@ plugins {
 
 }
 
-//find from environment, if null then find it from gradle.property , if null, show error messahe
-val mapboxApiKey = System.getenv("MAPBOX_API_KEY")
-    ?: project.findProperty("MAPBOX_API_KEY") as? String
-    ?: error("MAPBOX_API_KEY is not defined.")
 
-val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
-    ?: project.findProperty("KEYSTORE_PASSWORD") as? String
-    ?: error("KEYSTORE_PASSWORD is not defined.")
-
-val keyPassword = System.getenv("KEY_PASSWORD")
-    ?: project.findProperty("KEY_PASSWORD") as? String
-    ?: error("KEY_PASSWORD is not defined.")
+val MAPBOX_API_KEY: String by project
+val KEYSTORE_PASSWORD: String by project
+val KEY_PASSWORD: String by project
 
 android {
     namespace = "com.example.nearbynote"
@@ -37,16 +29,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        resValue("string", "mapbox_access_token", mapboxApiKey)
-        buildConfigField("String", "MAPBOX_API_KEY", "\"${mapboxApiKey}\"")
+        resValue("string", "mapbox_access_token", MAPBOX_API_KEY)
+        buildConfigField("String", "MAPBOX_API_KEY", "\"${MAPBOX_API_KEY}\"")
     }
 
     signingConfigs {
         create("release") {
             storeFile = file("app/keystore/nearbynote-release.jks")
-            storePassword = keystorePassword
+            storePassword = KEYSTORE_PASSWORD
             keyAlias = "nearbynote"
-            keyPassword = keyPassword
+            keyPassword = KEY_PASSWORD
         }
     }
 

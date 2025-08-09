@@ -29,24 +29,16 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      - name: Setup gradle.properties
-        run: |
-          cat <<EOF > gradle.properties
-          android.useAndroidX=true
-          android.enableJetifier=true
-          kotlin.code.style=official
-          android.nonTransitiveRClass=true
-          EOF
-
       - name: Grant Gradle permission
         run: chmod +x ./gradlew  # Make the Gradle wrapper executable
 
       - name: Build and run Unit Tests
-        run: ./gradlew clean testDebugUnitTest  # Clean the project and run unit tests on the debug build
+        run: ./gradlew clean testDebugUnitTest
         env:
-          MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # 🔹 Gradle mapping: ORG_GRADLE_PROJECT_<PropName>
+          ORG_GRADLE_PROJECT_MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
+          ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload test report (JUnit)
         if: always()  # Run even if the previous step failed
