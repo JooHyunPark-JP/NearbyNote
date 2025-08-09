@@ -1,55 +1,67 @@
 # NearbyNote
 
-**NearbyNote** is a smart location-based memo app that reminds you of your notes when you arrive at a specific location.
+## Google Play link (Coming Soon)
+
+A link to the app on Google Play will be added here.
+
+## App Overview
+
+**NearbyNote** is a smart location-based memo app that automatically notifies you of your notes when you arrive at specific locations.  
+It helps you remember important tasks based on where you are.
+
+**Example Use Cases:**
+- When you arrive at the office: "Prepare for today's meeting"
+- When you get to the grocery store: "Buy fruits and eggs"
+- When you get home: "Open the windows"
+
+You can quickly create notes via voice recognition or text input,  
+and easily save locations using the interactive map.
 
 ---
 
 ## Key Features
 
-### Location-Based Reminders
-- Uses Geofencing API to detect when entering a defined area
-- Automatically sends notifications and opens the related note
-- Geofences are restored after device reboot (WorkManager + BootCompleteReceiver)
+### 1. Note Creation
+- Create notes via text or voice input *(currently supports English only)*
+- Converts voice to text using the Google Speech API
 
-### Notes
-- Leverages Google Speech Recognition to create notes with your voice (Voice-to-text note)
-- General Note or note with location setup
+### 2. Location-Based Notes Notifications
+- Set a location and geofence radius for each note
+- Get notified automatically when you enter the defined area
 
-### Map-Driven Note Management
-- Search locations with Mapbox Places API autocomplete
-- View and manage notes directly on the map
-- Tap any location on the map to add a note instantly
+### 3. Map Integration
+- Map UI powered by Mapbox
+- Create notes by clicking on the map or searching for an address
+- View notes by saved location
 
-### Smart Notifications
-- Keeps detecting location in the background and foreground
-- Automatically notifies and displays the memo even when app is closed
+### 4. Accurate Location Detection & Recovery
+- Continues location tracking even after app termination, reboot, or in the background
+- ForegroundService (Only runs when at least one location-based note exists) ensures consistent and accurate location updates
+- Uses optimized Android APIs (Geofencing, Location Services), resulting in low battery usage
 
-### Permission UX
-- Clear separation and request flow for foreground & background location permissions
-- Custom permission status page for transparency
-- Fully supports Android 11+ UX constraints (via Accompanist)
+### 5. Permissions Management UI
+- A dedicated page shows the current status of all permissions at a glance
 
 ---
 
 ## Tech Stack
 
-| Category | Technology |
-|---------|------------|
-| UI | Jetpack Compose |
-| Architecture | MVVM, Hilt (DI) |
-| Storage | Room Database |
-| Async | Kotlin Coroutines, Flow |
-| Maps & Location | Mapbox Places API, Geofencing API |
-| Voice | Google Speech API |
-| Permissions | Accompanist Permissions |
-| Network | Ktor + kotlinx.serialization |
-| Background Tasks | WorkManager, ForegroundService, BootCompleteReceiver |
-| Testing | JUnit, MockK |
-| CI/CD | GitHub Actions (automated testing & APK build)
+| Category         | Technology                          |
+|------------------|--------------------------------------|
+| UI               | Jetpack Compose                     |
+| Architecture     | MVVM, Hilt (Dependency Injection)   |
+| Storage          | Room Database                       |
+| Async            | Kotlin Coroutines, Flow             |
+| Maps & Location  | Mapbox Places API, Geofencing API   |
+| Voice            | Google Speech API                   |
+| Network          | Ktor + kotlinx.serialization        |
+| Background Tasks | ForegroundService, BroadcastReceiver, Notification |
+| Permissions      | Accompanist                         |
+| Testing          | JUnit, MockK                        |
+| CI/CD            | GitHub Actions (automated testing & APK build) |
 
+---
 
-## 📸 Screenshots (Coming Soon)
+## Screenshots (Coming Soon)
 
 Screenshots of the app UI will be added here.
-
-
