@@ -11,10 +11,15 @@ plugins {
 
 }
 
-val mapboxApiKey = project.findProperty("MAPBOX_API_KEY") as String
+val mapboxApiKey = project.findProperty("MAPBOX_API_KEY") as? String
+    ?: error("MAPBOX_API_KEY is not defined. Please provide it.")
 
-val keystorePassword = project.findProperty("KEYSTORE_PASSWORD") as String
-val keyPassword = project.findProperty("KEY_PASSWORD") as String
+
+val keystorePassword = project.findProperty("KEYSTORE_PASSWORD") as? String
+    ?: error("KEYSTORE_PASSWORD is not defined. Please provide it.")
+
+val keyPassword = project.findProperty("KEY_PASSWORD") as? String
+    ?: error("KEY_PASSWORD is not defined. Please provide it.")
 
 android {
     namespace = "com.example.nearbynote"
