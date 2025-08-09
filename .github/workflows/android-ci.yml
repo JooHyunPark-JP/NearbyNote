@@ -2,9 +2,9 @@ name: Android CI  # Workflow name displayed in GitHub Actions UI
 
 on:
   pull_request:
-    branches: [develop]  # Trigger on pull requests targeting the 'develop' branch
+    branches: [ develop ]  # Trigger on pull requests targeting the 'develop' branch
   push:
-    branches: [develop, 'feature/**']  # Trigger on pushes to 'develop' and any 'feature/*' branches
+    branches: [ develop, 'feature/**' ]  # Trigger on pushes to 'develop' and any 'feature/*' branches
 
 jobs:
   build:
@@ -29,18 +29,20 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-
       - name: Setup gradle.properties
         run: |
           cat <<EOF > gradle.properties
-         android.useAndroidX=true
-         android.enableJetifier=true
-         kotlin.code.style=official
-         android.nonTransitiveRClass=true
-         EOF
+          android.useAndroidX=true
+          android.enableJetifier=true
+          kotlin.code.style=official
+          android.nonTransitiveRClass=true
+          EOF
+
+      - name: Grant Gradle permission
+        run: chmod +x ./gradlew  # Make the Gradle wrapper executable
 
       - name: Build and run Unit Tests
-        run: ./gradlew clean testDebugUnitTest -Dandroid.useAndroidX=true  # Clean the project and run unit tests on the debug build
+        run: ./gradlew clean testDebugUnitTest  # Clean the project and run unit tests on the debug build
         env:
           MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
