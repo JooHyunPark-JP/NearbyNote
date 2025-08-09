@@ -52,10 +52,4 @@
 
 Screenshots of the app UI will be added here.
 
----
-
-## 📦 Installation
-
-```bash
-# APK download or Play Store link will be added soon
 
