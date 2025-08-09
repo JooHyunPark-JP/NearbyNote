@@ -11,7 +11,7 @@ plugins {
 
 }
 
-val MAPBOX_API_KEY = project.findProperty("MAPBOX_API_KEY") as String
+val mapboxApiKey = project.findProperty("MAPBOX_API_KEY") as String
 
 val keystorePassword = project.findProperty("KEYSTORE_PASSWORD") as String
 val keyPassword = project.findProperty("KEY_PASSWORD") as String
@@ -29,8 +29,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        resValue("string", "mapbox_access_token", MAPBOX_API_KEY)
-        buildConfigField("String", "MAPBOX_API_KEY", "\"${MAPBOX_API_KEY}\"")
+        resValue("string", "mapbox_access_token", mapboxApiKey)
+        buildConfigField("String", "MAPBOX_API_KEY", "\"${mapboxApiKey}\"")
     }
 
     signingConfigs {
