@@ -35,7 +35,7 @@
 -keep class kotlinx.serialization.** { *; }
 
 
--keep class com.example.nearbynote.MainActivity { *; }
+-keep class com.pjh.nearbynote.MainActivity { *; }
 
 
 -keep class androidx.navigation.** { *; }
