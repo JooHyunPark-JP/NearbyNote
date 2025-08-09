@@ -17,11 +17,11 @@ val KEYSTORE_PASSWORD: String by project
 val KEY_PASSWORD: String by project
 
 android {
-    namespace = "com.example.nearbynote"
+    namespace = "com.pjh.nearbynote"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.nearbynote"
+        applicationId = "com.pjh.nearbynote"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
