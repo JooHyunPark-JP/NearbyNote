@@ -29,6 +29,15 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
+      - name: Setup gradle.properties (CI only)
+        run: |
+          cat <<EOF > gradle.properties
+          android.useAndroidX=true
+          android.enableJetifier=true
+          kotlin.code.style=official
+          android.nonTransitiveRClass=true
+          EOF
+
       - name: Grant Gradle permission
         run: chmod +x ./gradlew  # Make the Gradle wrapper executable
 
