@@ -33,7 +33,7 @@ jobs:
         run: chmod +x ./gradlew  # Make the Gradle wrapper executable
 
       - name: Build and run Unit Tests
-        run: ./gradlew clean testDebugUnitTest  # Clean the project and run unit tests on the debug build
+        run: ./gradlew clean testDebugUnitTest -Dandroid.useAndroidX=true  # Clean the project and run unit tests on the debug build
         env:
           MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
