@@ -1,0 +1,39 @@
+name: Android CD
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Decode service account json
+        run: |
+          echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" > "${{ github.workspace }}/service-account.json"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build signed AAB
+        run: ./gradlew bundleRelease
+
+      - name: Upload to Google Play (Internal Testing)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ github.workspace }}/service-account.json
+          packageName: com.pjh.nearbynote
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
