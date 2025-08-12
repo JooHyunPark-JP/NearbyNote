@@ -35,7 +35,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("app/keystore/nearbynote-release.jks")
+            storeFile = file("./keystore/nearbynote-release.jks")
             storePassword = KEYSTORE_PASSWORD
             keyAlias = "nearbynote"
             keyPassword = KEY_PASSWORD
