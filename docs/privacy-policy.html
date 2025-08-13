@@ -1,91 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Privacy Policy for NearbyNote</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Privacy Policy — NearbyNote</title>
   <style>
-    body {
-      font-family: sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
-      line-height: 1.6;
-    }
-    h1, h2 {
-      color: #333;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #ccc;
-      margin: 2em 0;
-    }
-    ul {
-      padding-left: 1.2em;
-    }
+    :root { color-scheme: light dark; }
+    body { margin: 2rem auto; max-width: 820px; line-height: 1.6; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; padding: 0 1rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.2rem; }
+    .muted { color: #6b7280; font-size: 0.95rem; }
+    section { margin: 1.5rem 0; }
+    ul { margin: 0.5rem 0 0.5rem 1.25rem; }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    a { color: inherit; text-decoration: underline; }
+    hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Privacy Policy — NearbyNote</h1>
+    <p class="muted"><strong>Last Updated:</strong> August 13, 2025</p>
+  </header>
+  <hr />
 
-  <h1>Privacy Policy for NearbyNote</h1>
-  <p><strong>Last Updated:</strong> August 12, 2025</p>
+  <p><span class="mono">NearbyNote</span> (“the App”) provides location-based reminders on Android. We design the App to minimize data leaving your device. We do not operate any server backend.</p>
 
-  <p>This Privacy Policy explains how the NearbyNote mobile application handles user data. NearbyNote respects your privacy and was designed to prioritize simplicity, transparency, and on-device data handling.</p>
+  <section id="data-we-access-process">
+    <h2>1) Data We Access/Process</h2>
 
-  <hr>
+    <h3>Location (precise/approximate, including background)</h3>
+    <p>Used to create and trigger your geofences and to display your position on the map.</p>
 
-  <h2>1. What the App Collects — and Why</h2>
-  <p>NearbyNote uses the following types of data strictly to support its core functionality:</p>
-  <ul>
-    <li><strong>Location Information:</strong> The app uses the user's location to trigger notes when the user enters predefined areas. Location data is processed locally and is never transmitted or stored externally.</li>
-    <li><strong>Microphone Access (Speech Input):</strong> When users choose to create a note using their voice, the app utilizes Google’s Speech API to convert speech to text. Audio is not recorded or stored; the conversion is handled temporarily by Google's API.</li>
-    <li><strong>Boot State & Wake Locks:</strong> To ensure that location-based reminders remain functional after device restarts, the app may start a minimal background service. Temporary wake locks may be used to maintain reliability during these operations.</li>
-    <li><strong>Internet & Network Access:</strong> Network access is required to load map data (via Mapbox) and perform speech-to-text conversion. No analytics, tracking, or cloud-based storage is implemented.</li>
-    <li><strong>Permission Management:</strong> A dedicated page within the app displays all requested permissions. Users can review their permission status and are provided with shortcuts to system settings to modify or revoke them at any time.</li>
-  </ul>
+    <h3>Network &amp; map requests</h3>
+    <p>Required to load map tiles and perform place search via Mapbox. Requests can include your IP address and app/device metadata needed to provide these services.</p>
 
-  <hr>
+    <h3>Microphone (optional, when you start voice input)</h3>
+    <p>The App invokes the device’s built-in speech recognition service (e.g., Google Speech Services). Audio is handled by that provider according to your device settings. The App does not capture or store audio.</p>
 
-  <h2>2. How the App Uses Data</h2>
-  <p>Data collected is used solely for:</p>
-  <ul>
-    <li>Displaying location-based notifications</li>
-    <li>Enabling voice input for note creation</li>
-    <li>Ensuring reliability across reboots and background states</li>
-  </ul>
-  <p>The app does not use any data for behavioral tracking, advertising, or analytics.</p>
+    <h3>Local app data (notes, saved places, geofence settings)</h3>
+    <p>Stored only on your device using local storage.</p>
 
-  <hr>
+    <p><em>The App does not include ads or third-party analytics SDKs.</em></p>
+  </section>
 
-  <h2>3. Data Sharing</h2>
-  <p>NearbyNote does not share, sell, or transmit user data to any third party. All data remains stored on the user’s device and is never uploaded to a server.</p>
+  <section id="how-we-use-data">
+    <h2>2) How We Use the Data</h2>
+    <ul>
+      <li>Provide core features: geofence notifications, maps, place search, and optional voice input.</li>
+      <li>Ensure reliability in the background and after reboot using Android Location &amp; Geofencing APIs (Google Play services), a foreground service, and a boot receiver.</li>
+      <li>We do not use your data for advertising, profiling, or sale.</li>
+    </ul>
+  </section>
 
-  <hr>
+  <section id="third-parties">
+    <h2>3) Third-Party Services</h2>
+    <p>To deliver specific features, the App interacts with:</p>
+    <ul>
+      <li><strong>Mapbox</strong> — map tiles and geocoding/place search. The Mapbox SDK and related services may process diagnostic or usage information in accordance with Mapbox’s privacy notice.</li>
+      <li><strong>Device speech recognition service</strong> (e.g., Google Speech Services) — used only when you start voice input; processing may occur on-device or by the provider per device capabilities and settings.</li>
+      <li><strong>Android/Google Play services (Location &amp; Geofencing APIs)</strong> — system components on your device that determine location and deliver geofence enter/exit events to the App.</li>
+    </ul>
+    <p>We do not receive your notes or transcripts on any server we operate.</p>
+  </section>
 
-  <h2>4. Data Security</h2>
-  <p>Because NearbyNote operates entirely on-device and does not connect to external servers, the risk of data breaches is significantly reduced. All permissions are requested transparently and used only when required to support key features.</p>
+  <section id="data-sharing">
+    <h2>4) Data Sharing</h2>
+    <p>We do not share data with third parties for their independent marketing. Limited transfers occur only as necessary to deliver maps/geocoding and, if invoked, speech recognition. Platform services (Android/Google Play services) may process location to provide system features.</p>
+  </section>
 
-  <hr>
+  <section id="retention-deletion">
+    <h2>5) Data Retention &amp; Deletion</h2>
+    <ul>
+      <li>On-device data (notes, geofences, saved places) remains on your device until you delete it or uninstall the App.</li>
+      <li>Third-party processing (Mapbox, device speech service, platform location services) follows each provider’s retention practices.</li>
+      <li>You can delete items in the App or uninstall to remove local data.</li>
+    </ul>
+  </section>
 
-  <h2>5. Children’s Privacy</h2>
-  <p>NearbyNote is designed for a general audience and is not intended for use by children under the age of 13. The app does not knowingly collect data from children and does not serve personalized content or advertisements.</p>
+  <section id="choices-controls">
+    <h2>6) Your Choices &amp; Controls</h2>
+    <ul>
+      <li><strong>Permissions</strong> — You can grant/deny location, microphone, and notifications at runtime and later change them in Android Settings.</li>
+      <li><strong>Background location</strong> — Requested only to deliver geofence reminders; if you remove all location-based notes, background location is no longer needed.</li>
+      <li><strong>Maps &amp; network</strong> — Maps and place search require network connectivity; disabling permissions or network may limit features.</li>
+    </ul>
+  </section>
 
-  <hr>
+  <section id="children">
+    <h2>7) Children’s Privacy</h2>
+    <p>The App targets a general audience and is not directed to children under 13. We do not knowingly collect data from children.</p>
+  </section>
 
-  <h2>6. User Control</h2>
-  <p>Users maintain full control over their data and permissions:</p>
-  <ul>
-    <li>Permissions can be denied or revoked at any time</li>
-    <li>Uninstalling the app permanently deletes all stored data</li>
-    <li>In-app tools are provided to manage privacy and permission settings</li>
-  </ul>
-  <p>NearbyNote stores all data locally, ensuring user information remains private.</p>
+  <section id="security">
+    <h2>8) Security</h2>
+    <p>All network communication uses HTTPS. Android cloud backup for the App is disabled to reduce unintended copies of local data. We do not operate a remote server for your notes.</p>
+  </section>
 
-  <hr>
+  <section id="international-processing">
+    <h2>9) International Processing</h2>
+    <p>Our providers (e.g., Mapbox, device/OS services) may process data on servers outside your country. Refer to each provider’s privacy notice for details.</p>
+  </section>
 
-  <h2>7. Contact</h2>
-  <p>For any questions or concerns regarding this Privacy Policy, please contact:</p>
-  <p><strong>pjh0629@gmail.com</strong></p>
+  <section id="changes">
+    <h2>10) Changes</h2>
+    <p>We may update this Policy; the “Last Updated” date will reflect the latest version.</p>
+  </section>
 
+  <section id="contact">
+    <h2>11) Contact</h2>
+    <p>Email: <a href="mailto:pjh0629@gmail.com">pjh0629@gmail.com</a></p>
+  </section>
+
+  <footer class="muted" style="margin-top:2rem">
+    <p>&copy; <span id="year">2025</span> NearbyNote</p>
+    <script>
+      // optional: keep year current if hosted on the web (safe no-op in Play Console)
+      (function(){ try { document.getElementById('year').textContent = new Date().getFullYear(); } catch(e){} })();
+    </script>
+  </footer>
 </body>
 </html>
