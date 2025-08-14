@@ -19,6 +19,7 @@ val KEY_PASSWORD: String by project
 android {
     namespace = "com.pjh.nearbynote"
     compileSdk = 35
+    flavorDimensions += "distribution_build"
 
     defaultConfig {
         applicationId = "com.pjh.nearbynote"
@@ -31,6 +32,17 @@ android {
 
         resValue("string", "mapbox_access_token", MAPBOX_API_KEY)
         buildConfigField("String", "MAPBOX_API_KEY", "\"${MAPBOX_API_KEY}\"")
+    }
+
+    productFlavors {
+        create("review") {
+            dimension = "distribution_build"
+            buildConfigField("boolean", "REVIEW_MODE", "true")
+        }
+        create("public") {
+            dimension = "distribution_build"
+            buildConfigField("boolean", "REVIEW_MODE", "false")
+        }
     }
 
     signingConfigs {
@@ -55,14 +67,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.7.3"
     }
     buildFeatures {
         compose = true

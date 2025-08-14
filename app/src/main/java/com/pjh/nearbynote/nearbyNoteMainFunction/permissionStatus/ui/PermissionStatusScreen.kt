@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.pjh.nearbynote.nearbyNoteDemo.ui.ReviewDemoSection
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -50,6 +51,8 @@ fun PermissionStatusScreen(navController: NavController) {
     val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val notificationPermission = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
     val microphonePermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+
+    // val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
@@ -131,6 +134,41 @@ fun PermissionStatusScreen(navController: NavController) {
         ) {
             Text("Go to Settings")
         }
+
+        ReviewDemoSection(latestNoteId = 11, onTrigger = {})
+
+        /*        //For testing purposes
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    item {
+                        Text(
+                            "📍 Geofences",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+
+                    items(allGeofences) { geofence ->
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            Text("ID: ${geofence.id}")
+                            Text("📍 ${geofence.addressName}")
+                            Text("Lat: ${geofence.latitude}, Lng: ${geofence.longitude}")
+                            Text("Radius: ${geofence.radius}m")
+                            Text(
+                                "Created at: ${
+                                    DateFormat.getDateTimeInstance()
+                                        .format(Date(geofence.createdAt))
+                                }"
+                            )
+                            HorizontalDivider()
+                        }
+                    }
+                }*/
     }
 }
 
@@ -202,3 +240,4 @@ fun PermissionRow(
         )
     }
 }
+

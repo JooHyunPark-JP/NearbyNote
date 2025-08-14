@@ -7,13 +7,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingEvent
 import com.pjh.nearbynote.MainActivity
 import com.pjh.nearbynote.R
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.di.NoteDaoEntryPoint
 import com.pjh.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.pjh.nearbynote.nearbyNoteMainFunction.note.data.NoteRepository
-import com.google.android.gms.location.Geofence
-import com.google.android.gms.location.GeofencingEvent
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +26,8 @@ import java.util.Locale
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+
+
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent?.hasError() == true) return
 

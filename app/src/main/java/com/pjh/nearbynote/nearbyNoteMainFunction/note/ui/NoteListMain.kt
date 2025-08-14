@@ -53,14 +53,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import com.pjh.nearbynote.R
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
 import com.pjh.nearbynote.nearbyNoteMainFunction.note.data.NoteEntity
 import com.pjh.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.pjh.nearbynote.nearbyNoteNav.Screen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
 import java.text.DateFormat
 import java.util.Date
 
@@ -74,7 +74,7 @@ fun NoteListMain(
     savedAddressViewModel: SavedAddressViewModel
 ) {
     val notes by noteViewModel.notes.collectAsState()
-    val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
+    //  val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
 
     val savedAddresses by savedAddressViewModel.savedAddresses.collectAsState()
 
@@ -300,9 +300,12 @@ fun NoteListMain(
                                 }
                             }
 
+
                         }
 
                         Spacer(modifier = Modifier.height(4.dp))
+
+
                     }
                 }
             }
