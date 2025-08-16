@@ -42,7 +42,7 @@ jobs:
         run: chmod +x ./gradlew  # Make the Gradle wrapper executable
 
       - name: Build and run Unit Tests
-        run: ./gradlew -Dandroid.useAndroidX=true -Dandroid.enableJetifier=true clean testDebugUnitTest
+        run: ./gradlew :app:testPublicDebugUnitTest :app:testReviewDebugUnitTest --stacktrace
         env:
           # Gradle mapping: ORG_GRADLE_PROJECT_<PropName>
           ORG_GRADLE_PROJECT_MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
