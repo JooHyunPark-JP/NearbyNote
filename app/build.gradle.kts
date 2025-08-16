@@ -17,15 +17,16 @@ val KEYSTORE_PASSWORD: String by project
 val KEY_PASSWORD: String by project
 
 android {
-    namespace = "com.example.nearbynote"
+    namespace = "com.pjh.nearbynote"
     compileSdk = 35
+    flavorDimensions += "distribution_build"
 
     defaultConfig {
-        applicationId = "com.example.nearbynote"
+        applicationId = "com.pjh.nearbynote"
         minSdk = 30
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -33,9 +34,20 @@ android {
         buildConfigField("String", "MAPBOX_API_KEY", "\"${MAPBOX_API_KEY}\"")
     }
 
+    productFlavors {
+        create("review") {
+            dimension = "distribution_build"
+            buildConfigField("boolean", "REVIEW_MODE", "true")
+        }
+        create("public") {
+            dimension = "distribution_build"
+            buildConfigField("boolean", "REVIEW_MODE", "false")
+        }
+    }
+
     signingConfigs {
         create("release") {
-            storeFile = file("app/keystore/nearbynote-release.jks")
+            storeFile = file("./keystore/nearbynote-release.jks")
             storePassword = KEYSTORE_PASSWORD
             keyAlias = "nearbynote"
             keyPassword = KEY_PASSWORD
@@ -55,14 +67,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.7.3"
     }
     buildFeatures {
         compose = true

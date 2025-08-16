@@ -42,7 +42,7 @@ jobs:
         run: chmod +x ./gradlew  # Make the Gradle wrapper executable
 
       - name: Build and run Unit Tests
-        run: ./gradlew -Dandroid.useAndroidX=true -Dandroid.enableJetifier=true clean testDebugUnitTest
+        run: ./gradlew :app:testPublicDebugUnitTest :app:testReviewDebugUnitTest --stacktrace
         env:
           # Gradle mapping: ORG_GRADLE_PROJECT_<PropName>
           ORG_GRADLE_PROJECT_MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
@@ -54,4 +54,6 @@ jobs:
         uses: actions/upload-artifact@v4  # Upload test results as artifacts
         with:
           name: junit-report  # Artifact name displayed in the GitHub UI
-          path: app/build/test-results/testDebugUnitTest/  # Path to JUnit test result files
+          path: |
+            app/build/test-results/testPublicDebugUnitTest/
+            app/build/test-results/testReviewDebugUnitTest/
