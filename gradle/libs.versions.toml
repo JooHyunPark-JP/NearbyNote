@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.1"
+agp = "8.12.0"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -90,7 +90,7 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 
 accompanist-jetpack-compose-permission = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
-mapbox-map = { group = "com.mapbox.maps", name = "android", version.ref = "mapboxmaps" }
+mapbox-map = { group = "com.mapbox.maps", name = "android-ndk27", version.ref = "mapboxmaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
