@@ -148,7 +148,7 @@ fun PermissionStatusScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         //Demo section for google tester and closed testing testers
-        if (!BuildConfig.REVIEW_MODE) {
+        if (BuildConfig.REVIEW_MODE) {
             ReviewDemoSection(
                 latestNoteId = latestNoteId,
                 onTrigger = { id ->
