@@ -22,5 +22,6 @@ class NoteRepository @Inject constructor(
 
     suspend fun getNotesByLocation(note: String) = dao.getNotesByLocation(note)
 
+    /*suspend fun getLatestGeofencedNote(): NoteEntity? = dao.getLatestGeofencedNote()*/
 
 }

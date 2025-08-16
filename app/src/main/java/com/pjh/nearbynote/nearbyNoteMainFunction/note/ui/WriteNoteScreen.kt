@@ -65,7 +65,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import com.pjh.nearbynote.R
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
@@ -73,10 +78,6 @@ import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewMode
 import com.pjh.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressEntity
 import com.pjh.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
 import com.pjh.nearbynote.nearbyNoteNav.Screen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -419,40 +420,54 @@ fun WriteNoteScreen(
             AlertDialog(
                 onDismissRequest = { showBackgroundDialog = false },
                 confirmButton = {
-                    TextButton(onClick = {
-                        showBackgroundDialog = false
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", context.packageName, null)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                "https://joohyunpark-jp.github.io/NearbyNote/privacy-policy".toUri()
+                            )
+                            context.startActivity(intent)
+                        }) { Text("Privacy Policy") }
+
+                        Row {
+                            TextButton(onClick = { showBackgroundDialog = false }) {
+                                Text("Not now")
+                            }
+                            TextButton(onClick = {
+                                showBackgroundDialog = false
+                                val intent =
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.fromParts("package", context.packageName, null)
+                                    }
+                                context.startActivity(intent)
+                            }) { Text("Open Settings") }
                         }
-                        // settingsLauncher.launch(intent)
-                        context.startActivity(intent)
-                    }) {
-                        Text("Open Settings")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = {
+/*                    TextButton(onClick = {
                         showBackgroundDialog = false
                     }) {
                         Text("Cancel")
-                    }
+                    }*/
                 },
-                title = { Text("Background location permission Required") },
+                title = { Text("Background location is required for geofence reminders") },
                 text = {
                     Text(
                         buildString {
-                            appendLine("📍 For a smarter note-taking experience...")
+                            appendLine("NearbyNote uses Android’s geofencing to trigger reminders even when the app isn’t open.")
                             appendLine()
-                            appendLine("To keep showing your note when you arrive at a location, your phone requires you to enable \"Allow all the time\" manually.")
+                            appendLine("This geofencing system requires Android's “Allow all the time” location access.")
                             appendLine()
-                            appendLine("📌 Don’t worry — your location is never stored or shared.")
-                            appendLine("You can always change anytime in Settings.")
+                            appendLine("• You can change this anytime in Settings.")
+                            appendLine("• Check privacy policy below for more details!")
                             appendLine()
-                            appendLine("🔧 How to set:")
-                            appendLine("1. Tap \"Open Settings\" below")
-                            appendLine("2. Tap \"Permissions\"")
-                            appendLine("3. Choose \"Location\"")
-                            appendLine("4. Select \"Allow all the time\"")
+                            appendLine("How to enable (may vary by device):")
+                            appendLine("1) Open Settings -> Permissions -> Location")
+                            appendLine("2) Choose “Allow all the time”")
                         }
                     )
                 }

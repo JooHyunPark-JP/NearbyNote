@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,12 +40,18 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.pjh.nearbynote.BuildConfig
 import com.pjh.nearbynote.nearbyNoteDemo.ui.ReviewDemoSection
+import com.pjh.nearbynote.nearbyNoteDemo.ui.triggerGeofenceDemo
+import com.pjh.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PermissionStatusScreen(navController: NavController) {
+fun PermissionStatusScreen(
+    navController: NavController,
+    noteViewModel: NoteViewModel
+) {
     val context = LocalContext.current
 
     val backgroundLocationPermission =
@@ -53,6 +61,8 @@ fun PermissionStatusScreen(navController: NavController) {
     val microphonePermission = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
 
     // val allGeofences by geofenceViewModel.allGeofences.collectAsState(initial = emptyList())
+
+    val latestNoteId by noteViewModel.latestGeofencedNoteId.collectAsState(initial = null)
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
@@ -135,7 +145,25 @@ fun PermissionStatusScreen(navController: NavController) {
             Text("Go to Settings")
         }
 
-        ReviewDemoSection(latestNoteId = 11, onTrigger = {})
+        Spacer(modifier = Modifier.height(8.dp))
+
+        //Demo section for google tester and closed testing testers
+        if (!BuildConfig.REVIEW_MODE) {
+            ReviewDemoSection(
+                latestNoteId = latestNoteId,
+                onTrigger = { id ->
+                    if (id != null) {
+                        triggerGeofenceDemo(context, id)
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Please create a geofenced note (Note with location) first to trigger events.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            )
+        }
 
         /*        //For testing purposes
                 LazyColumn(

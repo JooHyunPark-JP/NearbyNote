@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.GeofenceBroadcastReceiver
 
-const val ACTION_DEMO_GEOFENCE_ENTER = "com.pjh.nearbynote.action.DEMO_GEOFENCE_ENTER"
+const val ACTION_DEMO_GEOFENCE_ENTER = "DEMO_GEOFENCE_ENTER"
 const val EXTRA_NOTE_ID = "extra_note_id"
 
 fun triggerGeofenceDemo(context: Context, noteId: Long?) {

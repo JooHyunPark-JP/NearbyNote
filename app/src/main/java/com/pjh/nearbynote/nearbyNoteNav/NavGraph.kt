@@ -86,7 +86,7 @@ fun NavGraph(
         composable(Screen.PermissionStatusScreen.route) {
 /*            PermissionStatusScreen(navController = navController,
                 geofenceViewModel = geofenceViewModel)*/
-            PermissionStatusScreen(navController = navController)
+            PermissionStatusScreen(navController = navController, noteViewModel = noteViewModel)
         }
 
         composable(

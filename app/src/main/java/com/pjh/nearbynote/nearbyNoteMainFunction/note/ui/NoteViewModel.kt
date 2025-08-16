@@ -53,10 +53,24 @@ class NoteViewModel @Inject constructor(
     //checking condition if address is selected from else where, not by user from address search bar
     var isAddressSelected by mutableStateOf(false)
 
+    private val _latestGeofencedNoteId = MutableStateFlow<Long?>(null)
+    val latestGeofencedNoteId: StateFlow<Long?> = _latestGeofencedNoteId
+
+
     init {
         viewModelScope.launch {
-            noteRepository.allNotes.collectLatest {
-                _notes.value = it
+            noteRepository.allNotes.collectLatest { list ->
+                _notes.value = list
+
+                val latest = list
+                    .filter { it.geofenceId != null }
+                    .maxByOrNull { note ->
+
+                        val updated = note.updatedAt
+                        if (updated > 0L) updated else note.createdAt
+                    }
+
+                _latestGeofencedNoteId.value = latest?.id
             }
         }
 

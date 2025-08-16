@@ -32,4 +32,7 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE locationName = :locationName ORDER BY createdAt DESC")
     fun getNotesByLocation(locationName: String): Flow<List<NoteEntity>>
 
+/*    @Query("SELECT * FROM notes WHERE geofenceId IS NOT NULL ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLatestGeofencedNote(): NoteEntity?*/
+
 }
