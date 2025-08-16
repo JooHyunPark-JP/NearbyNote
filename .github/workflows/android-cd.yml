@@ -4,7 +4,7 @@ on:
   push:
     branches:
     # - release
-    
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p app/keystore
           echo "${{ secrets.UPLOAD_KEYSTORE }}" | base64 -d > app/keystore/nearbynote-release.jks    
-          
+
 
       - name: Setup gradle.properties (CD)
         run: |
