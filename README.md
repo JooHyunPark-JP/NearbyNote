@@ -35,13 +35,17 @@ and easily save locations using the interactive map.
 - Create notes by clicking on the map or searching for an address
 - View notes by saved location
 
-### 4. Accurate Location Detection & Recovery
+### 4. Saved Places (Favorites)
+- Save frequently used addresses and reuse them when creating notes
+- Manage your favorites for quicker setup of new location-based notes
+
+### 5. Accurate Location Detection & Recovery
 - Continues location tracking even after app termination, reboot, or in the background
 - Foreground service runs only when at least one location-based note exists
 - Uses optimized Android APIs (Geofencing + Google Play Services Location), designed for low battery usage
 - Restores geofences after reboot
 
-### 5. Permissions Management UI
+### 6. Permissions Management UI
 - A dedicated page shows the current status of all permissions at a glance
 
 ---
