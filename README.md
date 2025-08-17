@@ -62,13 +62,6 @@ and easily save locations using the interactive map.
 | Testing          | JUnit, MockK, Turbine |
 | CI/CD            | GitHub Actions |
 
----
-
-## Platform & Requirements
-- **Android 11+ (API 30+)**, target **API 35**
-
----
-
 ## Privacy (Short)
 - No account, no analytics or crash reporting
 - Notes are stored on-device
