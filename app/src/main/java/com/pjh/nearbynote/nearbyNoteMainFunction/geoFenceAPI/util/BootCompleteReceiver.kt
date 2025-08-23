@@ -36,12 +36,6 @@ class BootCompleteReceiver : BroadcastReceiver() {
             scope.launch {
                 val geofences = geofenceDao.getAllGeofencesOnce()
 
-                //if geofence is exist, enable the foreground services as well
-                if (geofences.isNotEmpty()) {
-                    val serviceIntent = Intent(appContext, NearbyNoteForegroundService::class.java)
-                    appContext.startForegroundService(serviceIntent)
-                }
-
                 geofences.forEach { entity ->
                     val geofence = Geofence.Builder()
                         .setRequestId(entity.id)
