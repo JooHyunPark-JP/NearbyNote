@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
+import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.GeofenceReconcileWorker
 import com.pjh.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxViewModel
 import com.pjh.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.pjh.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
@@ -37,6 +38,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        GeofenceReconcileWorker.schedule(this)
 
         val noteViewModel: NoteViewModel by viewModels()
         val geofenceViewModel: GeofenceViewModel by viewModels()
