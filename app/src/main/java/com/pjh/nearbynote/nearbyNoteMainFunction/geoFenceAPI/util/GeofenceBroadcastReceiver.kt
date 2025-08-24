@@ -28,48 +28,6 @@ import java.util.Locale
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
-    /*    override fun onReceive(context: Context, intent: Intent) {
-
-
-            val geofencingEvent = GeofencingEvent.fromIntent(intent)
-            if (geofencingEvent?.hasError() == true) return
-
-
-            val triggeringGeofenceId =
-                geofencingEvent?.triggeringGeofences?.firstOrNull()?.requestId ?: return
-            //val isInside = geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER
-            val geofenceTransition = geofencingEvent.geofenceTransition
-            if (geofenceTransition != Geofence.GEOFENCE_TRANSITION_ENTER) return
-
-            val isInside = when (geofenceTransition) {
-                // DWELL is trigger when user is stay in the location for some time.
-                //  Geofence.GEOFENCE_TRANSITION_DWELL -> true
-                Geofence.GEOFENCE_TRANSITION_ENTER -> true
-                //     Geofence.GEOFENCE_TRANSITION_EXIT -> false
-                else -> false
-            }
-
-
-            CoroutineScope(Dispatchers.IO).launch {
-                val appContext = context.applicationContext
-                val hiltEntryPoint = EntryPointAccessors.fromApplication(
-                    appContext,
-                    NoteDaoEntryPoint::class.java
-                )
-                val noteDao = hiltEntryPoint.noteDao()
-                val noteRepository = NoteRepository(noteDao)
-                val note = noteRepository.getNoteByGeofenceId(triggeringGeofenceId)
-
-                *//*            val message =
-                            if (isInside) " You've arrived at '${note?.locationName}'" else "You're leaving ${note?.locationName}"*//*
-
-            withContext(Dispatchers.Main) {
-                note?.let {
-                    sendNotification(appContext, isInside, it)
-                }
-            }
-        }*/
-
     override fun onReceive(context: Context, intent: Intent) {
 
         //First take care of demo version id first (for testers)
