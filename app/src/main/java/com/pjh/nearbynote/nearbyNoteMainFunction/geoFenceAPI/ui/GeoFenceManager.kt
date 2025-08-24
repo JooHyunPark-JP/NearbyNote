@@ -8,11 +8,11 @@ import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import android.util.Log
-import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.GeofenceBroadcastReceiver
-import com.pjh.nearbynote.util.isNetworkAvailable
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
+import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.GeofenceBroadcastReceiver
+import com.pjh.nearbynote.util.isNetworkAvailable
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -135,6 +135,7 @@ class GeofenceManager @Inject constructor(
             .setCircularRegion(latitude, longitude, radius)
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+            .setNotificationResponsiveness(15_000)
             .build()
 
         val geofencingRequest = GeofencingRequest.Builder()
@@ -144,9 +145,7 @@ class GeofenceManager @Inject constructor(
 
         geofencingClient.addGeofences(geofencingRequest, getGeofencePendingIntent(context))
             .addOnSuccessListener {
-                //  Log.d("GeofenceManager", "✅ Geofence added: $geofenceId")
                 activeGeofences.add(geofenceId)
-                //   Log.d("GeofenceManager", "📋 All registered geofences: $activeGeofences")
                 onSuccess()
             }
             .addOnFailureListener { e ->
@@ -179,12 +178,10 @@ class GeofenceManager @Inject constructor(
     ) {
         geofencingClient.removeGeofences(listOf(geofenceId))
             .addOnSuccessListener {
-        //        Log.d("GeofenceManager", "✅ Geofence removed: $geofenceId")
                 activeGeofences.remove(geofenceId)
                 onSuccess()
             }
             .addOnFailureListener { e ->
-         //       Log.e("GeofenceManager", "❌ Failed to remove geofence $geofenceId: ${e.message}")
                 onFailure(e)
             }
     }
