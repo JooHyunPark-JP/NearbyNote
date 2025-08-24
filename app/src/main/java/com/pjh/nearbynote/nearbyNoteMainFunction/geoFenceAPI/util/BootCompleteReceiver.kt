@@ -8,9 +8,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.di.GeofenceRebuildEntryPoint
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
+import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.di.GeofenceRebuildEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +44,7 @@ class BootCompleteReceiver : BroadcastReceiver() {
                         .setTransitionTypes(
                             Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT
                         )
+                        .setNotificationResponsiveness(15_000)
                         .build()
 
                     val request = GeofencingRequest.Builder()
@@ -63,10 +64,10 @@ class BootCompleteReceiver : BroadcastReceiver() {
                                 getGeofencePendingIntent(appContext)
                             ).await()
                         } catch (e: Exception) {
-/*                            Log.e(
-                                "BootReceiver",
-                                "Failed to re-add geofence ${entity.id}: ${e.message}"
-                            )*/
+                            /*                            Log.e(
+                                                            "BootReceiver",
+                                                            "Failed to re-add geofence ${entity.id}: ${e.message}"
+                                                        )*/
                         }
                     } else {
                         Log.w(
