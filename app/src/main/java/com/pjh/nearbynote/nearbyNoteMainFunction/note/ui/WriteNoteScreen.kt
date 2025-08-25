@@ -469,15 +469,14 @@ fun WriteNoteScreen(
                 text = {
                     Text(
                         buildString {
-                            appendLine("NearbyNote can alert you when you arrive at a saved place—even if the app is closed.")
+                            appendLine("NearbyNote uses your location in the background to deliver arrival reminders, even when the app is closed.")
                             appendLine()
-                            appendLine("To work reliably, Android needs “Allow all the time” location access.")
+                            appendLine("🔧 How to set:")
+                            appendLine("1) Open Settings > Permissions > Location")
+                            appendLine("2) Choose “Allow all the time”")
                             appendLine()
                             appendLine("• You can change this anytime in Settings!")
-                            appendLine()
-                            appendLine("How to enable (may vary by device):")
-                            appendLine("1) Open Settings -> Permissions -> Location")
-                            appendLine("2) Choose “Allow all the time”")
+
                         }
                     )
                 }
@@ -524,11 +523,9 @@ fun WriteNoteScreen(
                             appendLine("Geofence reminders need Precise (not Approximate) location so Android can tell when you enter your saved area.")
                             appendLine()
                             appendLine("🔧 How to set:")
-                            appendLine("1. Tap \"Open Settings\" below")
-                            appendLine("2. Tap \"Permission\"")
-                            appendLine("3. Tap \"Location\"")
-                            appendLine("4. Choose either option \"Allow only while using the app\" or \"Allow all the time\"")
-                            appendLine("5. Use precise location")
+                            appendLine("1. Open Settings > Permissions > Location")
+                            appendLine("2. Choose either option \"Allow only while using the app\" or \"Allow all the time\"")
+                            appendLine("3. Use precise location")
                         }
                     )
                 }
@@ -565,9 +562,8 @@ fun WriteNoteScreen(
                             appendLine("To receive note notifications from your app, you need to enable notification permissions.")
                             appendLine()
                             appendLine("🔧 How to set:")
-                            appendLine("1. Tap \"Open Settings\" below")
-                            appendLine("2. Tap \"Notifications\"")
-                            appendLine("3. And turn the notification on")
+                            appendLine("1. Open Settings > Notification")
+                            appendLine("2. Allow Notification")
                         }
                     )
                 }
