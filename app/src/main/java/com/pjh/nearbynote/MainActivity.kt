@@ -1,6 +1,5 @@
 package com.pjh.nearbynote
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,12 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
-import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.NearbyNoteForegroundService
+import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.GeofenceReconcileWorker
 import com.pjh.nearbynote.nearbyNoteMainFunction.mapBoxAPI.ui.MapboxViewModel
 import com.pjh.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.pjh.nearbynote.nearbyNoteMainFunction.savedAddress.ui.SavedAddressViewModel
@@ -41,6 +39,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        GeofenceReconcileWorker.schedule(this)
+
         val noteViewModel: NoteViewModel by viewModels()
         val geofenceViewModel: GeofenceViewModel by viewModels()
         val savedAddressViewModel: SavedAddressViewModel by viewModels()
@@ -56,14 +56,6 @@ class MainActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            val hasGeofence = geofenceViewModel.hasAnyGeofenceRegistered()
-            if (hasGeofence) {
-                val serviceIntent =
-                    Intent(applicationContext, NearbyNoteForegroundService::class.java)
-                ContextCompat.startForegroundService(applicationContext, serviceIntent)
-            }
-
-
             setContent {
                 NearbyNoteTheme {
                     val navController = rememberNavController()

@@ -102,12 +102,14 @@ fun WriteNoteScreen(
 
     val googleVoicePermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
 
+    val fineLocationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val backgroundLocationPermission =
         rememberPermissionState(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     val notificationPermission = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
 
     val isNotificationPermissionRequired = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
+    var showFineDialog by remember { mutableStateOf(false) }
     var showBackgroundDialog by remember { mutableStateOf(false) }
     var showNotificationPermissionDialog by remember { mutableStateOf(false) }
 
@@ -244,8 +246,14 @@ fun WriteNoteScreen(
                 enabled = geofenceEnabled,
                 isGeofenceImmutable = !isGeofenceImmutable,
                 onToggle = { enabled ->
+
+
                     geofenceEnabled = enabled
                     if (enabled) {
+                        if (fineLocationPermission.status !is PermissionStatus.Granted) {
+                            fineLocationPermission.launchPermissionRequest()
+                        }
+
                         coroutineScope.launch {
                             sheetState.show()
                             showGeofenceSheet.value = true
@@ -378,6 +386,7 @@ fun WriteNoteScreen(
                         geofenceEnabled = geofenceEnabled,
                         backgroundLocationPermission = backgroundLocationPermission,
                         notificationPermission = notificationPermission,
+                        fineLocationPermission = fineLocationPermission,
                         isNotificationPermissionRequired = isNotificationPermissionRequired,
                         addressQuery = noteViewModel.addressQuery,
                         lat = geofenceViewModel.latitude.value.toDoubleOrNull(),
@@ -391,7 +400,9 @@ fun WriteNoteScreen(
                         isFavoriteAddress = isFavoriteAddress,
                         favoriteAddressName = favoriteAddressName,
                         onShowBackgroundDialog = { showBackgroundDialog = true },
-                        onShowNotificationDialog = { showNotificationPermissionDialog = true }
+                        onShowNotificationDialog = { showNotificationPermissionDialog = true },
+                        onShowFineLocationDialog = { showFineDialog = true }
+
                     )
                 } else {
                     //Edit existed note
@@ -454,20 +465,67 @@ fun WriteNoteScreen(
                         Text("Cancel")
                     }*/
                 },
-                title = { Text("Background location is required for geofence reminders") },
+                title = { Text("Get arrival reminders in the background") },
                 text = {
                     Text(
                         buildString {
-                            appendLine("NearbyNote uses Android’s geofencing to trigger reminders even when the app isn’t open.")
+                            appendLine("NearbyNote uses your location in the background to deliver arrival reminders, even when the app is closed.")
                             appendLine()
-                            appendLine("This geofencing system requires Android's “Allow all the time” location access.")
-                            appendLine()
-                            appendLine("• You can change this anytime in Settings.")
-                            appendLine("• Check privacy policy below for more details!")
-                            appendLine()
-                            appendLine("How to enable (may vary by device):")
-                            appendLine("1) Open Settings -> Permissions -> Location")
+                            appendLine("🔧 How to set:")
+                            appendLine("1) Open Settings > Permissions > Location")
                             appendLine("2) Choose “Allow all the time”")
+                            appendLine()
+                            appendLine("• You can change this anytime in Settings!")
+
+                        }
+                    )
+                }
+            )
+        }
+
+        if (showFineDialog && geofenceEnabled) {
+            AlertDialog(
+                onDismissRequest = { showFineDialog = false },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                "https://joohyunpark-jp.github.io/NearbyNote/privacy-policy".toUri()
+                            )
+                            context.startActivity(intent)
+                        }) { Text("Privacy Policy") }
+
+                        Row {
+                            TextButton(onClick = { showFineDialog = false }) {
+                                Text("Not now")
+                            }
+                            TextButton(onClick = {
+                                showFineDialog = false
+                                val intent =
+                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                        data = Uri.fromParts("package", context.packageName, null)
+                                    }
+                                context.startActivity(intent)
+                            }) { Text("Open Settings") }
+                        }
+                    }
+                },
+                dismissButton = {
+                },
+                title = { Text("Turn on Precise location") },
+                text = {
+                    Text(
+                        buildString {
+                            appendLine("Geofence reminders need Precise (not Approximate) location so Android can tell when you enter your saved area.")
+                            appendLine()
+                            appendLine("🔧 How to set:")
+                            appendLine("1. Open Settings > Permissions > Location")
+                            appendLine("2. Choose either option \"Allow only while using the app\" or \"Allow all the time\"")
+                            appendLine("3. Use precise location")
                         }
                     )
                 }
@@ -503,12 +561,9 @@ fun WriteNoteScreen(
                         buildString {
                             appendLine("To receive note notifications from your app, you need to enable notification permissions.")
                             appendLine()
-                            appendLine("You can always change anytime in Settings.")
-                            appendLine()
                             appendLine("🔧 How to set:")
-                            appendLine("1. Tap \"Open Settings\" below")
-                            appendLine("2. Tap \"Notifications\"")
-                            appendLine("3. And turn the notification on")
+                            appendLine("1. Open Settings > Notification")
+                            appendLine("2. Allow Notification")
                         }
                     )
                 }
@@ -564,6 +619,7 @@ fun handleNewNoteSave(
     geofenceEnabled: Boolean,
     backgroundLocationPermission: PermissionState,
     notificationPermission: PermissionState,
+    fineLocationPermission: PermissionState,
     isNotificationPermissionRequired: Boolean,
     addressQuery: String,
     lat: Double?,
@@ -577,23 +633,19 @@ fun handleNewNoteSave(
     isFavoriteAddress: MutableState<Boolean>,
     favoriteAddressName: MutableState<String>,
     onShowBackgroundDialog: () -> Unit,
-    onShowNotificationDialog: () -> Unit
+    onShowNotificationDialog: () -> Unit,
+    onShowFineLocationDialog: () -> Unit,
 ) {
     if (noteText.isBlank()) {
         Toast.makeText(context, "Write down something before saving!", Toast.LENGTH_SHORT).show()
         return
     }
 
-    /*    if (geofenceEnabled && !backgroundLocationGranted) {
-            onShowBackgroundDialog()
-            return
-        }
-
-
-        if (geofenceEnabled && !notificationPermissionGranted && isNotificationPermissionRequired) {
-            onShowNotificationDialog()
-            return
-        }*/
+    if (geofenceEnabled && fineLocationPermission.status !is PermissionStatus.Granted) {
+        fineLocationPermission.launchPermissionRequest()
+        onShowFineLocationDialog()
+        return
+    }
 
 
     if (geofenceEnabled && backgroundLocationPermission.status !is PermissionStatus.Granted) {
@@ -601,7 +653,11 @@ fun handleNewNoteSave(
         return
     }
 
-    if (geofenceEnabled && notificationPermission.status !is PermissionStatus.Granted && isNotificationPermissionRequired) {
+
+    if (geofenceEnabled && isNotificationPermissionRequired &&
+        notificationPermission.status !is PermissionStatus.Granted
+    ) {
+        notificationPermission.launchPermissionRequest()
         onShowNotificationDialog()
         return
     }

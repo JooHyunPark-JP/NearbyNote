@@ -35,11 +35,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +55,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.gson.JsonObject
+import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.common.Cancelable
+import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapView
+import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.gestures
 import com.pjh.nearbynote.R
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceManager
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewModel
@@ -61,20 +80,6 @@ import com.pjh.nearbynote.nearbyNoteMainFunction.note.ui.AddressSearchSection
 import com.pjh.nearbynote.nearbyNoteMainFunction.note.ui.NoteViewModel
 import com.pjh.nearbynote.nearbyNoteNav.Screen
 import com.pjh.nearbynote.util.isNetworkAvailable
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.common.Cancelable
-import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.MapView
-import com.mapbox.maps.Style
-import com.mapbox.maps.plugin.annotation.annotations
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import com.mapbox.maps.plugin.gestures.OnMoveListener
-import com.mapbox.maps.plugin.gestures.gestures
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -114,6 +119,14 @@ fun MapboxScreen(
 
     val canOpenMapBoxMap = remember { mutableStateOf(false) }
     val mapViewHolder = remember { mutableStateOf<MapView?>(null) }
+
+    // Separate managers to avoid re-creating & listener duplication
+    var noteAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
+    var currentLocationAnnotationManager by remember { mutableStateOf<PointAnnotationManager?>(null) }
+
+    val latestNotes by rememberUpdatedState(notes)
+    val latestGeofences by rememberUpdatedState(geofences)
+
 
     LaunchedEffect(Unit) {
         noteViewModel.addressQuery = ""
@@ -287,7 +300,7 @@ fun MapboxScreen(
                                         }
                                     )
 
-                                    // clear the message "Create a note here" on map when zoom in/out or move map
+                                    // clear the message "Create a note here" when user moves
                                     cameraSubscription = mv.mapboxMap.subscribeCameraChanged {
                                         if (mapboxViewModel.isUserInteractingWithMap) {
                                             mapboxViewModel.clearTappedLocation()
@@ -320,6 +333,11 @@ fun MapboxScreen(
                                         )
                                             .scale(62, 62, false)
                                     )
+
+                                    noteAnnotationManager =
+                                        mv.annotations.createPointAnnotationManager()
+                                    currentLocationAnnotationManager =
+                                        mv.annotations.createPointAnnotationManager()
 
                                     mapboxViewModel.loadUserLocation { point ->
                                         mapView?.mapboxMap?.setCamera(
@@ -378,55 +396,75 @@ fun MapboxScreen(
                     }
                 }
 
-                LaunchedEffect(userLocation) {
-                    userLocation?.let { point ->
-                        mapView?.let { mv ->
-                            mv.mapboxMap.setCamera(
-                                CameraOptions.Builder().center(point).zoom(17.0).build()
-                            )
-
-                            val annotationApi = mv.annotations
-                            val pointAnnotationManager =
-                                annotationApi.createPointAnnotationManager()
-
-                            pointAnnotationManager.create(
-                                PointAnnotationOptions().withPoint(point)
-                                    .withIconImage("current-location-icon")
-                            )
-
-                            notes.forEach { note ->
-                                geofences.find { it.id == note.geofenceId }
-                                    ?.let { geofence ->
-                                        val notePoint =
-                                            Point.fromLngLat(
-                                                geofence.longitude,
-                                                geofence.latitude
-                                            )
-                                        val marker = pointAnnotationManager.create(
-                                            PointAnnotationOptions().withPoint(notePoint)
-                                                .withIconImage("note-marker-icon")
-                                        )
-
-                                        pointAnnotationManager.addClickListener { clicked ->
-                                            if (clicked == marker) {
-                                                mapboxViewModel.selectNote(
-                                                    SelectedNoteInfo(
-                                                        id = note.id,
-                                                        content = note.content,
-                                                        createdAt = note.createdAt,
-                                                        updateAt = note.updatedAt,
-                                                        radius = geofence.radius,
-                                                        address = geofence.addressName
-                                                    )
-                                                )
-                                                true
-                                            } else false
-                                        }
-                                    }
-                            }
-                        }
+                // keep camera + current location marker tied to userLocation
+                LaunchedEffect(userLocation, currentLocationAnnotationManager) {
+                    val point = userLocation ?: return@LaunchedEffect
+                    mapView?.mapboxMap?.setCamera(
+                        CameraOptions.Builder().center(point).zoom(17.0).build()
+                    )
+                    currentLocationAnnotationManager?.let { mgr ->
+                        mgr.deleteAll()
+                        mgr.create(
+                            PointAnnotationOptions()
+                                .withPoint(point)
+                                .withIconImage("current-location-icon")
+                        )
                     }
                 }
+
+
+                LaunchedEffect(notes, geofences, noteAnnotationManager) {
+                    val mgr = noteAnnotationManager ?: return@LaunchedEffect
+                    mgr.deleteAll()
+
+                    if (notes.isEmpty() || geofences.isEmpty()) return@LaunchedEffect
+
+                    val geofenceById = geofences.associateBy { it.id }
+
+                    notes.forEach { note ->
+                        val geofence = geofenceById[note.geofenceId] ?: return@forEach
+                        val notePoint = Point.fromLngLat(geofence.longitude, geofence.latitude)
+                        val data =
+                            JsonObject().apply { addProperty("noteId", note.id) }
+                        mgr.create(
+                            PointAnnotationOptions()
+                                .withPoint(notePoint)
+                                .withIconImage("note-marker-icon")
+                                .withData(data)
+                        )
+                    }
+                }
+
+                // single click listener registered once per manager (read noteId from annotation.data)
+                DisposableEffect(noteAnnotationManager) {
+                    val mgr = noteAnnotationManager
+                    if (mgr == null) return@DisposableEffect onDispose { }
+
+                    val listener =
+                        OnPointAnnotationClickListener { clicked ->
+                            val noteId = runCatching {
+                                clicked.getData()?.asJsonObject?.get("noteId")?.asLong
+                            }.getOrNull()
+                            val note = latestNotes.firstOrNull { it.id == noteId }
+                                ?: return@OnPointAnnotationClickListener false
+                            val geofence = latestGeofences.firstOrNull { it.id == note.geofenceId }
+                                ?: return@OnPointAnnotationClickListener false
+                            mapboxViewModel.selectNote(
+                                SelectedNoteInfo(
+                                    id = note.id,
+                                    content = note.content,
+                                    createdAt = note.createdAt,
+                                    updateAt = note.updatedAt,
+                                    radius = geofence.radius,
+                                    address = geofence.addressName
+                                )
+                            )
+                            true
+                        }
+                    mgr.addClickListener(listener)
+                    onDispose { mgr.removeClickListener(listener) }
+                }
+
 
                 LaunchedEffect(mapboxViewModel.tappedLocation) {
                     val tappedPoint =
@@ -446,6 +484,21 @@ fun MapboxScreen(
                         )
                     }
                 }
+
+                /*                LaunchedEffect(mapboxViewModel.tappedLocation) {
+                                    val point = mapboxViewModel.tappedLocation ?: return@LaunchedEffect
+                                    val mv = mapView ?: return@LaunchedEffect
+                                    val mgr = mapboxViewModel.tappedAnnotationManager
+                                        ?: mv.annotations.createPointAnnotationManager().also {
+                                            mapboxViewModel.tappedAnnotationManager = it
+                                        }
+                                    mgr.deleteAll()
+                                    mgr.create(
+                                        PointAnnotationOptions()
+                                            .withPoint(point)
+                                            .withIconImage("location-marker-icon")
+                                    )
+                                }*/
 
                 FloatingActionButton(
                     onClick = {
@@ -543,6 +596,10 @@ fun MapboxScreen(
                             }
                         }
                     }
+                }
+                // clean up subscriptions tied to mapView lifecycle
+                DisposableEffect(mapView) {
+                    onDispose { cameraSubscription?.cancel(); cameraSubscription = null }
                 }
             }
         }

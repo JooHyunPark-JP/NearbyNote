@@ -1,12 +1,9 @@
 package com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui
 
-import android.content.Intent
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceEntity
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.data.GeofenceRepository
-import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.util.NearbyNoteForegroundService
 import com.pjh.nearbynote.nearbyNoteMainFunction.mapBoxAPI.data.AddressSuggestion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -110,11 +107,6 @@ class GeofenceViewModel @Inject constructor(
                 createdAt = System.currentTimeMillis()
             )
             geofenceRepository.saveGeofence(entity)
-
-            //enable foreground service
-            val serviceIntent =
-                Intent(geofenceManager.context, NearbyNoteForegroundService::class.java)
-            ContextCompat.startForegroundService(geofenceManager.context, serviceIntent)
         }
     }
 
@@ -133,16 +125,6 @@ class GeofenceViewModel @Inject constructor(
                         viewModelScope.launch {
                             geofenceRepository.deleteGeofence(entity)
                             _geofenceMessage.value = "✅ Geofence removed for ID: $geofenceId"
-
-                            //remove foreground service if there is no geofence saved on the app
-                            val remaining = geofenceRepository.getAllGeofencesOnce().size
-                            if (remaining == 0) {
-                                val stopIntent = Intent(
-                                    geofenceManager.context,
-                                    NearbyNoteForegroundService::class.java
-                                )
-                                geofenceManager.context.stopService(stopIntent)
-                            }
                         }
                     },
                     onFailure = {
