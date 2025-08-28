@@ -15,12 +15,19 @@
     code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
     a { color: inherit; text-decoration: underline; }
     hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+    .badge { display:inline-block; border:1px solid #e5e7eb; border-radius:999px; padding:0.15rem 0.6rem; font-size:0.82rem; margin-right:0.35rem; }
   </style>
 </head>
 <body>
   <header>
     <h1>Privacy Policy — NearbyNote</h1>
-    <p class="muted"><strong>Last Updated:</strong> August 13, 2025</p>
+    <p class="muted"><strong>Last Updated:</strong> August 28, 2025</p>
+    <p>
+      <span class="badge">No Ads</span>
+      <span class="badge">No Analytics SDK</span>
+      <span class="badge">No Data Sale</span>
+      <span class="badge">On-device Notes</span>
+    </p>
   </header>
   <hr />
 
@@ -33,7 +40,7 @@
     <p>Used to create and trigger your geofences and to display your position on the map.</p>
 
     <h3>Network &amp; map requests</h3>
-    <p>Required to load map tiles and perform place search via Mapbox. Requests can include your IP address and app/device metadata needed to provide these services.</p>
+    <p>Required to load map tiles and perform place search via Mapbox. Requests can include your IP address and app/device metadata necessary to provide these services.</p>
 
     <h3>Microphone (optional, when you start voice input)</h3>
     <p>The App invokes the device’s built-in speech recognition service (e.g., Google Speech Services). Audio is handled by that provider according to your device settings. The App does not capture or store audio.</p>
@@ -48,7 +55,7 @@
     <h2>2) How We Use the Data</h2>
     <ul>
       <li>Provide core features: geofence notifications, maps, place search, and optional voice input.</li>
-      <li>Ensure reliability in the background and after reboot using Android Location &amp; Geofencing APIs (Google Play services), a foreground service, and a boot receiver.</li>
+      <li>Ensure reliability in the background and after reboot using Android Location &amp; Geofencing APIs (Google Play services), <strong>BroadcastReceivers</strong>, and a periodic <strong>WorkManager</strong> job to reconcile or re-register geofences as needed. <em>No persistent foreground service.</em></li>
       <li>We do not use your data for advertising, profiling, or sale.</li>
     </ul>
   </section>
@@ -61,7 +68,7 @@
       <li><strong>Device speech recognition service</strong> (e.g., Google Speech Services) — used only when you start voice input; processing may occur on-device or by the provider per device capabilities and settings.</li>
       <li><strong>Android/Google Play services (Location &amp; Geofencing APIs)</strong> — system components on your device that determine location and deliver geofence enter/exit events to the App.</li>
     </ul>
-    <p>These third-party services do not receive notes created in the app by the user.</p>
+    <p>These third-party services do not receive notes you create in the App.</p>
   </section>
 
   <section id="data-sharing">
@@ -73,6 +80,7 @@
     <h2>5) Data Retention &amp; Deletion</h2>
     <ul>
       <li>On-device data (notes, geofences, saved places) remains on your device until you delete it or uninstall the App.</li>
+      <li>We do not store your notes on any server.</li>
       <li>Third-party processing (Mapbox, device speech service, platform location services) follows each provider’s retention practices.</li>
       <li>You can delete items in the App or uninstall to remove local data.</li>
     </ul>
@@ -82,7 +90,8 @@
     <h2>6) Your Choices &amp; Controls</h2>
     <ul>
       <li><strong>Permissions</strong> — You can grant/deny location, microphone, and notifications at runtime and later change them in Android Settings.</li>
-      <li><strong>Background location</strong> — Requested only to deliver geofence reminders; if you remove all location-based notes, background location is no longer needed.</li>
+      <li><strong>Background location</strong> — Requested only to deliver geofence reminders and only where required by the OS for reliable delivery. If you remove all location-based notes, background location is no longer needed.</li>
+      <li><strong>Battery optimizations</strong> — Some devices restrict background behavior. For best reliability, you may optionally disable battery optimizations for the App.</li>
       <li><strong>Maps &amp; network</strong> — Maps and place search require network connectivity; disabling permissions or network may limit features.</li>
     </ul>
   </section>
@@ -94,7 +103,7 @@
 
   <section id="security">
     <h2>8) Security</h2>
-    <p>All network communication uses HTTPS. Android cloud backup for the App is disabled to reduce unintended copies of local data. We do not operate a remote server for your notes.</p>
+    <p>All network communication uses HTTPS. Android cloud backup for the App is <em>disabled</em> to reduce unintended copies of local data. We do not operate a remote server for your notes.</p>
   </section>
 
   <section id="international-processing">
@@ -111,13 +120,5 @@
     <h2>11) Contact</h2>
     <p>Email: <a href="mailto:pjh0629@gmail.com">pjh0629@gmail.com</a></p>
   </section>
-
-  <footer class="muted" style="margin-top:2rem">
-    <p>&copy; <span id="year">2025</span> NearbyNote</p>
-    <script>
-      // optional: keep year current if hosted on the web (safe no-op in Play Console)
-      (function(){ try { document.getElementById('year').textContent = new Date().getFullYear(); } catch(e){} })();
-    </script>
-  </footer>
 </body>
 </html>
