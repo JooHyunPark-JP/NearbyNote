@@ -67,7 +67,7 @@ and easily save locations by auto address searching or using the interactive map
 
 <img src="./image/nearbynote_notelist.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_writenote.png" alt="Example Image" width="200"/> 
 <img src="./image/nearbynote_mapview.jpg" alt="Example Image" width="200"/> <img src="./image/nearbynote_readnoteonmap.png" alt="Example Image" width="200"/>
-<img src="./image/nearbynote_setlocation.png" alt="Example Image" width="200"/><img src="./image/nearbynote_favouriteaddress.jpg" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_setlocation.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_favouriteaddress.jpg" alt="Example Image" width="200"/> 
 
 ## Google Play link (Coming Soon)
 
