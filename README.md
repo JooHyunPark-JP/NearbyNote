@@ -71,7 +71,3 @@
 - **Flow**: Note → Location & Radius → Register Geofence → System triggers ENTER → Receiver posts notification.
 - **Resilience**: On reboot/app update, a worker reconciles and re-registers geofences.
 - **Battery**: Uses Play Services Geofencing which batches efficiently (no constant foreground GPS).
-
-## Google Play link (Coming Soon)
-
-A link to the app on Google Play will be added here.
