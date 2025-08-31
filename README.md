@@ -2,11 +2,14 @@
 
 ## Quick Start
 1. Download the **APK** from the [latest release](https://github.com/JooHyunPark-JP/NearbyNote/releases/latest) (see **Assets**).
-2. Install on your Android device (enable “Install unknown apps” if prompted).
-3. Grant requested permissions, create a note, set a location, and enter the area to receive a notification.  
-   _Tip: For indoor testing, use a mock location app (Developer options) to simulate entering a geofence..._
+2. Install on your Android device.
 
-## App Overview
+## Screenshots
+<img src="./image/nearbynote_notelist.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_writenote.png" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_setlocation.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_mapview.jpg" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_readnoteonmap.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_favouriteaddress.jpg" alt="Example Image" width="200"/> 
+
+# App Overview
 
 **NearbyNote** is a smart location-based memo app. Create a note (text or voice), set a place + radius, and get a notification when you enter the area.
 
@@ -68,13 +71,6 @@
 - **Flow**: Note → Location & Radius → Register Geofence → System triggers ENTER → Receiver posts notification.
 - **Resilience**: On reboot/app update, a worker reconciles and re-registers geofences.
 - **Battery**: Uses Play Services Geofencing which batches efficiently (no constant foreground GPS).
-
-
-
-## Screenshots
-<img src="./image/nearbynote_notelist.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_writenote.png" alt="Example Image" width="200"/> 
-<img src="./image/nearbynote_setlocation.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_mapview.jpg" alt="Example Image" width="200"/> 
-<img src="./image/nearbynote_readnoteonmap.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_favouriteaddress.jpg" alt="Example Image" width="200"/> 
 
 ## Google Play link (Coming Soon)
 
