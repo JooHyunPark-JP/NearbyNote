@@ -1,7 +1,7 @@
 # NearbyNote
 
 ## Quick Start
-1. Download the **APK** from the [latest release](https://github.com/JooHyunPark-JP/NearbyNote/releases/latest) (see **Assets**).
+1. Download the **APK** from the [latest release](https://github.com/JooHyunPark-JP/NearbyNote/releases/latest)
 2. Install on your Android device.
 
 ## Screenshots
