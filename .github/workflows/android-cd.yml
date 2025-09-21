@@ -108,7 +108,9 @@ jobs:
           packageName: com.pjh.nearbynote
           releaseFiles: app/build/outputs/bundle/publicRelease/app-public-release.aab
           track: internal
-          status: completed
+          status: draft
+          #uncomment these below when app status is not draft (aka after release to google play)
+         # status: completed
          # changesNotSentForReview: true
 
       - name: Keep artifacts
