@@ -33,27 +33,43 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Decode keystore (base64)
+      - name: Decode keystore (base64 → jks)
         run: |
           mkdir -p app/keystore
-          echo "${UPLOAD_KEYSTORE_B64}" | base64 -d > app/keystore/nearbynote-release.jks
+          printf "%s" "${UPLOAD_KEYSTORE_B64}" | base64 -d > app/keystore/nearbynote-release.jks
           ls -al app/keystore
+          test -s app/keystore/nearbynote-release.jks || (echo "❌ keystore is empty or not existed "; exit 1)
         env:
           UPLOAD_KEYSTORE_B64: ${{ secrets.UPLOAD_KEYSTORE }}
 
-      - name: Check store password (quick preflight)
+      - name: Check store password (diagnostic preflight)
         env:
           ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          set -e
-          keytool -list -v \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            -storetype PKCS12 >/dev/null 2>&1 || \
-          keytool -list -v \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            -storetype JKS >/dev/null 2>&1
+          set -eu
+          KS="app/keystore/nearbynote-release.jks"
+          if [ -z "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD:-}" ]; then
+            echo "❌ KEYSTORE_PASSWORD 시크릿이 비어있습니다."; exit 1
+          fi
+          echo "==> file type:"
+          file -b "$KS" || true
+
+          echo "==> [1/2] Try PKCS12"
+          if keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype PKCS12 | head -n 15; then
+            echo "✅ Store password OK (PKCS12)"
+          else
+            echo "==> PKCS12 실패. 자세한 오류:"
+            keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype PKCS12 || true
+            echo "==> [2/2] Try JKS"
+            if keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype JKS | head -n 15; then
+              echo "✅ Store password OK (JKS)"
+            else
+              echo "❌ Store password 실패 (JKS)."
+              keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype JKS || true
+              echo "Hint: KEYSTORE_PASSWORD이 스토어 비번과 다르거나, UPLOAD_KEYSTORE base64가 깨졌을 수 있습니다."
+              exit 1
+            fi
+          fi
 
       - name: Write gradle.properties for CI
         run: |
