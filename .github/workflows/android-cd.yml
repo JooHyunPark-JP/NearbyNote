@@ -41,20 +41,6 @@ jobs:
         env:
           UPLOAD_KEYSTORE_B64: ${{ secrets.UPLOAD_KEYSTORE }}
 
-      - name: Check store password (quick preflight)
-        env:
-          ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        run: |
-          set -e
-          keytool -list -v \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            -storetype PKCS12 >/dev/null 2>&1 || \
-          keytool -list -v \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            -storetype JKS >/dev/null 2>&1    
-
       - name: Write gradle.properties for CI
         run: |
           cat > gradle.properties <<'EOF'
