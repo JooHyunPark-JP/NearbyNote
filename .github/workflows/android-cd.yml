@@ -109,7 +109,7 @@ jobs:
           releaseFiles: app/build/outputs/bundle/publicRelease/app-public-release.aab
           track: internal
           status: completed
-          changesNotSentForReview: true
+         # changesNotSentForReview: true
 
       - name: Keep artifacts
         if: always()
