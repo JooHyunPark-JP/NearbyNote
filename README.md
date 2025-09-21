@@ -23,7 +23,7 @@
 ## Key Features
 
 ### 1. Note Creation
-- Create notes via text or voice (currently defaults to en‑US)
+- Create notes via text or voice (currently defaults to English)
 - Uses Android SpeechRecognizer to convert voice to text
 
 ### 2. Location-Based Notes Notifications
