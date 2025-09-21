@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ develop ]  # Trigger on pull requests targeting the 'develop' branch
   push:
-    branches: [ develop, 'feature/**', release ]  # Trigger on pushes to 'develop' and any 'feature/*' branches
+    branches: [ develop, 'feature/**' ]  # Trigger on pushes to 'develop' and any 'feature/*' branches
 
 jobs:
   build:
@@ -40,46 +40,6 @@ jobs:
 
       - name: Grant Gradle permission
         run: chmod +x ./gradlew  # Make the Gradle wrapper executable
-
-
-      # ---------- Preflight (only run this when push on 'release' branch) ----------
-      - name: Decode keystore (base64 → jks)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
-        run: |
-          mkdir -p app/keystore
-          printf "%s" "${UPLOAD_KEYSTORE_B64}" | base64 -d > app/keystore/nearbynote-release.jks
-          ls -al app/keystore
-        env:
-          UPLOAD_KEYSTORE_B64: ${{ secrets.UPLOAD_KEYSTORE }}
-
-      - name: Preflight keystore sanity (store/alias/key 비번 검증)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
-        env:
-          ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          ORG_GRADLE_PROJECT_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        run: |
-          set -euo pipefail
-          alias="${ORG_GRADLE_PROJECT_KEY_ALIAS:-nearbynote}"
-          echo "[1/3] store password verification"
-          keytool -list -v \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            | head -n 20
-          echo "[2/3] alias verification: ${alias}"
-          keytool -list \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            | grep -q "alias name: ${alias}" || (echo "ERROR: alias '${alias}' not found"; exit 1)
-          echo "[3/3] key password verification"
-          keytool -exportcert \
-            -alias "${alias}" \
-            -keystore app/keystore/nearbynote-release.jks \
-            -storepass "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD}" \
-            -keypass "${ORG_GRADLE_PROJECT_KEY_PASSWORD}" \
-            -rfc -file /tmp/cert.pem
-          echo "✅ Keystore/alias/key password OK"
-      # ---------- /Preflight ----------
 
       - name: Build and run Unit Tests
         run: ./gradlew :app:testPublicDebugUnitTest :app:testReviewDebugUnitTest --stacktrace
