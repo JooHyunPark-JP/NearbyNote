@@ -2,62 +2,122 @@ name: Android CD
 
 on:
   push:
-    branches:
-     - release
+    branches: [ release ]
+
+concurrency:
+  group: cd-release
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make gradlew executable
+        run: |
+          test -f gradlew || (echo "gradlew not found at repo root"; ls -al && exit 1)
+          chmod +x gradlew      
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: 17
+          distribution: temurin
+          java-version: "17"
 
-      - name: Decode service account json
-        run: |
-          echo "${{ secrets.SERVICE_ACCOUNT_JSON }}" > "${{ github.workspace }}/service-account.json"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Decode keystore file
+      - name: Decode keystore (base64 → jks)
         run: |
           mkdir -p app/keystore
-          echo "${{ secrets.UPLOAD_KEYSTORE }}" | base64 -d > app/keystore/nearbynote-release.jks    
+          printf "%s" "${UPLOAD_KEYSTORE_B64}" | base64 -d > app/keystore/nearbynote-release.jks
+          ls -al app/keystore
+          test -s app/keystore/nearbynote-release.jks || (echo "❌ keystore is empty or not existed "; exit 1)
+        env:
+          UPLOAD_KEYSTORE_B64: ${{ secrets.UPLOAD_KEYSTORE }}
 
-
-      - name: Setup gradle.properties (CD)
+      - name: Check store password (diagnostic preflight)
+        env:
+          ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          cat <<EOF > gradle.properties
+          set -eu
+          KS="app/keystore/nearbynote-release.jks"
+          if [ -z "${ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD:-}" ]; then
+            echo "❌ KEYSTORE_PASSWORD 시크릿이 비어있습니다."; exit 1
+          fi
+          echo "==> file type:"
+          file -b "$KS" || true
+
+          echo "==> [1/2] Try PKCS12"
+          if keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype PKCS12 | head -n 15; then
+            echo "✅ Store password OK (PKCS12)"
+          else
+            echo "==> PKCS12 실패. 자세한 오류:"
+            keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype PKCS12 || true
+            echo "==> [2/2] Try JKS"
+            if keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype JKS | head -n 15; then
+              echo "✅ Store password OK (JKS)"
+            else
+              echo "❌ Store password 실패 (JKS)."
+              keytool -list -v -keystore "$KS" -storepass "$ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD" -storetype JKS || true
+              echo "Hint: KEYSTORE_PASSWORD이 스토어 비번과 다르거나, UPLOAD_KEYSTORE base64가 깨졌을 수 있습니다."
+              exit 1
+            fi
+          fi
+
+      - name: Write gradle.properties for CI
+        run: |
+          cat > gradle.properties <<'EOF'
           android.useAndroidX=true
           android.enableJetifier=true
           kotlin.code.style=official
           android.nonTransitiveRClass=true
+          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
           EOF
-
-      - name: Grant execute permission for Gradle
-        run: chmod +x ./gradlew
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build signed AAB
-        run: ./gradlew bundleRelease
 
+      - name: Gradle preflight
+        run: ./gradlew -v
+
+      - name: Build signed AAB
         env:
           ORG_GRADLE_PROJECT_MAPBOX_API_KEY: ${{ secrets.MAPBOX_API_KEY }}
           ORG_GRADLE_PROJECT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           ORG_GRADLE_PROJECT_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+         # ORG_GRADLE_PROJECT_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: ./gradlew --no-daemon --stacktrace :app:bundlePublicRelease
 
+      - name: Sanity check AAB exists
+        run: |
+          ls -al app/build/outputs/bundle/publicRelease
+          test -f app/build/outputs/bundle/publicRelease/app-public-release.aab
 
-      - name: Upload to Google Play (Internal Testing)
+      - name: Upload to Google Play (Internal)
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJson: ${{ github.workspace }}/service-account.json
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.pjh.nearbynote
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          releaseFiles: app/build/outputs/bundle/publicRelease/app-public-release.aab
           track: internal
-          status: completed
+          status: draft
+          #uncomment these below when app status is not draft (aka after release to google play)
+         # status: completed
+         # changesNotSentForReview: true
+
+      - name: Keep artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-public-release
+          path: |
+            app/build/outputs/bundle/publicRelease/app-public-release.aab
+            app/build/outputs/mapping/publicRelease/mapping.txt
