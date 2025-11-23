@@ -11,7 +11,7 @@
 
 # App Overview
 
-**NearbyNote** is a smart location-based memo app. Create a note (text or voice), set a place + radius, and get a notification when you enter the area.
+**NearbyNote** is a location-based reminder app that lets people pin notes to real-world places and get notified when they enter the area. Users can create notes from a Mapbox-powered map or by searching for an address, choose a radius for the reminder, and then view their notes either on the map or in a list. The app also supports favorite places (like home or work) for quick reuse and voice input for creating notes hands-free.
 
 **Example Use Cases:**
 - Arriving at the office → “Prepare for today’s meeting”
