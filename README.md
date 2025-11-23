@@ -51,6 +51,14 @@
 
 ---
 
+## Architecture & Reliability (Summary)
+
+- **Architecture:** MVVM with Hilt-injected repositories; Compose screens observe state from ViewModels while repositories hide Room, Mapbox, and the Android Geofencing API behind testable interfaces.
+- **Room as single source of truth:** One Room database stores notes, geofences, and saved addresses; DAOs expose Flows that feed both the UI and background workers.
+- **Background reliability:** A geofence reconcile worker, triggered by boot/package-replaced broadcasts, re-registers geofences after reboots or Play Services updates so reminders keep working without a foreground service.
+- **Permissions & privacy:** Foreground/background location and notification access are requested with clear rationale screens and a linked privacy policy to keep location usage transparent.
+- **Testing & CI/CD:** Core note/geofence logic is unit-tested at the repository/ViewModel layer, and GitHub Actions runs tests on each push; a release workflow builds a signed release and uploads it to Google Play console when pushing to the `release` branch.
+
 ## Tech Stack
 
 | Category         | Technology |
