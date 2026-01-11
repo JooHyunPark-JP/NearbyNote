@@ -66,12 +66,6 @@ fun SavedAddressMain(
             modifier = Modifier.fillMaxSize()
         ) {
             Text(
-                text = "Saved places",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
                 text = if (savedAddresses.isEmpty()) {
                     "Save your frequent places and quickly access them when creating a memo."
                 } else {
@@ -118,8 +112,6 @@ fun SavedAddressMain(
             modifier = Modifier
                 .align(Alignment.BottomEnd),
             shape = CircleShape,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(Icons.Default.Add, contentDescription = "Add saved address")
         }

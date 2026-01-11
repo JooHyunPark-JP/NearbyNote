@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -137,6 +139,8 @@ fun WriteNoteScreen(
     }
 
     // val shouldDisableSavedAddressRow = noteId != null && hasExistingGeofence
+
+    val radius by geofenceViewModel.radius.collectAsState()
 
 
     val sheetState = rememberModalBottomSheetState(
@@ -263,6 +267,13 @@ fun WriteNoteScreen(
             )
 
             if (geofenceEnabled) {
+                Spacer(modifier = Modifier.height(8.dp))
+                GeofenceSummaryChip(
+                    address = noteViewModel.addressQuery,
+                    radiusMeters = radius,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
                 OutlinedButton(
                     onClick = {
                         coroutineScope.launch {
@@ -785,6 +796,57 @@ fun handleExistingNoteUpdate(
 }
 
 @Composable
+fun GeofenceSummaryChip(
+    address: String,
+    radiusMeters: String,
+    modifier: Modifier = Modifier
+) {
+    if (address.isBlank() && radiusMeters.isBlank()) return
+
+    val radiusText = radiusMeters.toFloatOrNull()?.let { value ->
+        if (value >= 1000f) {
+            "${"%.1f".format(value / 1000f)}km radius"
+        } else {
+            "${value.toInt()}m radius"
+        }
+    } ?: "Radius not set yet"
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Place,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            if (address.isNotBlank()) {
+                Text(
+                    text = address,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
+            Text(
+                text = radiusText,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 fun GeofenceToggleSwitch(
     enabled: Boolean,
     isGeofenceImmutable: Boolean,
@@ -817,23 +879,6 @@ fun GeofenceToggleSwitch(
         )
     }
 }
-
-/*@Composable
-fun NoteTextField(
-    noteText: String,
-    onNoteChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    TextField(
-        value = noteText,
-        onValueChange = onNoteChange,
-        placeholder = { Text("Write your note here.") },
-        textStyle = LocalTextStyle.current.copy(lineHeight = 24.sp),
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 120.dp, max = Dp.Infinity)
-    )
-}*/
 
 @Composable
 fun NoteTextField(
