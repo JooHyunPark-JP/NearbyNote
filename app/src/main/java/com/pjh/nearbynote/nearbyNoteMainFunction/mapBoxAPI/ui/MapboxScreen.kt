@@ -220,7 +220,7 @@ fun MapboxScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "📍 Search an address or tap the map icon below to open the map.",
+                    text = "Search an address or tap the map icon below to open the map.",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge
                 )
