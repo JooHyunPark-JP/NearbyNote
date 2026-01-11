@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.BasicGeofenceSetup
@@ -40,173 +39,6 @@ import com.pjh.nearbynote.nearbyNoteMainFunction.geoFenceAPI.ui.GeofenceViewMode
 import com.pjh.nearbynote.nearbyNoteMainFunction.savedAddress.data.SavedAddressEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
-/*
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GeofenceSheetContent(
-    isGeofenceImmutable: Boolean,
-    isSavedAddressClicked: MutableState<Boolean>,
-    noteViewModel: NoteViewModel,
-    geofenceViewModel: GeofenceViewModel,
-    savedAddresses: List<SavedAddressEntity>,
-    selectedAddress: SavedAddressEntity?,
-    onSelectAddress: (SavedAddressEntity?) -> Unit,
-    isFavoriteAddress: MutableState<Boolean>,
-    isFavoriteAddressDisable: MutableState<Boolean>,
-    favoriteAddressName: MutableState<String>,
-    shouldDisableSavedAddressRow: Boolean,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    coroutineScope: CoroutineScope,
-    sheetState: SheetState,
-    showGeofenceSheet: MutableState<Boolean>,
-    geofenceEnabled: Boolean
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
-        val suggestions = noteViewModel.suggestions
-        val isAddressSearching = noteViewModel.isSearching
-
-
-        AddressSearchSection(
-            addressQuery = noteViewModel.addressQuery,
-            onQueryChange = { noteViewModel.onQueryChanged(it) },
-            suggestions = suggestions,
-            onSuggestionSelected = { suggestion ->
-                geofenceViewModel.onSuggestionSelected(suggestion)
-                noteViewModel.addressQuery = suggestion.placeName
-                noteViewModel.addressLatitude = suggestion.latitude
-                noteViewModel.addressLongitude = suggestion.longitude
-                noteViewModel.suggestions = emptyList()
-            },
-            enabled = !isGeofenceImmutable && !isSavedAddressClicked.value,
-            isAddressSearching = isAddressSearching,
-            isSavedAddressClicked = isSavedAddressClicked.value,
-            noteViewModel = noteViewModel,
-            geofenceViewModel = geofenceViewModel
-
-        )
-
-        if (isGeofenceImmutable) {
-            Text(
-                text = "📍 This note already has a location reminder. To change location, please create a new note.",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray),
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(enabled = !shouldDisableSavedAddressRow) {
-                    onExpandedChange(true)
-                }
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-        ) {
-            Icon(
-                imageVector = if (!isSavedAddressClicked.value) Icons.Default.FavoriteBorder else Icons.Default.Favorite,
-                contentDescription = "Select Favorite Address",
-                tint = if (isSavedAddressClicked.value) Color.Red else Color.Gray
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = selectedAddress?.name ?: "Choose your favorite address",
-                color = if (!shouldDisableSavedAddressRow) Color.Black else Color.Gray
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { onExpandedChange(false) }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("No favorite address") },
-                    onClick = {
-                        onSelectAddress(null)
-                        onExpandedChange(false)
-                        noteViewModel.addressQuery = ""
-                        noteViewModel.addressLatitude = 0.0
-                        noteViewModel.addressLongitude = 0.0
-                        geofenceViewModel.onLatitudeChanged("")
-                        geofenceViewModel.onLongitudeChanged("")
-                        isFavoriteAddressDisable.value = false
-                        isSavedAddressClicked.value = false
-                        isFavoriteAddress.value = false
-                        favoriteAddressName.value = ""
-                        noteViewModel.suggestions = emptyList()
-                    }
-                )
-
-                if (savedAddresses.isNotEmpty()) {
-                    DropdownMenuItem(
-                        text = { HorizontalDivider() },
-                        onClick = {},
-                        enabled = false
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .heightIn(max = 300.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-
-                        savedAddresses.forEach { address ->
-                            DropdownMenuItem(
-                                text = { Text(address.name) },
-                                onClick = {
-                                    onSelectAddress(address)
-                                    onExpandedChange(false)
-                                    noteViewModel.addressQuery = address.placeName
-                                    noteViewModel.addressLatitude = address.latitude
-                                    noteViewModel.addressLongitude = address.longitude
-                                    geofenceViewModel.onLatitudeChanged(address.latitude.toString())
-                                    geofenceViewModel.onLongitudeChanged(address.longitude.toString())
-                                    isFavoriteAddressDisable.value = true
-                                    isSavedAddressClicked.value = true
-                                    isFavoriteAddress.value = false
-                                    favoriteAddressName.value = ""
-                                    noteViewModel.suggestions = emptyList()
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        BasicGeofenceSetup(
-            geofenceViewModel = geofenceViewModel,
-            geofenceOptionsEnabled = geofenceEnabled,
-            isFavoriteAddress = isFavoriteAddress,
-            favoriteAddressName = favoriteAddressName,
-            isFavoriteAddressDisable = isFavoriteAddressDisable,
-            shouldDisableSavedAddressRow = shouldDisableSavedAddressRow,
-            isGeofenceImmutable = isGeofenceImmutable
-        )
-
-
-        Button(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            onClick = {
-                coroutineScope.launch {
-                    sheetState.hide()
-                }.invokeOnCompletion {
-                    showGeofenceSheet.value = false
-                }
-            }
-        ) {
-            Text("Done")
-        }
-
-
-    }
-}*/
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,20 +77,8 @@ fun GeofenceSheetContent(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "Choose where this note should trigger and how its geofence behaves.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Location search section
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = CardDefaults.shape,
@@ -318,7 +138,6 @@ fun GeofenceSheetContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Saved places section
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = CardDefaults.shape,
@@ -336,25 +155,12 @@ fun GeofenceSheetContent(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        tint = if (shouldDisableSavedAddressRow) {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Saved places",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                Text(
+                    text = "Saved places",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
 
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -477,8 +283,6 @@ fun GeofenceSheetContent(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Geofence options section (BasicGeofenceSetup 내용은 그대로 사용)
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = CardDefaults.shape,
@@ -492,20 +296,6 @@ fun GeofenceSheetContent(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                Text(
-                    text = "Geofence options",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Fine-tune how strict the geofence is and whether to save this as a reusable favorite.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
                 BasicGeofenceSetup(
                     geofenceViewModel = geofenceViewModel,
                     geofenceOptionsEnabled = geofenceEnabled,
