@@ -220,7 +220,7 @@ fun MapboxScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "📍 Search an address or tap the map icon below to open the map.",
+                    text = "Search an address or tap the map icon below to open the map.",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge
                 )
@@ -635,13 +635,13 @@ fun MapboxScreen(
     selectedNote?.let { note ->
         AlertDialog(
             onDismissRequest = { mapboxViewModel.clearSelectedNote() },
-            title = { Text("📝 About this note...") },
+            title = { Text(text = "📝 Note at this place...") },
             text = {
                 Column {
                     Text(text = note.content)
                     Spacer(Modifier.height(12.dp))
                     HorizontalDivider()
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(12.dp))
                     Text(
                         text = note.address,
                         style = MaterialTheme.typography.labelSmall,

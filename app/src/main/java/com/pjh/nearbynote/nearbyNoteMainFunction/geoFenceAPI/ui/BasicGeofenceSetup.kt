@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
+/*
 @Composable
 fun BasicGeofenceSetup(
     geofenceViewModel: GeofenceViewModel,
@@ -179,20 +181,255 @@ fun BasicGeofenceSetup(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        /*        Text(
+        */
+/*        Text(
                     text = "Recommended radius is 300m-1000m for better accuracy.",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))*/
+                Spacer(modifier = Modifier.height(8.dp))*//*
 
-        /*        Button(
+
+        */
+/*        Button(
                     onClick = { geofenceViewModel.onRemoveAllGeofencesClick() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Remove All Geofences")
-                }*/
+                }*//*
+
+    }
+}*/
+
+@Composable
+fun BasicGeofenceSetup(
+    geofenceViewModel: GeofenceViewModel,
+    geofenceOptionsEnabled: Boolean = false,
+    isFavoriteAddress: MutableState<Boolean>,
+    favoriteAddressName: MutableState<String>,
+    isFavoriteAddressDisable: MutableState<Boolean>,
+    shouldDisableSavedAddressRow: Boolean,
+    isGeofenceImmutable: Boolean
+) {
+    val radius by geofenceViewModel.radius.collectAsState()
+    var radiusSliderValue by remember { mutableFloatStateOf(radius.toFloatOrNull() ?: 300f) }
+
+    val radiusDisplay = remember(radius) {
+        val radiusFloat = radius.toFloatOrNull() ?: 0f
+        if (radiusFloat >= 1000f) {
+            "${"%.1f".format(radiusFloat / 1000)} km"
+        } else {
+            "${radiusFloat.toInt()} m"
+        }
+    }
+
+    val isFavoriteInteractive = !isFavoriteAddressDisable.value && !shouldDisableSavedAddressRow
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+
+        // --- Favorite section ---
+        Text(
+            text = "Favorite place",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Save this location as a reusable address so you can quickly pick it for other notes.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val favoriteRowModifier = if (isFavoriteInteractive) {
+            Modifier
+                .fillMaxWidth()
+                .clickable { isFavoriteAddress.value = !isFavoriteAddress.value }
+        } else {
+            Modifier.fillMaxWidth()
+        }
+
+        Row(
+            modifier = favoriteRowModifier.padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (isFavoriteAddress.value) {
+                    Icons.Default.Favorite
+                } else {
+                    Icons.Default.FavoriteBorder
+                },
+                contentDescription = "Save as favorite",
+                tint = if (isFavoriteAddress.value && isFavoriteInteractive) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Save this location as a favorite",
+                color = if (isFavoriteInteractive) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        if (isFavoriteAddress.value) {
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = favoriteAddressName.value,
+                onValueChange = {
+                    if (it.length <= 20) favoriteAddressName.value = it
+                },
+                label = { Text("Favorite name") },
+                placeholder = { Text("e.g. Home, Office") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                singleLine = true,
+                enabled = isFavoriteInteractive
+            )
+            Text(
+                text = "This name will show up in your saved places list.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 4.dp),
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // --- Radius section ---
+        Text(
+            text = "Radius",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "How far from the center this note should be triggered.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Current radius: $radiusDisplay",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Slider(
+                value = radiusSliderValue.coerceIn(0f, 2000f),
+                onValueChange = {
+                    radiusSliderValue = it
+                    geofenceViewModel.onRadiusChanged(it.toInt().toString())
+                },
+                valueRange = 100f..2000f,
+                steps = 18,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(36.dp),
+                enabled = !isGeofenceImmutable
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            OutlinedTextField(
+                value = radius,
+                onValueChange = { text ->
+                    val newValue = text.toFloatOrNull()
+                    if (newValue != null) {
+                        radiusSliderValue = newValue
+                        geofenceViewModel.onRadiusChanged(newValue.toInt().toString())
+                    }
+                },
+                label = { Text("Radius (m)") },
+                singleLine = true,
+                modifier = Modifier.width(100.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                enabled = !isGeofenceImmutable
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            listOf(100, 300, 500, 700).forEach { preset ->
+                val isSelected = radius.toFloatOrNull()?.toInt() == preset
+
+                OutlinedButton(
+                    onClick = {
+                        radiusSliderValue = preset.toFloat()
+                        geofenceViewModel.onRadiusChanged(preset.toString())
+                    },
+                    shape = RoundedCornerShape(20),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        }
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    enabled = !isGeofenceImmutable,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (isSelected) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                        } else {
+                            Color.Transparent
+                        },
+                        contentColor = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+                ) {
+                    Text("$preset m", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Recommended range is usually between 300 m and 1 km for most locations.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
