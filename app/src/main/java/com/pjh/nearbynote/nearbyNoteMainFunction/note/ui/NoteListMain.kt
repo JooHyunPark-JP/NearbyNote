@@ -93,7 +93,7 @@ fun NoteListMain(
     val tabs = listOf(
         "All Notes" to notes.size,
         "With Location" to notesWithLocation.size,
-        "Without Location" to notesWithoutLocation.size
+        "No Location" to notesWithoutLocation.size
     )
 
     val filteredNotes = when (selectedTabIndex) {
