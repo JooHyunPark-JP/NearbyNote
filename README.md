@@ -5,9 +5,10 @@
 2. Install on your Android device.
 
 ## Screenshots
-<img src="./image/nearbynote_notelist.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_writenote.png" alt="Example Image" width="200"/> 
-<img src="./image/nearbynote_setlocation.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_mapview.jpg" alt="Example Image" width="200"/> 
-<img src="./image/nearbynote_readnoteonmap.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_favouriteaddress.jpg" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_notelist.jpg" alt="Example Image" width="200"/> <img src="./image/nearbynote_writenote.jpg" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_setlocation.jpg" alt="Example Image" width="200"/> <img src="./image/nearbynote_map.jpg" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_readnoteonmap.png" alt="Example Image" width="200"/> <img src="./image/nearbynote_saved.jpg" alt="Example Image" width="200"/> 
+<img src="./image/nearbynote_notification.jpg" alt="Example Image" width="300"/>
 
 # App Overview
 
